@@ -2,21 +2,22 @@ lidgren:
 
 svn checkout http://lidgren-network-gen3.googlecode.com/svn/trunk/Lidgren.Network
 
-into a new folder
+into a new folder named
 
 Lidgren.Network 
 
-in this folder, then apply the svn patch
+in this folder, then apply the lidgren_patch.path to that folder.
 
-SlimMath
+
+SlimMath:
 
 svn checkout http://slimmath.googlecode.com/svn/trunk/SlimMath
 
-into a new folder
+into a new folder named
 
 SlimMath
 
-in this folder, then apply the svn patch
+in this folder.
 
 
 
