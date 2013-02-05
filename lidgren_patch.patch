@@ -1,0 +1,126 @@
+Index: Lidgren.Network.csproj
+===================================================================
+--- Lidgren.Network.csproj	(revision 331)
++++ Lidgren.Network.csproj	(working copy)
+@@ -10,7 +10,7 @@
+     <AppDesignerFolder>Properties</AppDesignerFolder>
+     <RootNamespace>Lidgren.Network</RootNamespace>
+     <AssemblyName>Lidgren.Network</AssemblyName>
+-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
++    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+     <FileAlignment>512</FileAlignment>
+     <PublishUrl>publish\</PublishUrl>
+     <Install>true</Install>
+@@ -27,6 +27,7 @@
+     <IsWebBootstrapper>false</IsWebBootstrapper>
+     <UseApplicationTrust>false</UseApplicationTrust>
+     <BootstrapperEnabled>true</BootstrapperEnabled>
++    <TargetFrameworkProfile />
+   </PropertyGroup>
+   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+     <DebugSymbols>true</DebugSymbols>
+@@ -38,6 +39,7 @@
+     <WarningLevel>4</WarningLevel>
+     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+     <DocumentationFile>bin\Debug\Lidgren.Network.XML</DocumentationFile>
++    <PlatformTarget>x86</PlatformTarget>
+   </PropertyGroup>
+   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+     <DebugType>pdbonly</DebugType>
+@@ -47,11 +49,12 @@
+     <ErrorReport>prompt</ErrorReport>
+     <WarningLevel>4</WarningLevel>
+     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
++    <PlatformTarget>x86</PlatformTarget>
++    <DocumentationFile>bin\Release\Lidgren.Network.XML</DocumentationFile>
+   </PropertyGroup>
+   <ItemGroup>
+     <Reference Include="System" />
+     <Reference Include="System.Core" />
+-    <Reference Include="Microsoft.CSharp" />
+     <Reference Include="System.Data" />
+     <Reference Include="System.Xml" />
+   </ItemGroup>
+Index: NetBuffer.cs
+===================================================================
+--- NetBuffer.cs	(revision 331)
++++ NetBuffer.cs	(working copy)
+@@ -69,8 +69,39 @@
+ 		{
+ 			get { return (int)(m_readPosition / 8); }
+ 		}
+-		
+-		static NetBuffer()
++
++        /// <summary>
++        /// Gets the remaining number of bits in the buffer to be read
++        /// </summary>
++	    public long RemainingBits
++	    {
++            get { return (long)(m_bitLength - m_readPosition); }
++	    }
++        
++        /// <summary>
++        /// Clones this buffer into dest
++        /// </summary>
++        /// <param name="dest"></param>
++        public void Clone(NetBuffer dest)
++        {
++            dest.m_data = new byte[m_data.Length];
++
++            Buffer.BlockCopy(m_data, 0, dest.m_data, 0, m_data.Length);
++            //foreach loops are faster in release builds until about 32k of bytes. supposedly. probably has something to do with the method call taking time.
++            //dest.m_data = new byte[m_data.Length];
++            //var i = 0;
++            //foreach (var by in m_data)
++            //{
++            //    dest.m_data[i] = by;
++            //    ++i;
++            //}
++
++            //set other values...
++            dest.m_bitLength = m_bitLength;
++            dest.m_readPosition = 0;
++        }
++
++        static NetBuffer()
+ 		{
+ 			s_readMethods = new Dictionary<Type, MethodInfo>();
+ 			MethodInfo[] methods = typeof(NetIncomingMessage).GetMethods(BindingFlags.Instance | BindingFlags.Public);
+Index: NetConstants.cs
+===================================================================
+--- NetConstants.cs	(revision 331)
++++ NetConstants.cs	(working copy)
+@@ -33,7 +33,7 @@
+ 
+ 		internal const int HeaderByteSize = 5;
+ 
+-		internal const int UnreliableWindowSize = 128;
++		internal const int UnreliableWindowSize = 65535;
+ 		internal const int ReliableOrderedWindowSize = 64;
+ 		internal const int ReliableSequencedWindowSize = 64;
+ 		internal const int DefaultWindowSize = 64;
+Index: NetPeer.Internal.cs
+===================================================================
+--- NetPeer.Internal.cs	(revision 331)
++++ NetPeer.Internal.cs	(working copy)
+@@ -1,5 +1,5 @@
+ ﻿#if !__ANDROID__ && !IOS
+-#define IS_MAC_AVAILABLE
++//#define IS_MAC_AVAILABLE
+ #endif
+ 
+ using System;
+Index: NetUtility.cs
+===================================================================
+--- NetUtility.cs	(revision 331)
++++ NetUtility.cs	(working copy)
+@@ -17,7 +17,7 @@
+ USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+ #if !__ANDROID__ && !IOS
+-#define IS_FULL_NET_AVAILABLE
++//#define IS_FULL_NET_AVAILABLE
+ #endif
+ 
+ using System;

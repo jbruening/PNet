@@ -1,0 +1,30 @@
+lidgren:
+
+svn checkout http://lidgren-network-gen3.googlecode.com/svn/trunk/Lidgren.Network
+
+into a new folder
+
+Lidgren.Network 
+
+in this folder, then apply the svn patch
+
+SlimMath
+
+svn checkout http://slimmath.googlecode.com/svn/trunk/SlimMath
+
+into a new folder
+
+SlimMath
+
+in this folder, then apply the svn patch
+
+
+
+
+After you are done, you should have at least the following folders:
+
+Lidgren.Network
+PNet
+PNetS
+PNetU
+SlimMath
