@@ -1,8 +1,6 @@
-using System;
 using Lidgren.Network;
 using PNetU;
 using UnityEngine;
-using System.Collections;
 
 public class ExamplePNet : MonoBehaviour
 {
@@ -49,6 +47,9 @@ public class ExamplePNet : MonoBehaviour
     private void OnRoomChange(string s)
     {
         Debug.Log("server switched us to room " + s);
+
+        //TODO: technically, this should be called after we actually switch scenes, but because we're not changing scenes, we'll call it right now
+        Net.FinishedRoomChange();
     }
 
     // Use this for initialization

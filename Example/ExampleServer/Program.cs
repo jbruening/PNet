@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using Lidgren.Network;
 using PNetS;
@@ -25,6 +23,7 @@ namespace ExampleServer
             Debug.logger = new DefaultConsoleLogger();
 
             //TODO: make some Room child classes, and load them into the _rooms dictionary
+            _room = new BasicRoom();
             //loading of other data as well
 
             //Finish starting the server. Started in a new thread so that the console can sit open and still accept input
@@ -52,9 +51,10 @@ namespace ExampleServer
         {
             //TODO: move the player to a room maybe?
             Debug.Log("player {0} connected", player.Id);
+            player.ChangeRoom(_room);
         }
 
-        private Dictionary<string, Room> _rooms;
+        private static BasicRoom _room;
         private static Thread _serverThread;
 
         //main loop. run once every game tick.
