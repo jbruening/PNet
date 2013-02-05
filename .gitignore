@@ -109,3 +109,12 @@ UpgradeLog*.XML
 
 /Lidgren.Network
 /SlimMath
+/Example/Example Client/Library
+/Example/Example Client/Assembly-CSharp.csproj
+/Example/Example Client/Assembly-CSharp-firstpass.csproj
+/Example/Example Client/Assembly-CSharp-firstpass-vs.csproj
+/Example/Example Client/Assembly-CSharp-vs.csproj
+/Example/Example Client/Assembly-UnityScript-firstpass.unityproj
+/Example/Example Client/Assembly-UnityScript-firstpass-vs.unityproj
+/Example/Example Client/Example Client.sln
+/Example/Example Client/Example Client-csharp.sln

@@ -1,0 +1,483 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PNet</name>
+    </assembly>
+    <members>
+        <member name="T:PNet.RPCUtils">
+            <summary>
+            Helpers for RPCs
+            </summary>
+        </member>
+        <member name="F:PNet.RPCUtils.Instantiate">
+            <summary>
+            string resourcepath
+            ushort viewid
+            ushort ownerid
+            </summary>
+        </member>
+        <member name="F:PNet.RPCUtils.Remove">
+            <summary>
+            Network destroy
+            </summary>
+        </member>
+        <member name="F:PNet.RPCUtils.TimeUpdate">
+            <summary>
+            new time
+            </summary>
+        </member>
+        <member name="F:PNet.RPCUtils.SetPlayerId">
+            <summary>
+            set the id of this client
+            </summary>
+        </member>
+        <member name="F:PNet.RPCUtils.ChangeRoom">
+            <summary>
+            change to the specified room
+            </summary>
+        </member>
+        <member name="F:PNet.RPCUtils.FinishedRoomChange">
+            <summary>
+            sent to the server when the client has finished changing rooms
+            </summary>
+        </member>
+        <member name="F:PNet.RPCUtils.FinishedInstantiate">
+            <summary>
+            sent to the server when a networkview has been created
+            </summary>
+        </member>
+        <member name="M:PNet.RPCUtils.AllocSize(System.Int32@,PNet.INetSerializable[])">
+            <summary>
+            get the allocation size from the specified serializing objects
+            </summary>
+            <param name="prealloc"></param>
+            <param name="towrite"></param>
+        </member>
+        <member name="M:PNet.RPCUtils.WriteParams(Lidgren.Network.NetOutgoingMessage@,PNet.INetSerializable[])">
+            <summary>
+            write all the serializing objects to the stream
+            </summary>
+            <param name="msg"></param>
+            <param name="towrite"></param>
+        </member>
+        <member name="M:PNet.RPCUtils.Serialize(System.Enum)">
+            <summary>
+            Serialize to an IntSerializer. This will have issues if the enum isn't an int type.
+            </summary>
+            <param name="enumeration"></param>
+            <returns></returns>
+        </member>
+        <member name="T:PNet.RpcAttribute">
+            <summary>
+            Attribute for marking rpc methods
+            </summary>
+        </member>
+        <member name="F:PNet.RpcAttribute.rpcId">
+            <summary>
+            id of the rpc
+            </summary>
+        </member>
+        <member name="M:PNet.RpcAttribute.#ctor(System.Byte)">
+            <summary>
+            mark the specified method with this rpc id
+            </summary>
+            <param name="rpcId"></param>
+        </member>
+        <member name="T:PNet.INetSerializable">
+            <summary>
+            Interface used for objects that can read and write from network streams
+            </summary>
+        </member>
+        <member name="M:PNet.INetSerializable.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            write to the message
+            </summary>
+            <param name="message">message to write to</param>
+        </member>
+        <member name="M:PNet.INetSerializable.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            read the message
+            </summary>
+            <param name="message">message to read from</param>
+        </member>
+        <member name="P:PNet.INetSerializable.AllocSize">
+            <summary>
+            size to allocate for bytes in the message.  if you're under, it'll result in array resizing.
+            </summary>
+        </member>
+        <member name="T:PNet.StringSerializer">
+            <summary>
+            serializer for strings
+            </summary>
+        </member>
+        <member name="F:PNet.StringSerializer.str">
+            <summary>
+            string to be serialized
+            </summary>
+        </member>
+        <member name="M:PNet.StringSerializer.#ctor(System.String)">
+            <summary>
+            create a new serializer for the specified string
+            </summary>
+            <param name="str"></param>
+        </member>
+        <member name="M:PNet.StringSerializer.#ctor">
+            <summary>
+            Create a new serializer, with nothing for the value
+            </summary>
+        </member>
+        <member name="M:PNet.StringSerializer.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.StringSerializer.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            deserialize
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.StringSerializer.AllocSize">
+            <summary>
+            get the size of the string in bytes
+            </summary>
+        </member>
+        <member name="T:PNet.IntSerializer">
+            <summary>
+            serializer for integers
+            </summary>
+        </member>
+        <member name="F:PNet.IntSerializer.inte">
+            <summary>
+            integer to be serialized
+            </summary>
+        </member>
+        <member name="M:PNet.IntSerializer.#ctor(System.Int32)">
+            <summary>
+            create a new serializer for the specified integer
+            </summary>
+            <param name="inte"></param>
+        </member>
+        <member name="M:PNet.IntSerializer.#ctor">
+            <summary>
+            Create a new serializer with a value of 0
+            </summary>
+        </member>
+        <member name="M:PNet.IntSerializer.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.IntSerializer.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            deserialize
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.IntSerializer.AllocSize">
+            <summary>
+            size of the integer in bytes
+            </summary>
+        </member>
+        <member name="T:PNet.FloatSerializer">
+            <summary>
+            serializer for floats
+            </summary>
+        </member>
+        <member name="F:PNet.FloatSerializer.floa">
+            <summary>
+            float used for serialization
+            </summary>
+        </member>
+        <member name="M:PNet.FloatSerializer.#ctor(System.Single)">
+            <summary>
+            create a new serializer for a float
+            </summary>
+            <param name="inte"></param>
+        </member>
+        <member name="M:PNet.FloatSerializer.#ctor">
+            <summary>
+            Create a new serializer with a value of 0
+            </summary>
+        </member>
+        <member name="M:PNet.FloatSerializer.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.FloatSerializer.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            deserialize
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.FloatSerializer.AllocSize">
+            <summary>
+            get the size of this serializable
+            </summary>
+        </member>
+        <member name="T:PNet.ObjectArraySerializer`1">
+            <summary>
+            A serializer for an array of INetSerializable
+            WARNING: DOES NOT SAVE INDICES IF THERE ARE NULL VALUES
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="F:PNet.ObjectArraySerializer`1.items">
+            <summary>
+            items
+            </summary>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor">
+            <summary>
+            Create a new serializer
+            </summary>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor(`0[])">
+            <summary>
+            Create a new serializer from the specified array
+            </summary>
+            <param name="newItems"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor(System.Collections.Generic.List{`0})">
+            <summary>
+            Create a new serializer from the specified list
+            </summary>
+            <param name="newItems"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            Deserialize the array from the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            Serialize the array to the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.ObjectArraySerializer`1.AllocSize">
+            <summary>
+            Size when writing to the stream
+            </summary>
+        </member>
+        <member name="T:PNet.Channels">
+            <summary>
+            Channels for various rpcs
+            </summary>
+        </member>
+        <member name="F:PNet.Channels.UNRELIABLE_STREAM">
+            <summary>
+            unreliable streaming
+            </summary>
+        </member>
+        <member name="F:PNet.Channels.RELIABLE_STREAM">
+            <summary>
+            reliable streaming
+            </summary>
+        </member>
+        <member name="F:PNet.Channels.STATIC_RPC">
+            <summary>
+            static rpcs (rooms)
+            </summary>
+        </member>
+        <member name="F:PNet.Channels.STATIC_UTILS">
+            <summary>
+            utility rpcs
+            </summary>
+        </member>
+        <member name="F:PNet.Channels.BEGIN_RPCMODES">
+            <summary>
+            beginning RPCMode channels
+            </summary>
+        </member>
+        <member name="F:PNet.Channels.OWNER_RPC">
+            <summary>
+            channel for owner rcpmode
+            </summary>
+        </member>
+        <member name="F:PNet.Channels.OBJECT_RPC">
+            <summary>
+            channel for NetworkedSceneObject rpcs
+            </summary>
+        </member>
+        <member name="F:PNet.Channels.SYNCHED_FIELD">
+            <summary>
+            channel for synchronized fields
+            </summary>
+        </member>
+        <member name="T:PNet.LidgrenExtensions">
+            <summary>
+            class for extensions to lidgren
+            </summary>
+        </member>
+        <member name="M:PNet.LidgrenExtensions.Read``1(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            ONLY WORKS FOR VALUE TYPES AND STRING. NO ENUMS.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="msg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.LidgrenExtensions.ReadINet``1(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            Read an INetSerializable out of the NetIncomingMessage
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="msg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.LidgrenExtensions.Write``1(Lidgren.Network.NetOutgoingMessage,``0)">
+            <summary>
+            ONLY WORKS FOR VALUE TYPES AND STRING. NO ENUMS.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="msg"></param>
+            <param name="val"></param>
+        </member>
+        <member name="T:PNet.IntDictionary`1">
+            <summary>
+            provides a dictionary where the key is an integer, but provides array-time lookups
+            TODO: implement a trimming function
+            TODO: implemnt ICollections interface
+            </summary>
+            <remarks>
+            Benefits: access speed is identical to an array
+            Downsides: 
+            collection takes up more memory than a dictionary of the same size of objects
+            Of note: as this takes up as much memory as the last index + bool array the same size, this should probably be used for small collections.
+            </remarks>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:PNet.IntDictionary`1.#ctor(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="collectionSize">initial size of the internal collection</param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.Add(`0)">
+            <summary>
+            adds the object to the collection, and returns the key that was assigned to the object
+            </summary>
+            <param name="add"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.IntDictionary`1.Add(System.Int32,`0)">
+            <summary>
+            NOT RECOMMENDED.
+            This will overwrite the previous value if the key already exists.
+            </summary>
+            <param name="key"></param>
+            <param name="add"></param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.Remove(System.Int32)">
+            <summary>
+            remove the item at the specified key
+            </summary>
+            <param name="key"></param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.HasValue(System.Int32)">
+            <summary>
+            does a value exist for the specified key
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.IntDictionary`1.GetEnumerator">
+            <summary>
+            get the enumerator to enumerate the collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:PNet.IntDictionary`1.Values">
+            <summary>
+            returns the values stored in the dictionary. keys where there is no value will be return as default(T)
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:PNet.IntDictionary`1.HasValues">
+            <summary>
+            get an array for the size of the internal array, that says if a value is contained for that key
+            </summary>
+        </member>
+        <member name="P:PNet.IntDictionary`1.Item(System.Int32)">
+            <summary>
+            value for a specified key
+            </summary>
+            <param name="index"></param>
+            <returns></returns>
+        </member>
+        <member name="T:PNet.IntDictionary`1.IntDictionaryEnumerator`1">
+            <summary>
+            enumerator helper
+            </summary>
+            <typeparam name="U"></typeparam>
+        </member>
+        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.#ctor(System.Collections.Generic.List{`1})">
+            <summary>
+            create a new enumerator helper for the intdictionary
+            </summary>
+            <param name="m_Collection"></param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.MoveNext">
+            <summary>
+            go to the next iem in the collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.Reset">
+            <summary>
+            reset the position of the enumerator
+            </summary>
+        </member>
+        <member name="P:PNet.IntDictionary`1.IntDictionaryEnumerator`1.Current">
+            <summary>
+            current item in the enumeration
+            </summary>
+        </member>
+        <member name="T:PNet.DictionarySerializer`2">
+            <summary>
+            THIS ONLY WORKS WITH BUILT IN TYPES AND STRING. USER DEFINED STRUCTS WILL BREAK
+            </summary>
+            <typeparam name="T"></typeparam>
+            <typeparam name="U"></typeparam>
+        </member>
+        <member name="F:PNet.DictionarySerializer`2.dictionary">
+            <summary>
+            serialized value
+            </summary>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.#ctor(System.Collections.Generic.Dictionary{`0,`1})">
+            <summary>
+            create a new serializer from the dictionary
+            </summary>
+            <param name="dictionary"></param>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.#ctor">
+            <summary>
+            create a new serializer with no values
+            </summary>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            deserialize from the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize to the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.DictionarySerializer`2.AllocSize">
+            <summary>
+            size in bytes
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -19,8 +19,10 @@ namespace ExampleServer
 
             PNetServer.ApproveConnection = ApproveConnection;
             PNetServer.OnPlayerConnected += OnPlayerConnected;
-            PNetServer.OnPlayerDisconnected += delegate(Player player) { Console.WriteLine(player.Id + " disconnected"); };
+            PNetServer.OnPlayerDisconnected += delegate(Player player) { Debug.Log("player {0} disconnected", player.Id); };
             GameState.update += Update;
+
+            Debug.logger = new DefaultConsoleLogger();
 
             //TODO: make some Room child classes, and load them into the _rooms dictionary
             //loading of other data as well
@@ -49,6 +51,7 @@ namespace ExampleServer
         private static void OnPlayerConnected(Player player)
         {
             //TODO: move the player to a room maybe?
+            Debug.Log("player {0} connected", player.Id);
         }
 
         private Dictionary<string, Room> _rooms;
