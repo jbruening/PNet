@@ -65,19 +65,12 @@ namespace PNetS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public T GetComponent<T>() 
-            where T : Component
+            where T : class
         {
             if (components == null)
                 return null;
 
-            foreach (var c in components)
-            {
-                var possible = c.component as T;
-
-                if (possible != null)
-                    return possible;
-            }
-            return null;
+            return components.Select(c => c.component).OfType<T>().FirstOrDefault();
         }
 
         /// <summary>
@@ -87,12 +80,7 @@ namespace PNetS
         /// <returns></returns>
         public Component GetComponent(Type t)
         {
-            foreach (var c in components)
-            {
-                if (c.component.GetType().IsSubclassOf(t))
-                    return c.component;
-            }
-            return null;
+            return (from c in components where c.component.GetType().IsSubclassOf(t) select c.component).FirstOrDefault();
         }
 
         /// <summary>
@@ -101,16 +89,9 @@ namespace PNetS
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public List<T> GetComponents<T>() 
-            where T : Component
+            where T : class
         {
-            List<T> gathered = new List<T>(components.Count);
-            foreach (var c in components)
-            {
-                var convert = c.component as T;
-                if (convert != null)
-                    gathered.Add(convert);
-            }
-            return gathered;
+            return components.Select(c => c.component).OfType<T>().ToList();
         }
 
         /// <summary>

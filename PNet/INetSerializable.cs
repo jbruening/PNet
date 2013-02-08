@@ -169,6 +169,39 @@ namespace PNet
     }
 
     /// <summary>
+    /// class to serialize byte arrays
+    /// </summary>
+    public class ByteArraySerializer : INetSerializable
+    {
+        /// <summary>
+        /// the data
+        /// </summary>
+        public byte[] Bytes;
+
+        /// <summary>
+        /// serialize to the stream
+        /// </summary>
+        /// <param name="message"></param>
+        public void OnSerialize(NetOutgoingMessage message)
+        {
+            message.Write(Bytes.Length);
+            message.Write(Bytes);
+        }
+
+        /// <summary>
+        /// deserialize from the stream
+        /// </summary>
+        /// <param name="message"></param>
+        public void OnDeserialize(NetIncomingMessage message)
+        {
+            var size = message.ReadInt32();
+            message.ReadBytes(size, out Bytes);
+        }
+
+        public int AllocSize { get { return Bytes.Length + 4; } }
+    }
+
+    /// <summary>
     /// A serializer for an array of INetSerializable
     /// WARNING: DOES NOT SAVE INDICES IF THERE ARE NULL VALUES
     /// </summary>
