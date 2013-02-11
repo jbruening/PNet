@@ -6,7 +6,7 @@ into a new folder named
 
 Lidgren.Network 
 
-in this folder, then apply the lidgren_patch.path to that folder.
+in this folder, then apply the lidgren_patch.patch to that folder.
 
 
 SlimMath:
