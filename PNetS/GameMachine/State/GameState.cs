@@ -89,7 +89,7 @@ namespace PNetS
                         try { a(); }
                         catch (Exception e)
                         {
-                            Debug.LogError(e.Message);
+                            Debug.LogError("[Start] ", e.ToString());
                         }
                     });
             }
@@ -99,14 +99,14 @@ namespace PNetS
                     try { o.Update(); }
                     catch (Exception e)
                     {
-                        Debug.LogError("[Update Loop] {0}, {1}", e.Message, e.StackTrace);
+                        Debug.LogError("[Update Loop] {0}", e.ToString());
                     }
                 });
 
             try { update(); }
             catch (Exception e)
             {
-                Debug.LogError("[Server Update] {0}, {1}", e.Message, e.StackTrace);
+                Debug.LogError("[Server Update] {0}", e.ToString());
             }
 
             LoopRoutines();
@@ -116,7 +116,7 @@ namespace PNetS
                     try { o.LateUpdate(); }
                     catch (Exception e)
                     {
-                        Debug.LogError("[Late Update] {0}, {1}", e.Message, e.StackTrace);
+                        Debug.LogError("[Late Update] {0}", e.ToString());
                     }
                 });
         }
@@ -157,17 +157,25 @@ namespace PNetS
                 var yield = routines[i].Current;
                 bool remaining = false;
 
-                if (yield != null)
+                try
                 {
-                    if (yield.IsDone)
-                        remaining = routines[i].MoveNext();
+
+                    if (yield != null)
+                    {
+                        if (yield.IsDone)
+                            remaining = routines[i].MoveNext();
+                        else
+                            remaining = true;
+                    }
                     else
-                        remaining = true;
+                    {
+                        //haven't started...
+                        remaining = routines[i].MoveNext();
+                    }
                 }
-                else
+                catch(Exception e)
                 {
-                    //haven't started...
-                    remaining = routines[i].MoveNext();
+                    Debug.LogError("[Yield] {0}", e.ToString());
                 }
 
 
