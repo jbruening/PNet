@@ -1,21 +1,23 @@
-﻿using PNetS;
+﻿using System.Linq;
+using PNetS;
 using SlimMath;
 
 namespace ExampleServer
 {
-    class BasicRoom : Room
+    class BasicRoom : RoomBehaviour
     {
-        public BasicRoom()
-        {
-            //This is the actual room name that gets passed to the clients on scene change
-            name = "basic room";
-        }
-
         public override void OnPlayerEnter(Player player)
         {
-            var playerObject = NetworkInstantiate("player", Vector3.Zero, Quaternion.Identity, player);
+            var playerObject = Room.NetworkInstantiate("player", Vector3.Zero, Quaternion.Identity, player);
             playerObject.AddComponent<PlayerComponent>();
             
+        }
+        public override void OnPlayerExit(Player player)
+        {
+            foreach (var actor in Room.actors.Where(a => a.owner == player))
+            {
+                Room.NetworkDestroy(actor);
+            }
         }
     }
 }

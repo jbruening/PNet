@@ -23,7 +23,8 @@ namespace ExampleServer
             Debug.logger = new DefaultConsoleLogger();
 
             //TODO: make some Room child classes, and load them into the _rooms dictionary
-            _room = new BasicRoom();
+            Room newRoom = Room.CreateRoom("basic room");
+            _room = newRoom.AddBehaviour<BasicRoom>();
             //loading of other data as well
 
             //Finish starting the server. Started in a new thread so that the console can sit open and still accept input
@@ -51,7 +52,7 @@ namespace ExampleServer
         {
             //TODO: move the player to a room maybe?
             Debug.Log("player {0} connected", player.Id);
-            player.ChangeRoom(_room);
+            player.ChangeRoom(_room.Room);
         }
 
         private static BasicRoom _room;
