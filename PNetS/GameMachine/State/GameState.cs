@@ -13,13 +13,14 @@ namespace PNetS
     /// </summary>
     public static class GameState
     {
-        static double frameTime = 0.020d;
+        static double _frameTime = 0.020d;
         static int loopTightness = 5;
         static List<GameObject> objects = new List<GameObject>(256);
-        static List<Action> starteds = new List<Action>(8);
+        static List<Action> _starteds = new List<Action>(8);
+        internal static event Action RoomUpdates;
         internal static void AddStart(Action startMethod)
         {
-            starteds.Add(startMethod);
+            _starteds.Add(startMethod);
         }
         static Stopwatch watch = new Stopwatch();
 
@@ -44,14 +45,14 @@ namespace PNetS
         {
             if (!quit) return;
 
-            GameState.frameTime = frameTime;
+            _frameTime = frameTime;
             watch.Start();
 
             quit = false;
 
             while (!quit)
             {
-                if (watch.Elapsed.TotalSeconds - TimeSinceStartup > frameTime)
+                if (watch.Elapsed.TotalSeconds - TimeSinceStartup > _frameTime)
                     Update();
                 Thread.Sleep(loopTightness);
             }
@@ -80,10 +81,10 @@ namespace PNetS
             PreviousFrameTime = TimeSinceStartup;
             TimeSinceStartup = watch.Elapsed.TotalSeconds;
 
-            if (starteds.Count > 0)
+            if (_starteds.Count > 0)
             {
-                List<Action> startsToRun = starteds;
-                starteds = new List<Action>();
+                List<Action> startsToRun = _starteds;
+                _starteds = new List<Action>();
                 startsToRun.ForEach(a => 
                     {
                         try { a(); }
@@ -94,14 +95,17 @@ namespace PNetS
                     });
             }
 
-            objects.ForEach(o => 
+            for (var i = 0; i < objects.Count; ++i )
+            {
+                try { objects[i].Update(); }
+                catch (Exception e)
                 {
-                    try { o.Update(); }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("[Update Loop] {0}", e.ToString());
-                    }
-                });
+                    Debug.LogError("[Update Loop] {0}", e.ToString());
+                }
+            }
+
+            if (RoomUpdates != null)
+                RoomUpdates();
 
             try { update(); }
             catch (Exception e)

@@ -58,6 +58,7 @@
     <Compile Include="NetworkView\NetworkedSceneObject.cs" />
     <Compile Include="NetworkView\NetworkedSceneView.cs" />
     <Compile Include="Server\PNetServer.Update.cs" />
+    <Compile Include="Server\RoomBehaviour.cs" />
     <Compile Include="Utils\NetworkStateSynchronization.cs" />
     <Compile Include="NetworkView\NetworkView.Static.cs" />
     <Compile Include="NetworkView\NetworkView.cs" />

@@ -83,6 +83,9 @@ namespace PNet
     /// <summary>
     /// Attribute for marking rpc methods
     /// </summary>
+    /// <remarks>
+    /// Only one rpc attribute is valid per rpc id per receiving object (room, networkview, etc). If there are multiple, they are overwritten
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple=true, Inherited=true)]
     public class RpcAttribute : Attribute
     {

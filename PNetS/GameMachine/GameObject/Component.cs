@@ -59,7 +59,12 @@ namespace PNetS
 
         internal void Dispose()
         {
-            Disposing();
+            try
+            {Disposing();}
+            catch(Exception e)
+            {
+                Debug.LogError("[Disposing {0}] {1}", gameObject.Name, e);
+            }
             foreach (var routine in rootRoutines)
             {
                 GameState.RemoveRoutine(routine);

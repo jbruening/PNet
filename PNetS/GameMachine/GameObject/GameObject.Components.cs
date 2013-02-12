@@ -245,6 +245,7 @@ namespace PNetS
             {
                 components.RemoveAt(ind);
                 target.Dispose();
+                target.gameObject = null;
             }
         }
 

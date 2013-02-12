@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using SlimMath;
 using Lidgren.Network;
@@ -12,7 +13,7 @@ namespace PNetS
     /// <summary>
     /// A container for players/network views
     /// </summary>
-    public abstract class Room
+    public sealed class Room
     {
         private List<Player> m_Players = new List<Player>();
         /// <summary>
@@ -35,7 +36,19 @@ namespace PNetS
         /// <param name="roomToChangeLeftoverPlayersTo"></param>
         public void Close(Room roomToChangeLeftoverPlayersTo)
         {
-            //TODO: close the room, move players to a new room or lobby or something
+            GameState.RoomUpdates -= Update;
+            
+            try
+            {
+                for (int i = 0; i < _roomBehaviours.Count; ++i)
+                {
+                    _roomBehaviours[i].Closing();
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("[Room Closing] {0}: {1}", name, e);
+            }
 
             foreach (var player in players)
             {
@@ -70,7 +83,7 @@ namespace PNetS
         /// <summary>
         /// Instantiate an object over the network
         /// </summary>
-        /// <param name="resourcePath"></param>
+        /// <param name="resourcePath">Path to the resource on the client</param>
         /// <param name="position"></param>
         /// <param name="rotation"></param>
         /// <param name="owner"></param>
@@ -210,7 +223,7 @@ namespace PNetS
             PNetServer.peer.SendMessage(message, toSendConnections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
         }
 
-        List<NetBuffer> bufferedMessages = new List<NetBuffer>(16);
+        readonly List<NetBuffer> bufferedMessages = new List<NetBuffer>(16);
 
         private void Buffer(NetOutgoingMessage message, RPCMode mode)
         {
@@ -326,12 +339,24 @@ namespace PNetS
         /// called when a player enters the room
         /// </summary>
         /// <param name="player"></param>
-        public virtual void OnPlayerEnter(Player player) { }
+        public void OnPlayerEnter(Player player)
+        {
+            for (int i = 0; i < _roomBehaviours.Count; ++i)
+            {
+                _roomBehaviours[i].OnPlayerEnter(player);
+            }
+        }
         /// <summary>
         /// called when a player exists the room
         /// </summary>
         /// <param name="player"></param>
-        public virtual void OnPlayerExit(Player player) { }
+        public void OnPlayerExit(Player player)
+        {
+            for (int i = 0; i < _roomBehaviours.Count; ++i)
+            {
+                _roomBehaviours[i].OnPlayerExit(player);
+            }
+        }
 
         internal void AddPlayer(Player player)
         {
@@ -411,6 +436,140 @@ namespace PNetS
             }
 
             return view;
+        }
+
+        private Room()
+        {
+            GameState.RoomUpdates+= Update;
+        }
+
+        /// <summary>
+        /// Create a room
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static Room CreateRoom(string name)
+        {
+            return new Room(){name = name};
+        }
+
+        /// <summary>
+        /// Add a behaviour
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T AddBehaviour<T>()
+            where T : RoomBehaviour, new()
+        {
+            var newT = new T();
+            _roomBehaviours.Add(newT);
+            newT.Room = this;
+
+            GameState.AddStart(newT.Start);
+            SubscribeMarkedRPCsOnBehaviour(newT);
+            return newT;
+        }
+
+        /// <summary>
+        /// get the first type that is t
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetBehaviour<T>()
+            where T : RoomBehaviour
+        {
+            return (T)_roomBehaviours.FirstOrDefault(b => b as T != null);
+        }
+
+        /// <summary>
+        /// get all behaviours that are of the type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T[] GetBehavours<T>()
+            where T : class
+        {
+            return _roomBehaviours.OfType<T>().ToArray();
+        }
+
+        /// <summary>
+        /// Subscribe all the marked rpcs on the supplied component
+        /// </summary>
+        /// <param name="behaviour"> </param>
+        public void SubscribeMarkedRPCsOnBehaviour(RoomBehaviour behaviour)
+        {
+            if (behaviour == null) return;
+
+            var thisType = behaviour.GetType();
+
+            //get all the methods of the derived type
+            MethodInfo[] methods = thisType.GetMethods(
+                BindingFlags.NonPublic |
+                BindingFlags.Instance |
+                BindingFlags.Static |
+                BindingFlags.Public |
+                BindingFlags.FlattenHierarchy
+                );
+
+            foreach (var method in methods)
+            {
+                var tokens = Attribute.GetCustomAttributes(method, typeof(RpcAttribute), false) as RpcAttribute[];
+
+                foreach (var token in tokens)
+                {
+
+                    if (token == null)
+                        continue;
+
+                    var del = Delegate.CreateDelegate(typeof(Action<NetIncomingMessage, NetMessageInfo>), behaviour, method, false) as Action<NetIncomingMessage, NetMessageInfo>;
+
+                    if (del != null)
+                        SubscribeToRPC(token.rpcId, del);
+                    else
+                        Debug.LogWarning("The method {0} for type {1} does not match the RPC delegate of Action<NetInComingMessage, NetMessageInfo>, but is marked to process RPC's. Please either fix this method, or remove the attribute",
+                            method.Name,
+                            method.DeclaringType.Name
+                            );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Remove the behaviour
+        /// </summary>
+        /// <param name="behaviour"></param>
+        public void RemoveBehaviour(RoomBehaviour behaviour)
+        {
+            var ind = _roomBehaviours.FindIndex(o => object.ReferenceEquals(behaviour, o));
+
+            if (ind != -1)
+            {
+                try
+                {
+                    _roomBehaviours[ind].Disposing();
+                }catch(Exception e)
+                {
+                    Debug.LogError("[Disposing behaviour] {0}", e);
+                }
+
+                _roomBehaviours.RemoveAt(ind);
+                behaviour.Room = null;
+            }
+        }
+
+        private readonly List<RoomBehaviour> _roomBehaviours = new List<RoomBehaviour>();
+        internal void Update()
+        {
+            try
+            {
+                for (int i = 0; i < _roomBehaviours.Count; ++i)
+                {
+                    _roomBehaviours[i].Update();
+                }
+            }catch(Exception e)
+            {
+                Debug.LogError("[Room Update] {0}: {1}", name, e);
+            }
         }
     }
 }
