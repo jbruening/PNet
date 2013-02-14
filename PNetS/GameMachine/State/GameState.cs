@@ -14,18 +14,19 @@ namespace PNetS
     public static class GameState
     {
         static double _frameTime = 0.020d;
-        static int loopTightness = 5;
-        static List<GameObject> objects = new List<GameObject>(256);
+        private const int LOOP_TIGHTNESS = 5;
+        static readonly Dictionary<int, GameObject> Objects = new Dictionary<int, GameObject>(256);
+        static readonly Stack<int> UseableIds = new Stack<int>(32);
         static List<Action> _starteds = new List<Action>(8);
         internal static event Action RoomUpdates;
         internal static void AddStart(Action startMethod)
         {
             _starteds.Add(startMethod);
         }
-        static Stopwatch watch = new Stopwatch();
+        static readonly Stopwatch Watch = new Stopwatch();
 
-        internal static void Quit() { quit = true; }
-        static bool quit = true;
+        internal static void Quit() { _quit = true; }
+        static bool _quit = true;
                
 
         static GameState()
@@ -34,7 +35,8 @@ namespace PNetS
 
         internal static void RemoveObject(GameObject gobj)
         {
-            objects.RemoveAt(gobj.Id);
+            Objects.Remove(gobj.Id);
+            UseableIds.Push(gobj.Id);
         }
 
         /// <summary>
@@ -43,43 +45,39 @@ namespace PNetS
         /// <param name="frameTime"></param>
         public static void Start(double frameTime = 0.02d)
         {
-            if (!quit) return;
+            if (!_quit) return;
 
             _frameTime = frameTime;
-            watch.Start();
+            Watch.Start();
 
-            quit = false;
+            _quit = false;
 
-            while (!quit)
+            while (!_quit)
             {
-                if (watch.Elapsed.TotalSeconds - TimeSinceStartup > _frameTime)
+                if (Watch.Elapsed.TotalSeconds - TimeSinceStartup > _frameTime)
                     Update();
-                Thread.Sleep(loopTightness);
+                Thread.Sleep(LOOP_TIGHTNESS);
             }
         }
 
         internal static GameObject CreateGameObject(SlimMath.Vector3 position, SlimMath.Quaternion rotation)
         {
-            var gameObject = new GameObject();
-            gameObject.Position = position;
-            gameObject.Rotation = rotation;
+            var gameObject = new GameObject {Position = position, Rotation = rotation};
 
             return gameObject;
         }
 
         internal static int AddGameObject(GameObject newObject)
         {
-            var nInd = objects.Count;
-            objects.Add(newObject);
-            return nInd;
+            var newId = UseableIds.Count > 0 ? UseableIds.Pop() : Objects.Count;
+            Objects.Add(newId, newObject);
+            return newId;
         }
-
-
 
         static void Update()
         {
             PreviousFrameTime = TimeSinceStartup;
-            TimeSinceStartup = watch.Elapsed.TotalSeconds;
+            TimeSinceStartup = Watch.Elapsed.TotalSeconds;
 
             if (_starteds.Count > 0)
             {
@@ -95,9 +93,12 @@ namespace PNetS
                     });
             }
 
-            for (var i = 0; i < objects.Count; ++i )
+            foreach (var o in Objects.Values)
             {
-                try { objects[i].Update(); }
+                try
+                {
+                    o.Update();
+                }
                 catch (Exception e)
                 {
                     Debug.LogError("[Update Loop] {0}", e.ToString());
@@ -115,14 +116,14 @@ namespace PNetS
 
             LoopRoutines();
 
-            objects.ForEach(o =>
+            foreach (var o in Objects.Values)
+            {
+                try { o.LateUpdate(); }
+                catch (Exception e)
                 {
-                    try { o.LateUpdate(); }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("[Late Update] {0}", e.ToString());
-                    }
-                });
+                    Debug.LogError("[Late Update] {0}", e.ToString());
+                }
+            }
         }
 
         /// <summary>
@@ -134,47 +135,44 @@ namespace PNetS
         /// </summary>
         public static Action lateUpdate = delegate { };
 
-        private static List<IEnumerator<YieldInstruction>> routines = new List<IEnumerator<YieldInstruction>>();
-        private static List<IEnumerator<YieldInstruction>> frameRoutineAdds = new List<IEnumerator<YieldInstruction>>();
+        private static readonly List<IEnumerator<YieldInstruction>> Routines = new List<IEnumerator<YieldInstruction>>();
+        private static readonly List<IEnumerator<YieldInstruction>> FrameRoutineAdds = new List<IEnumerator<YieldInstruction>>();
 
         internal static void AddRoutine(IEnumerator<YieldInstruction> toAdd)
         {
-            frameRoutineAdds.Add(toAdd);
+            FrameRoutineAdds.Add(toAdd);
         }
 
         internal static void RemoveRoutine(IEnumerator<YieldInstruction> toRemove)
         {
-            var ind = routines.FindIndex(c => object.ReferenceEquals(c, toRemove));
+            var ind = Routines.FindIndex(c => object.ReferenceEquals(c, toRemove));
 
             if (ind != -1)
             {
-                routines.RemoveAt(ind);
+                Routines.RemoveAt(ind);
             }
         }
 
         internal static void LoopRoutines()
         {
-            List<int> toRemove = new List<int>(8);
+            var toRemove = new List<int>(8);
             
-            for (int i = routines.Count - 1; i >= 0; i--)
+            for (var i = Routines.Count - 1; i >= 0; i--)
             {
-                var yield = routines[i].Current;
-                bool remaining = false;
+                var yield = Routines[i].Current;
+                var remaining = false;
 
                 try
                 {
 
                     if (yield != null)
                     {
-                        if (yield.IsDone)
-                            remaining = routines[i].MoveNext();
-                        else
-                            remaining = true;
+                        remaining = !yield.IsDone || Routines[i].MoveNext();
                     }
                     else
                     {
                         //haven't started...
-                        remaining = routines[i].MoveNext();
+                        remaining = Routines[i].MoveNext();
                     }
                 }
                 catch(Exception e)
@@ -186,22 +184,14 @@ namespace PNetS
                 if (!remaining)
                 {
                     //remove it
-                    routines.RemoveAt(i);
+                    Routines.RemoveAt(i);
                 }
             }
-
-            //remove all of the completed routines
-            //foreach (var index in toRemove)
-            //{
-            //    routines.RemoveAt(index);
-            //}
-
-            //now add the new ones
-            if (frameRoutineAdds.Count > 0)
-            {
-                routines.AddRange(frameRoutineAdds);
-                frameRoutineAdds = new List<IEnumerator<YieldInstruction>>();
-            }
+            
+            //add new routines
+            if (FrameRoutineAdds.Count <= 0) return;
+            Routines.AddRange(FrameRoutineAdds);
+            FrameRoutineAdds.Clear();
         }
 
         internal static double PreviousFrameTime { get; private set; }
