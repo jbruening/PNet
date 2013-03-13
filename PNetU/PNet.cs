@@ -89,7 +89,6 @@ namespace PNetU
         {
             status = NetConnectionStatus.Disconnected;
         }
-        
 
         /// <summary>
         /// Connect to the specified ip on the specified port
@@ -97,8 +96,23 @@ namespace PNetU
         /// <param name="ip"></param>
         /// <param name="port"></param>
         /// <param name="bindport">port to actually listen on. Default is just the first available port</param>
+        [Obsolete("Use the overload that takes a ClientConfiguration")]
         public static void Connect(string ip, int port, int bindport = 0)
         {
+            Configuration = new ClientConfiguration(ip, port, bindport);
+            Connect(Configuration);
+        }
+        /// <summary>
+        /// the current configuration
+        /// </summary>
+        public static ClientConfiguration Configuration { get; private set; }
+        /// <summary>
+        /// Connect with the specified configuration
+        /// </summary>
+        /// <param name="configuration"></param>
+        public static void Connect(ClientConfiguration configuration)
+        {
+            Configuration = configuration;
             if (peer != null && peer.Status != NetPeerStatus.NotRunning)
             {
                 Debug.LogError("cannot connect while connected");
@@ -113,7 +127,7 @@ namespace PNetU
                 GameObject.DontDestroyOnLoad(gobj);
                 gobj.hideFlags = HideFlags.HideAndDontSave;
 
-                
+
             }
             //set up netclient...
 
@@ -121,8 +135,8 @@ namespace PNetU
 
             singletonEngineHook.UpdateSubscription += Update;
 
-            config = new NetPeerConfiguration("PNet");
-            config.Port = bindport; //so we can run client and server on the same machine..
+            config = new NetPeerConfiguration(Configuration.AppIdentifier);
+            config.Port =  Configuration.BindPort; //so we can run client and server on the same machine..
 
             peer = new NetClient(config);
 
@@ -130,7 +144,7 @@ namespace PNetU
 
             var hailMessage = peer.CreateMessage();
             WriteHailMessage(hailMessage);
-            peer.Connect(ip, port, hailMessage);
+            peer.Connect(Configuration.Ip, Configuration.Port, hailMessage);
         }
 
         

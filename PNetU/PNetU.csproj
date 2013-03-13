@@ -48,6 +48,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientConfiguration.cs" />
     <Compile Include="EngineUpdateHook.cs" />
     <Compile Include="NetBehaviour.cs" />
     <Compile Include="NetworkedSceneObject.cs" />

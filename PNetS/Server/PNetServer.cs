@@ -59,31 +59,49 @@ namespace PNetS
         /// </summary>
         public static NetOutgoingMessage GetMessage { get { return peer.CreateMessage(); } }
         
-        static NetPeerConfiguration config;
-        
+        static NetPeerConfiguration _netPeerConfiguration;
+
+        /// <summary>
+        /// the server configuration
+        /// </summary>
+        public static ServerConfiguration Configuration { get; private set; }
+
         /// <summary>
         /// Set up the server, and bind to a socket. Use Start to actually fully start the server
         /// </summary>
         /// <param name="maxConnections"></param>
         /// <param name="listenPort"></param>
         /// <param name="tickRate"></param>
+        [Obsolete("Use the overload that takes a ServerConfiguration")]
         public static void InitializeServer(int maxConnections, int listenPort, int tickRate = 66)
         {
+            Configuration = new ServerConfiguration(maxConnections, listenPort, tickRate);
+        }
+
+        /// <summary>
+        /// Set up the server, bind to a socket. Use Start to fully start the server after running this
+        /// </summary>
+        /// <param name="configuration"></param>
+        public static void InitializeServer(ServerConfiguration configuration)
+        {
+            Configuration = configuration;
+
             if (peer != null && peer.Status != NetPeerStatus.NotRunning)
             {
                 Debug.LogError("cannot start server while already running");
                 return;
             }
 
-            config = new NetPeerConfiguration("PNet");
-            config.Port = listenPort;
-            config.MaximumConnections = maxConnections;
-            config.SetMessageTypeEnabled(NetIncomingMessageType.ConnectionApproval, true);
+            _netPeerConfiguration = new NetPeerConfiguration(Configuration.AppIdentifier);
+            _netPeerConfiguration.Port = Configuration.ListenPort;
+            _netPeerConfiguration.MaximumConnections = Configuration.MaximumConnections;
+            connections = new IntDictionary<NetConnection>(Configuration.MaximumConnections);
 
-            peer = new NetServer(config);
+            _netPeerConfiguration.SetMessageTypeEnabled(NetIncomingMessageType.ConnectionApproval, true);
+
+            peer = new NetServer(_netPeerConfiguration);
 
             peer.Start();
-
 
             var serverId = connections.Add(null);
             var serverPlayer = new Player();
@@ -91,7 +109,6 @@ namespace PNetS
             Player.Server = serverPlayer;
 
             GameState.update += Update;
-
         }
 
         /// <summary>
@@ -111,7 +128,10 @@ namespace PNetS
             GameState.Quit();
         }
         
-        static void Disconnect()
+        /// <summary>
+        /// shut down the networking
+        /// </summary>
+        public static void Disconnect()
         {
             if (peer == null)
                 return;
@@ -332,7 +352,7 @@ namespace PNetS
             }
         }
 
-        static IntDictionary<NetConnection> connections = new IntDictionary<NetConnection>(32);
+        private static IntDictionary<NetConnection> connections;
 
         internal static Player GetPlayer(NetConnection connection)
         {

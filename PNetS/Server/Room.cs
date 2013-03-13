@@ -423,7 +423,7 @@ namespace PNetS
         /// <summary>
         /// all the static objects in the scene
         /// </summary>
-        protected Dictionary<ushort, NetworkedSceneObjectView> SceneObjects { get { return roomObjects; } }
+        public Dictionary<ushort, NetworkedSceneObjectView> SceneObjects { get { return roomObjects; } }
 
         internal NetworkedSceneObjectView IncomingObjectRPC(NetIncomingMessage msg)
         {
