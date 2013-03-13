@@ -13,7 +13,7 @@ namespace PNetS
         /// <summary>
         /// Mode the rpc was sent from by the client
         /// </summary>
-        public RPCMode mode;
+        public readonly RPCMode mode;
         /// <summary>
         /// change this to false if the message should not continue forwarding to the rest of the players (you can tell who it'll forward to by the rpcmode)
         /// </summary>
@@ -21,6 +21,17 @@ namespace PNetS
         /// <summary>
         /// Player who sent the message
         /// </summary>
-        public Player player;
+        public readonly Player player;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <param name="player"></param>
+        internal NetMessageInfo(RPCMode mode, Player player)
+        {
+            this.mode = mode;
+            this.player = player;
+        }
     }
 }

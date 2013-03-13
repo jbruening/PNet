@@ -73,6 +73,7 @@
     <Compile Include="Utils\RPCMode.cs" />
     <Compile Include="Serializers\SlimMathSerializer.cs" />
     <Compile Include="GameMachine\Yield\WaitForSeconds.cs" />
+    <Compile Include="Utils\RPCProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lidgren.Network\Lidgren.Network.csproj">

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using PNetS.Utils;
 using SlimMath;
 using Lidgren.Network;
 using PNet;
@@ -271,7 +272,8 @@ namespace PNetS
         }
 
         #region RPC Processing
-        Dictionary<byte, Action<NetIncomingMessage, NetMessageInfo>> RPCProcessors = new Dictionary<byte, Action<NetIncomingMessage, NetMessageInfo>>();
+
+        readonly Dictionary<byte, RPCProcessor> _rpcProcessors = new Dictionary<byte, RPCProcessor>();
 
         /// <summary>
         /// Subscribe to an rpc
@@ -279,26 +281,26 @@ namespace PNetS
         /// <param name="rpcID">id of the rpc</param>
         /// <param name="rpcProcessor">action to process the rpc with</param>
         /// <param name="overwriteExisting">overwrite the existing processor if one exists.</param>
+        /// <param name="defaultContinueForwarding">default value for info.continueForwarding</param>
         /// <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
-        public bool SubscribeToRPC(byte rpcID, Action<NetIncomingMessage, NetMessageInfo> rpcProcessor, bool overwriteExisting = true)
+        public bool SubscribeToRPC(byte rpcID, Action<NetIncomingMessage, NetMessageInfo> rpcProcessor, bool overwriteExisting = true, bool defaultContinueForwarding = true)
         {
             if (rpcProcessor == null)
                 throw new ArgumentNullException("rpcProcessor", "the processor delegate cannot be null");
             if (overwriteExisting)
             {
-                RPCProcessors[rpcID] = rpcProcessor;
+                _rpcProcessors[rpcID] = new RPCProcessor(rpcProcessor, defaultContinueForwarding);
                 return true;
             }
             else
             {
-                Action<NetIncomingMessage, NetMessageInfo> checkExist;
-                if (RPCProcessors.TryGetValue(rpcID, out checkExist))
+                if (_rpcProcessors.ContainsKey(rpcID))
                 {
                     return false;
                 }
                 else
                 {
-                    RPCProcessors.Add(rpcID, checkExist);
+                    _rpcProcessors.Add(rpcID, new RPCProcessor(rpcProcessor, defaultContinueForwarding));
                     return true;
                 }
             }
@@ -310,26 +312,68 @@ namespace PNetS
         /// <param name="rpcID"></param>
         public void UnsubscribeFromRPC(byte rpcID)
         {
-            RPCProcessors.Remove(rpcID);
+            _rpcProcessors.Remove(rpcID);
         }
 
         internal void CallRPC(byte rpcID, NetIncomingMessage message, NetMessageInfo info)
         {
-            Action<NetIncomingMessage, NetMessageInfo> processor;
-            if (RPCProcessors.TryGetValue(rpcID, out processor))
+            RPCProcessor processor;
+            if (_rpcProcessors.TryGetValue(rpcID, out processor))
             {
-                if (processor != null)
-                    processor(message, info);
+                if (processor.Method != null)
+                    processor.Method(message, info);
                 else
                 {
                     Debug.LogWarning("RPC processor for {0} was null. Automatically cleaning up. Please be sure to clean up after yourself in the future.", rpcID);
-                    RPCProcessors.Remove(rpcID);
+                    _rpcProcessors.Remove(rpcID);
                 }
             }
             else
             {
                 Debug.LogWarning("Room {1}: unhandled RPC {0}", rpcID, name);
                 info.continueForwarding = false;
+            }
+        }
+
+        /// <summary>
+        /// Subscribe all the marked rpcs on the supplied component
+        /// </summary>
+        /// <param name="behaviour"> </param>
+        public void SubscribeMarkedRPCsOnBehaviour(RoomBehaviour behaviour)
+        {
+            if (behaviour == null) return;
+
+            var thisType = behaviour.GetType();
+
+            //get all the methods of the derived type
+            MethodInfo[] methods = thisType.GetMethods(
+                BindingFlags.NonPublic |
+                BindingFlags.Instance |
+                BindingFlags.Static |
+                BindingFlags.Public |
+                BindingFlags.FlattenHierarchy
+                );
+
+            foreach (var method in methods)
+            {
+                var tokens = Attribute.GetCustomAttributes(method, typeof(RpcAttribute), false) as RpcAttribute[];
+
+                foreach (var token in tokens)
+                {
+
+                    if (token == null)
+                        continue;
+
+                    var del = Delegate.CreateDelegate(typeof(Action<NetIncomingMessage, NetMessageInfo>), behaviour, method, false) as Action<NetIncomingMessage, NetMessageInfo>;
+
+                    if (del != null)
+                        SubscribeToRPC(token.rpcId, del, defaultContinueForwarding: token.defaultContinueForwarding);
+                    else
+                        Debug.LogWarning("The method {0} for type {1} does not match the RPC delegate of Action<NetInComingMessage, NetMessageInfo>, but is marked to process RPC's. Please either fix this method, or remove the attribute",
+                            method.Name,
+                            method.DeclaringType.Name
+                            );
+                }
             }
         }
 
@@ -432,7 +476,7 @@ namespace PNetS
             NetworkedSceneObjectView view;
             if (roomObjects.TryGetValue(viewId, out view))
             {
-                view.CallRPC(rpcId, msg, new NetMessageInfo(){player = msg.SenderConnection.Tag as Player, mode = RPCMode.Server});
+                view.CallRPC(rpcId, msg, new NetMessageInfo(RPCMode.Server, msg.SenderConnection.Tag as Player));
             }
 
             return view;
@@ -490,48 +534,6 @@ namespace PNetS
             where T : class
         {
             return _roomBehaviours.OfType<T>().ToArray();
-        }
-
-        /// <summary>
-        /// Subscribe all the marked rpcs on the supplied component
-        /// </summary>
-        /// <param name="behaviour"> </param>
-        public void SubscribeMarkedRPCsOnBehaviour(RoomBehaviour behaviour)
-        {
-            if (behaviour == null) return;
-
-            var thisType = behaviour.GetType();
-
-            //get all the methods of the derived type
-            MethodInfo[] methods = thisType.GetMethods(
-                BindingFlags.NonPublic |
-                BindingFlags.Instance |
-                BindingFlags.Static |
-                BindingFlags.Public |
-                BindingFlags.FlattenHierarchy
-                );
-
-            foreach (var method in methods)
-            {
-                var tokens = Attribute.GetCustomAttributes(method, typeof(RpcAttribute), false) as RpcAttribute[];
-
-                foreach (var token in tokens)
-                {
-
-                    if (token == null)
-                        continue;
-
-                    var del = Delegate.CreateDelegate(typeof(Action<NetIncomingMessage, NetMessageInfo>), behaviour, method, false) as Action<NetIncomingMessage, NetMessageInfo>;
-
-                    if (del != null)
-                        SubscribeToRPC(token.rpcId, del);
-                    else
-                        Debug.LogWarning("The method {0} for type {1} does not match the RPC delegate of Action<NetInComingMessage, NetMessageInfo>, but is marked to process RPC's. Please either fix this method, or remove the attribute",
-                            method.Name,
-                            method.DeclaringType.Name
-                            );
-                }
-            }
         }
 
         /// <summary>

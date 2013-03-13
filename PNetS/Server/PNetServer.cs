@@ -211,7 +211,7 @@ namespace PNetS
                     var rpcId = msg.ReadByte();
                     Player player = GetPlayer(msg.SenderConnection);
                     NetworkView find;
-                    NetMessageInfo info = new NetMessageInfo() { mode = (RPCMode)(msg.SequenceChannel - Channels.BEGIN_RPCMODES), player = player };
+                    var info = new NetMessageInfo((RPCMode)(msg.SequenceChannel - Channels.BEGIN_RPCMODES), player);
                     if (NetworkView.Find(viewID, out find))
                     {
                         find.CallRPC(rpcId, msg, info);
@@ -256,7 +256,7 @@ namespace PNetS
                     var currentRoom = player.currentRoom;
                     if (currentRoom != null)
                     {
-                        NetMessageInfo info = new NetMessageInfo() { mode = RPCMode.None, player = player };
+                        NetMessageInfo info = new NetMessageInfo(RPCMode.None, player);
                         currentRoom.CallRPC(rpcId, msg, info);
 
                         if (info.continueForwarding)
@@ -389,11 +389,11 @@ namespace PNetS
             var size = 1;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = PNetServer.peer.CreateMessage(size);
+            var message = peer.CreateMessage(size);
             message.Write(rpcId);
             RPCUtils.WriteParams(ref message, args);
 
-            PNetServer.peer.SendToAll(message, null, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+            peer.SendToAll(message, null, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
         }
     }
 }

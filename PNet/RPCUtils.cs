@@ -95,12 +95,28 @@ namespace PNet
         public byte rpcId = 0;
 
         /// <summary>
+        /// Server only. what the default value for continue forwarding is set to
+        /// </summary>
+        public bool defaultContinueForwarding = true;
+
+        /// <summary>
         /// mark the specified method with this rpc id
         /// </summary>
         /// <param name="rpcId"></param>
         public RpcAttribute(byte rpcId)
         {
             this.rpcId = rpcId;
+        }
+
+        /// <summary>
+        /// Server only
+        /// </summary>
+        /// <param name="rpcId"></param>
+        /// <param name="defaultContinueForwarding">what the default value for continue forwarding is set to</param>
+        public RpcAttribute(byte rpcId, bool defaultContinueForwarding)
+        {
+            this.rpcId = rpcId;
+            this.defaultContinueForwarding = defaultContinueForwarding;
         }
     }
 }

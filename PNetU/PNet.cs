@@ -125,7 +125,7 @@ namespace PNetU
                 var gobj = new GameObject("UNet Singleton");
                 singletonEngineHook = gobj.AddComponent<EngineUpdateHook>();
                 GameObject.DontDestroyOnLoad(gobj);
-                gobj.hideFlags = HideFlags.HideAndDontSave;
+                //gobj.hideFlags = HideFlags.DontSave;
 
 
             }
