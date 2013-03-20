@@ -320,6 +320,7 @@ namespace PNetS
             RPCProcessor processor;
             if (_rpcProcessors.TryGetValue(rpcID, out processor))
             {
+                info.continueForwarding = processor.DefaultContinueForwarding;
                 if (processor.Method != null)
                     processor.Method(message, info);
                 else
