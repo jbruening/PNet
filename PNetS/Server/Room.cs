@@ -115,6 +115,20 @@ namespace PNetS
             return gobj;
         }
 
+        internal void ResourceNetworkInstantiate(GameObject resourceLoadedObject)
+        {
+            var loadedView = resourceLoadedObject.GetComponent<NetworkView>();
+
+            NetworkView.RegisterNewView(ref loadedView);
+
+            loadedView.owner = Player.Server;
+            loadedView.MoveToPhase(loadedView.phase);
+
+            m_Actors.Add(loadedView);
+
+            SendNetworkInstantiate(GetConnectionsInPhase(loadedView.phase), resourceLoadedObject);
+        }
+
         /// <summary>
         /// Create a static game object that can receive rpc's in the scene. 
         /// The client should have a similar object in the scene matching the room with the same id

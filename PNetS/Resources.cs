@@ -20,14 +20,15 @@ namespace PNetS
         {
             ResourceFolder = Path.Combine(Assembly.GetAssembly(typeof (Resources)).Location, "Resources");
         }
-        
+
         /// <summary>
         /// Load a gameobject from a file
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="roomToInstantiateIn"></param>
+        /// <param name="allowNetworkInstantiateIfHasNetworkView"></param>
         /// <returns></returns>
-        public static GameObject Load(string filePath, Room roomToInstantiateIn)
+        public static GameObject Load(string filePath, Room roomToInstantiateIn, bool allowNetworkInstantiateIfHasNetworkView = false)
         {
             var dser = new GameObject();
             dser.Room = roomToInstantiateIn;
@@ -63,9 +64,9 @@ namespace PNetS
                     if (t.IsSubclassOf(componentType))
                     {
                         Type t1 = t;
-                        if (t1 == typeof(NetworkView))
+                        if (t1 == typeof(NetworkView) && !allowNetworkInstantiateIfHasNetworkView)
                         {
-                            Debug.LogWarning("[Resources.Load] file {0} has a NetworkView component on it. This will not make it networked. Use Room.NetworkLoad", actualFilePath);
+                            Debug.LogWarning("[Resources.Load] file {0} has a NetworkView component on it, but was run as to not network instantiate. It will not be networked.", actualFilePath);
                         }
                         GameObject dser1 = dser;
                         config.AddActivator(t, () =>
@@ -90,6 +91,9 @@ namespace PNetS
                 if (awake != null) awake();
             
             dser.OnComponentAfterDeserialization();
+
+            if (allowNetworkInstantiateIfHasNetworkView && dser.GetComponent<NetworkView>() != null)
+                roomToInstantiateIn.ResourceNetworkInstantiate(dser);
 
             return dser;
         }
