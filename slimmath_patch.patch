@@ -1,0 +1,13 @@
+Index: Design/FieldPropertyDescriptor.cs
+===================================================================
+--- Design/FieldPropertyDescriptor.cs	(revision 47)
++++ Design/FieldPropertyDescriptor.cs	(working copy)
+@@ -46,7 +46,7 @@
+         }
+ 
+         public FieldPropertyDescriptor(FieldInfo fieldInfo)
+-            : base(fieldInfo.Name, (Attribute[])fieldInfo.GetCustomAttributes(true))
++            : base(fieldInfo.Name, Array.ConvertAll(fieldInfo.GetCustomAttributes(true), item=> item as Attribute))
+         {
+             this.fieldInfo = fieldInfo;
+         }

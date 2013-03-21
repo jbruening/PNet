@@ -17,7 +17,7 @@ into a new folder named
 
 SlimMath
 
-in this folder.
+in this folder, then apply the slimmath_patch.patch to that folder
 
 
 
