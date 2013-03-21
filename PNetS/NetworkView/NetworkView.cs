@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Yaml.Serialization;
 using Lidgren.Network;
 using PNet;
 using System.Collections;
@@ -17,10 +18,12 @@ namespace PNetS
         /// <summary>
         /// The owner
         /// </summary>
+        [YamlSerialize(YamlSerializeMethod.Never)]
         public Player owner { get; internal set; }
         /// <summary>
         /// The room this is in
         /// </summary>
+        [YamlSerialize(YamlSerializeMethod.Never)]
         public Room room { get { return gameObject.Room; } }
         /// <summary>
         /// The phase this is in
@@ -30,6 +33,7 @@ namespace PNetS
         /// <summary>
         /// the identifier for the network view
         /// </summary>
+        [YamlSerialize(YamlSerializeMethod.Never)]
         public NetworkViewId viewID = NetworkViewId.Zero;
         
         private List<NetConnection> connections = new List<NetConnection>();

@@ -39,6 +39,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="YamlSerializer">
+      <HintPath>..\lib\YamlSerializer.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameMachine\GameObject\Component.cs" />
@@ -57,6 +60,7 @@
     <Compile Include="Log\NullLogger.cs" />
     <Compile Include="NetworkView\NetworkedSceneObject.cs" />
     <Compile Include="NetworkView\NetworkedSceneView.cs" />
+    <Compile Include="Resources.cs" />
     <Compile Include="ServerConfiguration.cs" />
     <Compile Include="Server\PNetServer.Update.cs" />
     <Compile Include="Server\RoomBehaviour.cs" />

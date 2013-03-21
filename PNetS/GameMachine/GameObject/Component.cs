@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using System.Threading;
+using System.Yaml.Serialization;
 
 namespace PNetS
 {
@@ -15,6 +16,7 @@ namespace PNetS
         /// <summary>
         /// The gameobject this is attached to. cached result.
         /// </summary>
+        [YamlSerialize(YamlSerializeMethod.Never)]
         public GameObject gameObject { get; internal set; }
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace PNetS
             }
             return new Coroutine(routine);
         }
-
+        [YamlSerialize(YamlSerializeMethod.Never)]
         internal List<IEnumerator<YieldInstruction>> rootRoutines = new List<IEnumerator<YieldInstruction>>();
 
         /// <summary>

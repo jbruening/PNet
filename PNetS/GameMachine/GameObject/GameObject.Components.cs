@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Yaml.Serialization;
 
 namespace PNetS
 {
@@ -47,7 +48,7 @@ namespace PNetS
 
         internal class ComponentTracker
         {
-            internal Component component;
+            public Component component;
             internal Action update;
             internal Action lateUpdate;
             internal Action<Player> onPlayerConnected;
@@ -57,7 +58,16 @@ namespace PNetS
             internal Action onDestroy;
         }
 
+        [YamlSerialize(YamlSerializeMethod.Assign)] 
         private List<ComponentTracker> components = new List<ComponentTracker>(4);
+
+        internal void OnComponentAfterDeserialization()
+        {
+            foreach (var component in components)
+            {
+                OnComponentAdded(component.component);
+            }
+        }
         
         /// <summary>
         /// Get the first component of type T attached to the gameobject
@@ -104,7 +114,7 @@ namespace PNetS
         {
             var component = new T();
 
-            var awakeMethod = AddComponentToGameObject(component);
+            var awakeMethod = AddComponentToGameObject(component, new ComponentTracker());
             if (awakeMethod != null)
             {
                 try { awakeMethod(); }
@@ -122,7 +132,7 @@ namespace PNetS
         /// <returns>instance of the component that was added</returns>
         public Component AddComponent(Type componentType)
         {
-            Component component = Activator.CreateInstance(componentType) as Component;
+            var component = Activator.CreateInstance(componentType) as Component;
 
             if (component == null)
             {
@@ -130,7 +140,7 @@ namespace PNetS
                 return null;
             }
 
-            var awakeMethod = AddComponentToGameObject(component);
+            var awakeMethod = AddComponentToGameObject(component, new ComponentTracker());
             if (awakeMethod != null)
             {
                 try { awakeMethod(); }
@@ -138,6 +148,22 @@ namespace PNetS
             }
 
             OnComponentAdded(component);
+            return component;
+        }
+
+        internal Component DeserializeAddComponent(Type componentType, out Action awakeMethod, ComponentTracker tracker)
+        {
+            var component = Activator.CreateInstance(componentType) as Component;
+            awakeMethod = null;
+
+            if (component == null)
+            {
+                Debug.LogError("Attempted to add a type that was not of the type Component to the gameobject");
+                return null;
+            }
+
+            awakeMethod = AddComponentToGameObject(component, tracker);
+
             return component;
         }
 
@@ -163,7 +189,7 @@ namespace PNetS
                 else
                 {
                     addedComponents[i] = component;
-                    awakes[i] = AddComponentToGameObject(component);
+                    awakes[i] = AddComponentToGameObject(component, new ComponentTracker());
                 }
             }
 
@@ -178,12 +204,11 @@ namespace PNetS
             return addedComponents;
         }
 
-        private Action AddComponentToGameObject(Component component)
+        private Action AddComponentToGameObject(Component component, ComponentTracker tracker)
         {
             component.gameObject = this;
 
-            ComponentTracker toAdd = new ComponentTracker();
-            toAdd.component = component;
+            tracker.component = component;
 
             var methods = GetMethods(
                 component,
@@ -213,16 +238,16 @@ namespace PNetS
                     });
 
             var startMethod = methods[0] as Action;
-            toAdd.update = methods[1] as Action;
-            toAdd.lateUpdate = methods[2] as Action;
-            toAdd.onPlayerConnected = methods[3] as Action<Player>;
-            toAdd.onPlayerDisconnected = methods[4] as Action<Player>;
-            toAdd.onComponentAdded = methods[5] as Action<Component>;
+            tracker.update = methods[1] as Action;
+            tracker.lateUpdate = methods[2] as Action;
+            tracker.onPlayerConnected = methods[3] as Action<Player>;
+            tracker.onPlayerDisconnected = methods[4] as Action<Player>;
+            tracker.onComponentAdded = methods[5] as Action<Component>;
             var awakeMethod = methods[6] as Action;
-            toAdd.onFinishedInstantiate = methods[7] as Action<Player>;
-            toAdd.onDestroy = methods[8] as Action;
+            tracker.onFinishedInstantiate = methods[7] as Action<Player>;
+            tracker.onDestroy = methods[8] as Action;
 
-            components.Add(toAdd);
+            components.Add(tracker);
 
             if (startMethod != null)
             {
@@ -291,9 +316,5 @@ namespace PNetS
                 (typeof(T), target, method, false) as T;
 
         }
-        /// <summary>
-        /// room this gameobject is in
-        /// </summary>
-        public Room Room { get; internal set; }
     }
 }

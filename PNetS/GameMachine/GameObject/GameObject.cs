@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Yaml;
+using System.Yaml.Serialization;
 using SlimMath;
 
 namespace PNetS
@@ -19,7 +21,12 @@ namespace PNetS
         /// <summary>
         /// Unique identifier
         /// </summary>
+        [YamlSerialize(YamlSerializeMethod.Never)]
         public readonly int Id;
+
+        [YamlSerialize(YamlSerializeMethod.Assign)]
+        private string _resource;
+
         /// <summary>
         /// Name of this gameobject. Not necessarily unique, just an identifier
         /// </summary>
@@ -27,12 +34,22 @@ namespace PNetS
         /// <summary>
         /// resource path this gameobject came from
         /// </summary>
-        public string Resource { get; internal set; }
+        [YamlSerialize(YamlSerializeMethod.Never)]
+        public string Resource
+        {
+            get { return _resource; }
+            internal set { _resource = value; }
+        }
+
+        /// <summary>
+        /// room this gameobject is in
+        /// </summary>
+        [YamlSerialize(YamlSerializeMethod.Never)]
+        public Room Room { get; internal set; }
         /// <summary>
         /// world position
         /// </summary>
         public Vector3 Position { get; set; }
-
         /// <summary>
         /// world rotation
         /// </summary>
@@ -57,6 +74,16 @@ namespace PNetS
             gameObject.components.ForEach(g => g.component.Dispose());
             gameObject.components = null;
             GameState.RemoveObject(gameObject);
+        }
+
+        /// <summary>
+        /// serialize this gameobject
+        /// </summary>
+        /// <returns></returns>
+        public string Serialize()
+        {
+            var serializer = new YamlSerializer();
+            return serializer.Serialize(this);
         }
     }
 
