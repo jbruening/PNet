@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Yaml;
 using System.Yaml.Serialization;
+using SlimMath;
 
 namespace PNetS
 {
@@ -26,9 +27,11 @@ namespace PNetS
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="roomToInstantiateIn"></param>
+        /// <param name="position"> </param>
+        /// <param name="rotation"> </param>
         /// <param name="allowNetworkInstantiateIfHasNetworkView"></param>
         /// <returns></returns>
-        public static GameObject Load(string filePath, Room roomToInstantiateIn, bool allowNetworkInstantiateIfHasNetworkView = false)
+        public static GameObject Load(string filePath, Room roomToInstantiateIn, bool allowNetworkInstantiateIfHasNetworkView = false, Vector3? position = null, Quaternion? rotation = null)
         {
             var dser = new GameObject();
             dser.Room = roomToInstantiateIn;
@@ -91,6 +94,11 @@ namespace PNetS
                 if (awake != null) awake();
             
             dser.OnComponentAfterDeserialization();
+
+            if (position.HasValue)
+                dser.Position = position.Value;
+            if (rotation.HasValue)
+                dser.Rotation = rotation.Value;
 
             if (allowNetworkInstantiateIfHasNetworkView && dser.GetComponent<NetworkView>() != null)
                 roomToInstantiateIn.ResourceNetworkInstantiate(dser);
