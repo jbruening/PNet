@@ -85,6 +85,13 @@ namespace PNetS
             var serializer = new YamlSerializer();
             return serializer.Serialize(this);
         }
+
+        public override string ToString()
+        {
+            if (string.IsNullOrWhiteSpace(Name))
+                return "PnetS.GameObject";
+            return "GameObject " + Name;
+        }
     }
 
     /// <summary>
