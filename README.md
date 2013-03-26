@@ -18,11 +18,11 @@ The server works similarly to Unity, where gameobjects have components attached 
 
 Some differences in PNetS:
   * there are no transforms. GameObjects are transforms.
-  * gameobjects should not be spawned by themselves if you want to network them. Use Network.Instantiate, which correctly sets up a networked gameobjects.
+  * gameobjects should not be spawned by themselves if you want to network them. Use room.NetworkInstantiate, which correctly sets up a networked gameobjects.
   * the server never exists in one 'scene', and instead runs them all at the same time as rooms. Gameobjects have a room variable that will return which room they are a part of.
   * rooms are not necessarily scenes in unity. Instead, you should define when a client should switch scenes, if it makes sense.
-  * as rooms are not necessarily scenes, they additionally have no default behaviour to them. nor do they load anything in to them. You'll need to make child classes for that.
-  * components derive from Component, not from Monobehaviour. Similarly, Component will call Awake, Start, Update, and LateUpdate.
+  * as rooms are not necessarily scenes, they additionally have no default behaviour to them. nor do they load anything in to them. You'll need to make RoomBehaviours and attach them to the room
+  * components derive from Component, not from Monobehaviour. Similarly, Component will call Awake, Start, Update, and LateUpdate (as well as a few others)
   * Coroutines require that you specify if they are a 'root coroutine', for an initial call to StartCoroutine. Additional calls to StartCoroutine inside a coroutine have to be defined as being a child coroutine.
   * RPC's can be verified by the server. The NetworkInfo object that is passed into the delegate for that rpc has a variable called continueForwarding. If set to false, the rpc will not go to other clients if the rpcmode was Other or All.
   
@@ -31,7 +31,7 @@ Some differences from the Unity Network class on the client
   * as rpc's only get passed to the same NetworkView as them, you can overlap RPC IDs, so long as you aren't overlapping components listening to said RPCs
   * Network instantiated objects need to exist in the Resources folder on the client.
   * NetworkViews can have custom tick rates, completely independent of one another. 
-  * Only the server can call Network.Instantiate, for obvious security reasons.
+  * Only the server can call NetworkInstantiate, for obvious security reasons.  Set up your own RPCs to request a spawn if clients should be able to do so
   * Scripts with Rpc marks need to be attached to the prefab on the client before it is instantiated, as that is when the attributes are found and subscribed. If you want to attach a component afterward, you can use the NetworkView.SubscribeToRPC method.  The server, however, will continue to subscribe marked methods after object instantiation, so you do not need to use NetworkView.SubscribeToRPC
 
-Yaml serialization/deserialization is performed using this library: https://github.com/jbruening/YamlSerializer-Fork
+Yaml serialization/deserialization for the server's Resources.Load and GameObject.Serialize is performed using this library: https://github.com/jbruening/YamlSerializer-Fork
