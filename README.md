@@ -33,3 +33,5 @@ Some differences from the Unity Network class on the client
   * NetworkViews can have custom tick rates, completely independent of one another. 
   * Only the server can call Network.Instantiate, for obvious security reasons.
   * Scripts with Rpc marks need to be attached to the prefab on the client before it is instantiated, as that is when the attributes are found and subscribed. If you want to attach a component afterward, you can use the NetworkView.SubscribeToRPC method.  The server, however, will continue to subscribe marked methods after object instantiation, so you do not need to use NetworkView.SubscribeToRPC
+  * 
+Yaml serialization/deserialization is performed using this library: https://github.com/jbruening/YamlSerializer-Fork
