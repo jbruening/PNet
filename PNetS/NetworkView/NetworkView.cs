@@ -71,12 +71,60 @@ namespace PNetS
         {
             //TODO: destroy this
         }
+
+        private void OnInstantiationFinished(Player player)
+        {
+            //get the player up to speed
+            SendBuffer(player);
+
+
+            //get all the secondary views and send them
+            if (IsSecondaryView) return;
+            var conn = new List<NetConnection> {player.connection};
+
+            foreach (var nview in gameObject.GetComponents<NetworkView>().Where(n => n != this))
+            {
+                SendSecondaryView(nview, conn);
+            }
+        }
         /// <summary>
         /// cleaning up
         /// </summary>
         protected override void Disposing()
         {
             _rpcProcessors.Clear();
+
+            RemoveView(this);
+        }
+
+        /// <summary>
+        /// Add another network view to the same gameobject on the server and all clients
+        /// </summary>
+        /// <returns></returns>
+        public NetworkView AddNetworkedNetworkView()
+        {
+            var nView = gameObject.AddComponent<NetworkView>();
+            nView.IsSecondaryView = true;
+            RegisterNewView(ref nView);
+
+            SendSecondaryView(nView, connections);
+            return nView;
+        }
+
+        /// <summary>
+        /// whether or not this is a network view added secondarily
+        /// </summary>
+        public bool IsSecondaryView { get; private set; }
+
+        void SendSecondaryView(NetworkView newView, List<NetConnection> conns)
+        {
+            var message = PNetServer.peer.CreateMessage();
+
+            message.Write(RPCUtils.AddView);
+            message.Write(viewID.guid);
+            message.Write(newView.viewID.guid);
+
+            PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
         #region RPC Subscriptions

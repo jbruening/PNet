@@ -16,7 +16,7 @@ namespace PNetS
     public partial class NetworkView
     {
 
-        static IntDictionary<NetworkView> views = new IntDictionary<NetworkView>();
+        static readonly IntDictionary<NetworkView> Views = new IntDictionary<NetworkView>();
 
         /// <summary>
         /// Find the networkview based on a viewID
@@ -25,7 +25,9 @@ namespace PNetS
         /// <returns></returns>
         public static NetworkView Find(NetworkViewId viewID)
         {
-            return views[viewID.guid];
+            NetworkView view;
+            Find(viewID.guid, out view);
+            return view;
         }
         /// <summary>
         /// Find a network view from an ID
@@ -35,20 +37,29 @@ namespace PNetS
         /// <returns></returns>
         public static bool Find(ushort id, out NetworkView view)
         {
-            view = views[id];
-            if (view != null)
-                return true;
-            return false;
+            lock (ViewsLock) {view = Views[id];}
+            return view != null;
         }
 
-        internal static void RemoveView(ushort viewId)
+        private readonly static object ViewsLock = new object();
+        internal static void RemoveView(NetworkView view)
         {
-            views.Remove(viewId);
+            lock (ViewsLock)
+            {
+                var findView = Views[view.viewID.guid];
+                if (findView != null)
+                {
+                    if (findView == view)
+                    {
+                        Views.Remove(view.viewID.guid);
+                    }
+                }
+            }
         }
 
         internal static void RegisterView(NetworkView view, ushort viewId)
         {
-            views.Add(viewId, view);
+            lock(ViewsLock) {Views.Add(viewId, view);}
         }
 
         /// <summary>
@@ -57,7 +68,12 @@ namespace PNetS
         /// <param name="view"></param>
         public static void RegisterNewView(ref NetworkView view)
         {
-            view.viewID.guid = (ushort)views.Add(view);
+            int addedId;
+            lock (ViewsLock)
+            {
+                addedId = Views.Add(view);
+            }
+            view.viewID.guid = (ushort) addedId;
         }
     }
 }

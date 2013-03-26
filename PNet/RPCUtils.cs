@@ -78,6 +78,10 @@ namespace PNet
         /// sent to the server when a networkview has been created
         /// </summary>
         public const byte FinishedInstantiate = 8;
+        /// <summary>
+        /// sent to the clients when a view is added to an already existing gameobject with a network view
+        /// </summary>
+        public const byte AddView = 10;
     }
 
     /// <summary>

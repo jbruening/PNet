@@ -347,7 +347,6 @@ namespace PNetS
                 if (NetworkView.Find(viewId, out find))
                 {
                     find.gameObject.OnFinishedInstantiate(player);
-                    find.SendBuffer(player);
                 }
             }
         }

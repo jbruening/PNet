@@ -57,12 +57,12 @@ namespace PNetS
         /// <summary>
         /// localized forward
         /// </summary>
-        public Vector3 Forward { get { return Vector3.UnitZ.Rotate(Rotation); } }
+        public Vector3 Forward { get { return  Rotation.Multiply(Vector3.UnitZ); } }
 
         /// <summary>
         /// localized right
         /// </summary>
-        public Vector3 Right { get { return Vector3.UnitX.Rotate(Rotation); } }
+        public Vector3 Right { get { return Rotation.Multiply(Vector3.UnitX); } }
 
         /// <summary>
         /// Destroy this gameObject. THIS IS NOT NETWORKED SYNCED.
@@ -86,6 +86,10 @@ namespace PNetS
             return serializer.Serialize(this);
         }
 
+        /// <summary>
+        /// tostring
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             if (string.IsNullOrWhiteSpace(Name))

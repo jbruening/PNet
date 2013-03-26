@@ -292,6 +292,21 @@ namespace PNetU
                 NetworkedSceneObject.sceneObjects = new Dictionary<int, NetworkedSceneObject>();
                 OnRoomChange(newRoom);
             }
+            else if (utilId == RPCUtils.AddView)
+            {
+                var addToId = msg.ReadUInt16();
+                var idToAdd = msg.ReadUInt16();
+
+                NetworkView view;
+                if (NetworkView.Find(addToId, out view))
+                {
+                    NetworkView.RegisterView(view, idToAdd);
+                    var newView = view.gameObject.AddComponent<NetworkView>();
+                    newView.viewID = new NetworkViewId() { guid = idToAdd, IsMine = view.IsMine };
+                    newView.IsMine = view.IsMine;
+                    newView.OwnerId = view.OwnerId;
+                }
+            }
             else if (utilId == RPCUtils.SetPlayerId)
             {
                 var playerId = msg.ReadUInt16();

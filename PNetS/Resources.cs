@@ -10,6 +10,9 @@ using SlimMath;
 
 namespace PNetS
 {
+    /// <summary>
+    /// class for loading prefabs
+    /// </summary>
     public static class Resources
     {
         /// <summary>

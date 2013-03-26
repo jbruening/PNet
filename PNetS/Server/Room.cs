@@ -64,7 +64,7 @@ namespace PNetS
             
             foreach (var act in m_Actors)
             {
-                NetworkView.RemoveView(act.viewID.guid);
+                NetworkView.RemoveView(act);
                 GameObject.Destroy(act.gameObject);
             }
             m_Actors = null;
@@ -161,6 +161,7 @@ namespace PNetS
             if (netView == null)
             {
                 Debug.Log("[Instantiate] the specified object {0} does not have a network view to actually use for network instantiation", gobj.Resource);
+                return;
             }
 
             var message = PNetServer.peer.CreateMessage(33 + (gobj.Resource.Length * 2));
@@ -193,7 +194,7 @@ namespace PNetS
             msg.Write(RPCUtils.Remove);
             msg.Write(view.viewID.guid);
 
-            NetworkView.RemoveView(view.viewID.guid);
+            NetworkView.RemoveView(view);
 
             //send a destruction message to everyone, just in case.
             var connections = players.Select(p => p.connection).ToList();
@@ -259,7 +260,8 @@ namespace PNetS
 
             foreach (var actor in m_Actors)
             {
-                SendNetworkInstantiate(new List<NetConnection>() { connection }, actor.gameObject);
+                if (!actor.IsSecondaryView)
+                    SendNetworkInstantiate(new List<NetConnection>() {connection}, actor.gameObject);
             }
         }
 
