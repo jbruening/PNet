@@ -302,8 +302,8 @@ namespace PNetU
                 NetworkView view;
                 if (NetworkView.Find(addToId, out view))
                 {
-                    NetworkView.RegisterView(view, idToAdd);
                     var newView = view.gameObject.AddComponent<NetworkView>();
+                    NetworkView.RegisterView(newView, idToAdd);
                     newView.viewID = new NetworkViewId() { guid = idToAdd, IsMine = view.IsMine };
                     newView.IsMine = view.IsMine;
                     newView.OwnerId = view.OwnerId;

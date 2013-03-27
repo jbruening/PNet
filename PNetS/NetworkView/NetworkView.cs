@@ -72,6 +72,21 @@ namespace PNetS
             //TODO: destroy this
         }
 
+        void OnPlayerEnteredRoom(Player player)
+        {
+            if (player.IsInPhase(phase))
+                connections.Add(player.connection);
+            if (player != owner)
+                allButOwner.Add(player.connection);
+        }
+        void OnPlayerLeftRoom(Player player)
+        {
+            if (player.IsInPhase(phase))
+                connections.Remove(player.connection);
+            if (player != owner)
+                allButOwner.Remove(player.connection);
+        }
+
         private void OnInstantiationFinished(Player player)
         {
             //get the player up to speed

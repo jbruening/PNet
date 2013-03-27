@@ -400,7 +400,7 @@ namespace PNetS
         /// called when a player enters the room
         /// </summary>
         /// <param name="player"></param>
-        public void OnPlayerEnter(Player player)
+        private void OnPlayerEnter(Player player)
         {
             for (int i = 0; i < _roomBehaviours.Count; ++i)
             {
@@ -416,7 +416,7 @@ namespace PNetS
         /// called when a player exists the room
         /// </summary>
         /// <param name="player"></param>
-        public void OnPlayerExit(Player player)
+        private void OnPlayerExit(Player player)
         {
             for (int i = 0; i < _roomBehaviours.Count; ++i)
             {
@@ -444,10 +444,10 @@ namespace PNetS
             SendBuffer(player.connection);
 
             // network views buffer
-            m_Actors.ForEach(a => 
-                {
-                    a.UpdateConnections();
-                });
+            //m_Actors.ForEach(a => 
+            //    {
+            //        a.UpdateConnections();
+            //    });
 
             OnPlayerEnter(player);
         }
@@ -458,7 +458,7 @@ namespace PNetS
 
             m_Players.Remove(player);
             
-            m_Actors.ForEach(a => a.UpdateConnections());
+            //m_Actors.ForEach(a => a.UpdateConnections());
 
             foreach (var ro in roomObjects)
             {
