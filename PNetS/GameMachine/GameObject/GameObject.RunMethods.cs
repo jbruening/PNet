@@ -17,7 +17,7 @@ namespace PNetS
             {
                 if (c.update != null)
                     try { c.update(); }
-                    catch (Exception e) { Debug.LogError(e.Message); }
+                    catch (Exception e) { Debug.LogError(e.ToString()); }
             }
         }
 
@@ -27,7 +27,7 @@ namespace PNetS
             {
                 if (c.lateUpdate != null)
                     try { c.lateUpdate(); }
-                    catch (Exception e) { Debug.LogError(e.Message); }
+                    catch (Exception e) { Debug.LogError(e.ToString()); }
             }
         }
 
@@ -37,7 +37,7 @@ namespace PNetS
             {
                 if (c.onPlayerConnected != null)
                     try { c.onPlayerConnected(player); }
-                    catch (Exception e) { Debug.LogError(e.Message); }
+                    catch (Exception e) { Debug.LogError(e.ToString()); }
             }
         }
 
@@ -47,7 +47,27 @@ namespace PNetS
             {
                 if (c.onPlayerDisconnected != null)
                     try { c.onPlayerDisconnected(player); }
-                    catch (Exception e) { Debug.LogError(e.Message); }
+                    catch (Exception e) { Debug.LogError(e.ToString()); }
+            }
+        }
+
+        internal void OnPlayerLeftRoom(Player player)
+        {
+            foreach(var c in components)
+            {
+                if (c.onPlayerLeftRoom != null)
+                    try { c.onPlayerLeftRoom(player); }
+                    catch(Exception e){Debug.LogError(e.ToString());}
+            }
+        }
+
+        internal void OnPlayerEnteredRoom(Player player)
+        {
+            foreach (var c in components)
+            {
+                if (c.onPlayerEnteredRoom != null)
+                    try { c.onPlayerEnteredRoom(player); }
+                    catch (Exception e) { Debug.LogError(e.ToString()); }
             }
         }
 
@@ -57,7 +77,7 @@ namespace PNetS
             {
                 if (c.onComponentAdded != null)
                     try { c.onComponentAdded(component); }
-                    catch (Exception e) { Debug.LogError(e.Message); }
+                    catch (Exception e) { Debug.LogError(e.ToString()); }
             }
         }
 
@@ -67,7 +87,7 @@ namespace PNetS
             {
                 if (c.onFinishedInstantiate != null)
                     try { c.onFinishedInstantiate(player); }
-                    catch (Exception e) { Debug.LogError(e.Message); }
+                    catch (Exception e) { Debug.LogError(e.ToString()); }
             }
         }
 
@@ -77,7 +97,7 @@ namespace PNetS
             {
                 if (c.onDestroy != null)
                     try { c.onDestroy(); }
-                    catch (Exception e) { Debug.LogError(e.Message); }
+                    catch (Exception e) { Debug.LogError(e.ToString()); }
             }
         }
     }

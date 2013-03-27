@@ -406,6 +406,11 @@ namespace PNetS
             {
                 _roomBehaviours[i].OnPlayerEnter(player);
             }
+
+            for (int i = 0; i < m_Actors.Count; i++)
+            {
+                m_Actors[i].gameObject.OnPlayerEnteredRoom(player);
+            }
         }
         /// <summary>
         /// called when a player exists the room
@@ -416,6 +421,11 @@ namespace PNetS
             for (int i = 0; i < _roomBehaviours.Count; ++i)
             {
                 _roomBehaviours[i].OnPlayerExit(player);
+            }
+
+            for (int i = 0; i < m_Actors.Count; i++)
+            {
+                m_Actors[i].gameObject.OnPlayerLeftRoom(player);
             }
         }
 

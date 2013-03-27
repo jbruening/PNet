@@ -34,6 +34,15 @@ namespace PNetS
         /// </summary>
         public const string OnPlayerDisconnectedMethodName = "OnPlayerDisconnected";
         /// <summary>
+        /// The name of the method that gets run when a client leaves the room the gameobject is in
+        /// </summary>
+        public const string OnPlayerLeftRoomMethodName = "OnPlayerLeftRoom";
+        /// <summary>
+        /// The name of the method that gets run when a client joins the room the gameobject is in
+        /// gets run before the player finishes instantiating things
+        /// </summary>
+        public const string OnPlayerEnteredRoomMethodName = "OnPlayerEnteredRoom";
+        /// <summary>
         /// Name of the method that gets run when a component is added
         /// </summary>
         public const string OnComponentAddedMethodName = "OnComponentAdded";
@@ -56,6 +65,8 @@ namespace PNetS
             internal Action<Component> onComponentAdded;
             internal Action<Player> onFinishedInstantiate;
             internal Action onDestroy;
+            internal Action<Player> onPlayerLeftRoom;
+            internal Action<Player> onPlayerEnteredRoom;
         }
 
         [YamlSerialize(YamlSerializeMethod.Assign)] 
@@ -222,7 +233,9 @@ namespace PNetS
                         OnComponentAddedMethodName,
                         AwakeMethodName,
                         OnInstantiationFinishedMethodName,
-                        OnDestroyMethodName
+                        OnDestroyMethodName,
+                        OnPlayerLeftRoomMethodName,
+                        OnPlayerEnteredRoomMethodName
                     },
                 new List<Type>()
                     {
@@ -234,7 +247,9 @@ namespace PNetS
                         typeof(Action<Component>),
                         typeof(Action),
                         typeof(Action<Player>),
-                        typeof(Action)
+                        typeof(Action),
+                        typeof(Action<Player>),
+                        typeof(Action<Player>)
                     });
 
             var startMethod = methods[0] as Action;
@@ -246,6 +261,8 @@ namespace PNetS
             var awakeMethod = methods[6] as Action;
             tracker.onFinishedInstantiate = methods[7] as Action<Player>;
             tracker.onDestroy = methods[8] as Action;
+            tracker.onPlayerLeftRoom = methods[9] as Action<Player>;
+            tracker.onPlayerEnteredRoom = methods[10] as Action<Player>;
 
             components.Add(tracker);
 

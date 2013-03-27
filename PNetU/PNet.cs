@@ -296,6 +296,8 @@ namespace PNetU
             {
                 var addToId = msg.ReadUInt16();
                 var idToAdd = msg.ReadUInt16();
+                string customFunction;
+                var runCustomFunction = msg.ReadString(out customFunction);
 
                 NetworkView view;
                 if (NetworkView.Find(addToId, out view))
@@ -305,6 +307,9 @@ namespace PNetU
                     newView.viewID = new NetworkViewId() { guid = idToAdd, IsMine = view.IsMine };
                     newView.IsMine = view.IsMine;
                     newView.OwnerId = view.OwnerId;
+
+                    if (runCustomFunction)
+                        view.gameObject.SendMessage(customFunction, newView, SendMessageOptions.RequireReceiver);
                 }
             }
             else if (utilId == RPCUtils.SetPlayerId)

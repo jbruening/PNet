@@ -100,11 +100,13 @@ namespace PNetS
         /// <summary>
         /// Add another network view to the same gameobject on the server and all clients
         /// </summary>
+        /// <param name="customFunctionOnClient">function to run using SendMessage on the gameobject this is added to on the client. The function should have NetworkView as its parameter</param>
         /// <returns></returns>
-        public NetworkView AddNetworkedNetworkView()
+        public NetworkView AddNetworkedNetworkView(string customFunctionOnClient = null)
         {
             var nView = gameObject.AddComponent<NetworkView>();
             nView.IsSecondaryView = true;
+            nView._customSecondaryFunction = customFunctionOnClient;
             RegisterNewView(ref nView);
 
             SendSecondaryView(nView, connections);
@@ -116,6 +118,8 @@ namespace PNetS
         /// </summary>
         public bool IsSecondaryView { get; private set; }
 
+        private string _customSecondaryFunction;
+
         void SendSecondaryView(NetworkView newView, List<NetConnection> conns)
         {
             var message = PNetServer.peer.CreateMessage();
@@ -123,8 +127,11 @@ namespace PNetS
             message.Write(RPCUtils.AddView);
             message.Write(viewID.guid);
             message.Write(newView.viewID.guid);
+            if (newView._customSecondaryFunction != null)
+                message.Write(newView._customSecondaryFunction);
 
-            PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
+            if (conns.Count > 0)
+                PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
         #region RPC Subscriptions
