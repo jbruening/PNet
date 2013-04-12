@@ -12,29 +12,25 @@ using System.Xml.Serialization;
 /// Objects that exist in a scene with pre-synchronized network id's
 /// </summary>
 [AddComponentMenu("PNet/Networked Scene Object")]
-public class NetworkedSceneObject : MonoBehaviour
+public abstract class NetworkedSceneObject : MonoBehaviour
 {
     /// <summary>
-    /// The scene/room Network ID of this item. Should only be one per room
+    /// The scene/room Network ID of this item. Should unique per room
     /// </summary>
     public int NetworkID = 0;
-    /// <summary>
-    /// data for the object
-    /// </summary>
-    public string ObjectData;
 
-    bool lastEnableState;
-    static bool hasResetDictionary = false;
+    private bool _lastEnableState;
+    private static bool _hasResetDictionary = false;
     void Awake()
     {
-        if (!hasResetDictionary)
+        if (!_hasResetDictionary)
         {
             sceneObjects = new Dictionary<int, NetworkedSceneObject>();
-            hasResetDictionary = true;
+            _hasResetDictionary = true;
         }
 
 
-        lastEnableState = this.enabled;
+        _lastEnableState = this.enabled;
         this.enabled = true;
         
     }
@@ -42,7 +38,7 @@ public class NetworkedSceneObject : MonoBehaviour
     void Start()
     {
         sceneObjects[NetworkID] = this;
-        this.enabled = lastEnableState;
+        this.enabled = _lastEnableState;
     }
 
     #region RPC Processing
@@ -133,20 +129,26 @@ public class NetworkedSceneObject : MonoBehaviour
     /// <returns></returns>
     public string Serialize()
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         sb.AppendLine("-NetworkedSceneObject-");
         sb.Append("id: ").Append(NetworkID).AppendLine(";");
         sb.Append("type:").Append(this.GetType().Name).AppendLine(";");
-        sb.Append("data:").Append(ObjectData).AppendLine(";");
+        sb.Append("data:").Append(SerializeObjectData()).AppendLine(";");
         sb.Append("pos:").Append(transform.position.ToString()).AppendLine(";");
         sb.Append("rot:").Append(transform.rotation.ToString()).AppendLine(";");
 
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Get the data to serialize for this scene object
+    /// </summary>
+    /// <returns></returns>
+    protected abstract string SerializeObjectData();
+
     void OnDestroy()
     {
-        hasResetDictionary = false;
+        _hasResetDictionary = false;
     }
     internal static Dictionary<int, NetworkedSceneObject> sceneObjects = new Dictionary<int, NetworkedSceneObject>();
 }
