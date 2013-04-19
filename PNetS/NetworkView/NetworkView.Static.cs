@@ -41,6 +41,19 @@ namespace PNetS
             return view != null;
         }
 
+        /// <summary>
+        /// find a networkview via a networkviewid serialize to the message
+        /// </summary>
+        /// <param name="message">read location is advanced</param>
+        /// <param name="view"></param>
+        /// <returns></returns>
+        public static bool Find(ref NetIncomingMessage message, out NetworkView view)
+        {
+            var id = NetworkViewId.Deserialize(message);
+
+            return Find(id, out view);
+        }
+
         private readonly static object ViewsLock = new object();
         internal static void RemoveView(NetworkView view)
         {
