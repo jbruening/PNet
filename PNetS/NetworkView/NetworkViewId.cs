@@ -32,6 +32,10 @@ namespace PNetS
             }
         }
 
+        /// <summary>
+        /// write to the message
+        /// </summary>
+        /// <param name="message">message to write to</param>
         public void OnSerialize(NetOutgoingMessage message)
         {
             message.Write(guid);
@@ -49,6 +53,9 @@ namespace PNetS
             return message.ReadUInt16();
         }
 
+        /// <summary>
+        /// size to allocate for bytes in the message
+        /// </summary>
         public int AllocSize { get { return 2; } }
     }
 }

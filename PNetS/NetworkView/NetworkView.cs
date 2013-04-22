@@ -412,12 +412,6 @@ namespace PNetS
 
                 if (owner == Player.Server || owner.connection.Status == NetConnectionStatus.Connected)
                 {
-                    var nMessage = PNetServer.peer.CreateMessage(DefaultStreamSize);
-                    nMessage.Write(viewID.guid);
-                    OnSerializeStream(nMessage);
-
-                    //TODO: figure out connections to send to, then send them
-
                     List<NetConnection> conns;
 
                     if (ProcessSerializationConnections != null)
@@ -425,15 +419,24 @@ namespace PNetS
                     else
                         conns = skipSerializationToOwner ? allButOwner : connections;
 
-                    if (StateSynchronization == NetworkStateSynchronization.Unreliable)
+                    if (conns.Count > 0)
                     {
-                        if (conns.Count > 0)
+                        var nMessage = PNetServer.peer.CreateMessage(DefaultStreamSize);
+                        nMessage.Write(viewID.guid);
+                        OnSerializeStream(nMessage);
+
+                        if (StateSynchronization == NetworkStateSynchronization.Unreliable)
+                        {
                             PNetServer.peer.SendMessage(nMessage, conns, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
-                    }
-                    else if (StateSynchronization == NetworkStateSynchronization.ReliableDeltaCompressed)
-                    {
-                        if (conns.Count > 0)
+                        }
+                        else if (StateSynchronization == NetworkStateSynchronization.ReliableDeltaCompressed)
+                        {
                             PNetServer.peer.SendMessage(nMessage, conns, NetDeliveryMethod.ReliableOrdered, Channels.RELIABLE_STREAM);
+                        }
+                        else
+                        {
+                            Debug.LogError("A networkview is set to the serialization type {0}. This is not a valid serialization type.", StateSynchronization);
+                        }
                     }
                 }
                 yield return new WaitForSeconds(SerializationTime);
