@@ -7,6 +7,7 @@ using Lidgren.Network;
 using PNet;
 using System.Collections;
 using System.Reflection;
+using Object = UnityEngine.Object;
 
 namespace PNetU
 {
@@ -322,11 +323,11 @@ namespace PNetU
         /// <summary>
         /// Subscribe to this to know when an object is being destroyed by the server.
         /// </summary>
-        public Action OnRemove = delegate { };
+        public event Action OnRemove = delegate { };
         /// <summary>
         /// run once we've finished setting up the networkview variables
         /// </summary>
-        public Action OnFinishedCreation = delegate { };
+        public event Action OnFinishedCreation = delegate { };
 
         private void Destroy()
         {
@@ -383,6 +384,21 @@ namespace PNetU
 
         static IntDictionary<NetworkView> allViews = new IntDictionary<NetworkView>();
 
+        internal static void DestroyAllViews()
+        {
+            var cap = allViews.Capacity;
+            for(int i = 0; i < cap; i++)
+            {
+                NetworkView view;
+                if (allViews.TryGetValue(i, out view))
+                {
+                    Destroy(view.gameObject);
+                }
+
+                allViews.Remove(i);
+            }
+        }
+
         internal static void RegisterView(NetworkView view, ushort viewId)
         {
             allViews.Add(viewId, view);
@@ -394,5 +410,15 @@ namespace PNetU
         public ushort OwnerId { get; internal set; }
 
         #endregion
+
+        internal void DoOnFinishedCreation()
+        {
+            if (OnFinishedCreation != null) OnFinishedCreation();
+        }
+
+        internal void DoOnRemove()
+        {
+            if (OnRemove != null) OnRemove();
+        }
     }
 }

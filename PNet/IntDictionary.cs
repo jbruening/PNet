@@ -130,7 +130,8 @@ namespace PNet
             return false;
         }
         /// <summary>
-        /// value for a specified key
+        /// value for a specified key. If there has no value there, it will return default(T)
+        /// You should probably use TryGetValue.
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -147,6 +148,28 @@ namespace PNet
                 Add(index, value);
             }
         }
+
+        /// <summary>
+        /// Try to get the value associated with the key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool TryGetValue(int key, out T value)
+        {
+            if (key < m_Collection.Count)
+            {
+                value = m_Collection[key];
+                return hasValueCollection[key];
+            }
+            value = default(T);
+            return false;
+        }
+
+        /// <summary>
+        /// size of the collection array. can be used as upper bound for enumeration
+        /// </summary>
+        public int Capacity { get { return m_Collection.Count; } }
 
         
 

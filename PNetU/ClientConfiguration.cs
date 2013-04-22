@@ -31,6 +31,15 @@ namespace PNetU
         public readonly int BindPort;
 
         /// <summary>
+        /// if true, delete network instantiates on changing rooms (after OnRoomChange is run)
+        /// </summary>
+        public bool DeleteNetworkInstantiatesOnRoomChange = true;
+        /// <summary>
+        /// if true, delete network instantiates on disconnecting from a server
+        /// </summary>
+        public bool DeleteNetworkInstantiatesOnDisconnect = true;
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="port"> </param>

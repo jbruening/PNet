@@ -53,7 +53,9 @@ public class ExamplePNet : MonoBehaviour
     }
 
     // Use this for initialization
-	void Start () {
-	    Net.Connect(ip, port);
+	void Start ()
+	{
+	    var config = new ClientConfiguration(ip, port);
+	    Net.Connect(config);
 	}
 }

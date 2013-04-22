@@ -46,6 +46,11 @@
             sent to the server when a networkview has been created
             </summary>
         </member>
+        <member name="F:PNet.RPCUtils.AddView">
+            <summary>
+            sent to the clients when a view is added to an already existing gameobject with a network view
+            </summary>
+        </member>
         <member name="M:PNet.RPCUtils.AllocSize(System.Int32@,PNet.INetSerializable[])">
             <summary>
             get the allocation size from the specified serializing objects
@@ -71,10 +76,18 @@
             <summary>
             Attribute for marking rpc methods
             </summary>
+            <remarks>
+            Only one rpc attribute is valid per rpc id per receiving object (room, networkview, etc). If there are multiple, they are overwritten
+            </remarks>
         </member>
         <member name="F:PNet.RpcAttribute.rpcId">
             <summary>
             id of the rpc
+            </summary>
+        </member>
+        <member name="F:PNet.RpcAttribute.defaultContinueForwarding">
+            <summary>
+            Server only. what the default value for continue forwarding is set to
             </summary>
         </member>
         <member name="M:PNet.RpcAttribute.#ctor(System.Byte)">
@@ -82,6 +95,13 @@
             mark the specified method with this rpc id
             </summary>
             <param name="rpcId"></param>
+        </member>
+        <member name="M:PNet.RpcAttribute.#ctor(System.Byte,System.Boolean)">
+            <summary>
+            Server only
+            </summary>
+            <param name="rpcId"></param>
+            <param name="defaultContinueForwarding">what the default value for continue forwarding is set to</param>
         </member>
         <member name="T:PNet.INetSerializable">
             <summary>
@@ -219,6 +239,28 @@
             get the size of this serializable
             </summary>
         </member>
+        <member name="T:PNet.ByteArraySerializer">
+            <summary>
+            class to serialize byte arrays
+            </summary>
+        </member>
+        <member name="F:PNet.ByteArraySerializer.Bytes">
+            <summary>
+            the data
+            </summary>
+        </member>
+        <member name="M:PNet.ByteArraySerializer.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize to the stream
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.ByteArraySerializer.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            deserialize from the stream
+            </summary>
+            <param name="message"></param>
+        </member>
         <member name="T:PNet.ObjectArraySerializer`1">
             <summary>
             A serializer for an array of INetSerializable
@@ -263,6 +305,160 @@
         <member name="P:PNet.ObjectArraySerializer`1.AllocSize">
             <summary>
             Size when writing to the stream
+            </summary>
+        </member>
+        <member name="T:PNet.IntDictionary`1">
+            <summary>
+            provides a dictionary where the key is an integer, but provides array-time lookups
+            TODO: implement a trimming function
+            TODO: implemnt ICollections interface
+            </summary>
+            <remarks>
+            Benefits: access speed is identical to an array
+            Downsides: 
+            collection takes up more memory than a dictionary of the same size of objects
+            Of note: as this takes up as much memory as the last index + bool array the same size, this should probably be used for small collections.
+            </remarks>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:PNet.IntDictionary`1.#ctor(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="collectionSize">initial size of the internal collection</param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.Add(`0)">
+            <summary>
+            adds the object to the collection, and returns the key that was assigned to the object
+            </summary>
+            <param name="add"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.IntDictionary`1.Add(System.Int32,`0)">
+            <summary>
+            NOT RECOMMENDED.
+            This will overwrite the previous value if the key already exists.
+            </summary>
+            <param name="key"></param>
+            <param name="add"></param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.Remove(System.Int32)">
+            <summary>
+            remove the item at the specified key
+            </summary>
+            <param name="key"></param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.HasValue(System.Int32)">
+            <summary>
+            does a value exist for the specified key
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.IntDictionary`1.TryGetValue(System.Int32,`0@)">
+            <summary>
+            Try to get the value associated with the key
+            </summary>
+            <param name="key"></param>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.IntDictionary`1.GetEnumerator">
+            <summary>
+            get the enumerator to enumerate the collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:PNet.IntDictionary`1.Values">
+            <summary>
+            returns the values stored in the dictionary. keys where there is no value will be return as default(T)
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:PNet.IntDictionary`1.HasValues">
+            <summary>
+            get an array for the size of the internal array, that says if a value is contained for that key
+            </summary>
+        </member>
+        <member name="P:PNet.IntDictionary`1.Item(System.Int32)">
+            <summary>
+            value for a specified key. If there has no value there, it will return default(T)
+            You should probably use TryGetValue.
+            </summary>
+            <param name="index"></param>
+            <returns></returns>
+        </member>
+        <member name="P:PNet.IntDictionary`1.Capacity">
+            <summary>
+            size of the collection array. can be used as upper bound for enumeration
+            </summary>
+        </member>
+        <member name="T:PNet.IntDictionary`1.IntDictionaryEnumerator`1">
+            <summary>
+            enumerator helper
+            </summary>
+            <typeparam name="U"></typeparam>
+        </member>
+        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.#ctor(System.Collections.Generic.List{`1})">
+            <summary>
+            create a new enumerator helper for the intdictionary
+            </summary>
+            <param name="m_Collection"></param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.MoveNext">
+            <summary>
+            go to the next iem in the collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.Reset">
+            <summary>
+            reset the position of the enumerator
+            </summary>
+        </member>
+        <member name="P:PNet.IntDictionary`1.IntDictionaryEnumerator`1.Current">
+            <summary>
+            current item in the enumeration
+            </summary>
+        </member>
+        <member name="T:PNet.DictionarySerializer`2">
+            <summary>
+            THIS ONLY WORKS WITH BUILT IN TYPES AND STRING. USER DEFINED STRUCTS WILL BREAK
+            </summary>
+            <typeparam name="T"></typeparam>
+            <typeparam name="U"></typeparam>
+        </member>
+        <member name="F:PNet.DictionarySerializer`2.dictionary">
+            <summary>
+            serialized value
+            </summary>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.#ctor(System.Collections.Generic.Dictionary{`0,`1})">
+            <summary>
+            create a new serializer from the dictionary
+            </summary>
+            <param name="dictionary"></param>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.#ctor">
+            <summary>
+            create a new serializer with no values
+            </summary>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            deserialize from the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize to the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.DictionarySerializer`2.AllocSize">
+            <summary>
+            size in bytes
             </summary>
         </member>
         <member name="T:PNet.Channels">
@@ -338,146 +534,6 @@
             <typeparam name="T"></typeparam>
             <param name="msg"></param>
             <param name="val"></param>
-        </member>
-        <member name="T:PNet.IntDictionary`1">
-            <summary>
-            provides a dictionary where the key is an integer, but provides array-time lookups
-            TODO: implement a trimming function
-            TODO: implemnt ICollections interface
-            </summary>
-            <remarks>
-            Benefits: access speed is identical to an array
-            Downsides: 
-            collection takes up more memory than a dictionary of the same size of objects
-            Of note: as this takes up as much memory as the last index + bool array the same size, this should probably be used for small collections.
-            </remarks>
-            <typeparam name="T"></typeparam>
-        </member>
-        <member name="M:PNet.IntDictionary`1.#ctor(System.Int32)">
-            <summary>
-            
-            </summary>
-            <param name="collectionSize">initial size of the internal collection</param>
-        </member>
-        <member name="M:PNet.IntDictionary`1.Add(`0)">
-            <summary>
-            adds the object to the collection, and returns the key that was assigned to the object
-            </summary>
-            <param name="add"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNet.IntDictionary`1.Add(System.Int32,`0)">
-            <summary>
-            NOT RECOMMENDED.
-            This will overwrite the previous value if the key already exists.
-            </summary>
-            <param name="key"></param>
-            <param name="add"></param>
-        </member>
-        <member name="M:PNet.IntDictionary`1.Remove(System.Int32)">
-            <summary>
-            remove the item at the specified key
-            </summary>
-            <param name="key"></param>
-        </member>
-        <member name="M:PNet.IntDictionary`1.HasValue(System.Int32)">
-            <summary>
-            does a value exist for the specified key
-            </summary>
-            <param name="key"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNet.IntDictionary`1.GetEnumerator">
-            <summary>
-            get the enumerator to enumerate the collection
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:PNet.IntDictionary`1.Values">
-            <summary>
-            returns the values stored in the dictionary. keys where there is no value will be return as default(T)
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:PNet.IntDictionary`1.HasValues">
-            <summary>
-            get an array for the size of the internal array, that says if a value is contained for that key
-            </summary>
-        </member>
-        <member name="P:PNet.IntDictionary`1.Item(System.Int32)">
-            <summary>
-            value for a specified key
-            </summary>
-            <param name="index"></param>
-            <returns></returns>
-        </member>
-        <member name="T:PNet.IntDictionary`1.IntDictionaryEnumerator`1">
-            <summary>
-            enumerator helper
-            </summary>
-            <typeparam name="U"></typeparam>
-        </member>
-        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.#ctor(System.Collections.Generic.List{`1})">
-            <summary>
-            create a new enumerator helper for the intdictionary
-            </summary>
-            <param name="m_Collection"></param>
-        </member>
-        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.MoveNext">
-            <summary>
-            go to the next iem in the collection
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:PNet.IntDictionary`1.IntDictionaryEnumerator`1.Reset">
-            <summary>
-            reset the position of the enumerator
-            </summary>
-        </member>
-        <member name="P:PNet.IntDictionary`1.IntDictionaryEnumerator`1.Current">
-            <summary>
-            current item in the enumeration
-            </summary>
-        </member>
-        <member name="T:PNet.DictionarySerializer`2">
-            <summary>
-            THIS ONLY WORKS WITH BUILT IN TYPES AND STRING. USER DEFINED STRUCTS WILL BREAK
-            </summary>
-            <typeparam name="T"></typeparam>
-            <typeparam name="U"></typeparam>
-        </member>
-        <member name="F:PNet.DictionarySerializer`2.dictionary">
-            <summary>
-            serialized value
-            </summary>
-        </member>
-        <member name="M:PNet.DictionarySerializer`2.#ctor(System.Collections.Generic.Dictionary{`0,`1})">
-            <summary>
-            create a new serializer from the dictionary
-            </summary>
-            <param name="dictionary"></param>
-        </member>
-        <member name="M:PNet.DictionarySerializer`2.#ctor">
-            <summary>
-            create a new serializer with no values
-            </summary>
-        </member>
-        <member name="M:PNet.DictionarySerializer`2.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
-            <summary>
-            deserialize from the message
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNet.DictionarySerializer`2.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            serialize to the message
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="P:PNet.DictionarySerializer`2.AllocSize">
-            <summary>
-            size in bytes
-            </summary>
         </member>
     </members>
 </doc>

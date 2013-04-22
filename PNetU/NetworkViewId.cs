@@ -52,5 +52,8 @@ public class NetworkViewId : INetSerializable
         return message.ReadUInt16();
     }
 
+    /// <summary>
+    /// size when serializing to stream
+    /// </summary>
     public int AllocSize { get { return 2; } }
 }

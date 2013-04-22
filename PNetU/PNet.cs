@@ -17,27 +17,32 @@ namespace PNetU
         /// <summary>
         /// When finished connecting to the server
         /// </summary>
-        public static Action OnConnectedToServer = delegate { };
+        public static event Action OnConnectedToServer;
+
         /// <summary>
         /// When disconnected from the server
         /// </summary>
-        public static Action OnDisconnectedFromServer = delegate { };
+        public static event Action OnDisconnectedFromServer;
+
         /// <summary>
         /// When we've failed to connect
         /// </summary>
-        public static Action<string> OnFailedToConnect = delegate { };
+        public static event Action<string> OnFailedToConnect;
+
         /// <summary>
         /// When the room is changing
         /// </summary>
-        public static Action<string> OnRoomChange = delegate { };
+        public static event Action<string> OnRoomChange;
+
         /// <summary>
         /// subscribe to this in order to receive static RPC's from the server. you need to manually process them.
         /// </summary>
-        public static Action<byte, NetIncomingMessage> ProcessRPC = delegate { };
+        public static event Action<byte, NetIncomingMessage> ProcessRPC;
+
         /// <summary>
         /// When a discovery response is received
         /// </summary>
-        public static Action<NetIncomingMessage> OnDiscoveryResponse = delegate { };
+        public static event Action<NetIncomingMessage> OnDiscoveryResponse;
         /// <summary>
         /// logging level. UNUSED
         /// </summary>
@@ -106,6 +111,12 @@ namespace PNetU
         /// the current configuration
         /// </summary>
         public static ClientConfiguration Configuration { get; private set; }
+
+        /// <summary>
+        /// last received latency value from the lidgren's calculations
+        /// </summary>
+        public static float Latency { get; private set; }
+
         /// <summary>
         /// Connect with the specified configuration
         /// </summary>
@@ -216,8 +227,6 @@ namespace PNetU
             {
                 //read the path...
                 var resourcePath = msg.ReadString();
-                if (Debug.isDebugBuild)
-                    Debug.Log("network instantiate of " + resourcePath);
                 var viewId = msg.ReadUInt16();
                 var ownerId = msg.ReadUInt16();
 
@@ -268,7 +277,7 @@ namespace PNetU
                         view.OnFinishedCreation += behave.CallFinished;
                     }
 
-                    view.OnFinishedCreation();
+                    view.DoOnFinishedCreation();
 
                     FinishedInstantiate(view.viewID.guid);
                 }
@@ -280,7 +289,8 @@ namespace PNetU
                 NetworkView find;
                 if (NetworkView.Find(viewId, out find))
                 {
-                    find.OnRemove();
+                    find.DoOnRemove();
+                    UnityEngine.Object.Destroy(find);
                 }
 
                 NetworkView.RemoveView(viewId);
@@ -290,7 +300,13 @@ namespace PNetU
                 var newRoom = msg.ReadString();
 
                 NetworkedSceneObject.sceneObjects = new Dictionary<int, NetworkedSceneObject>();
-                OnRoomChange(newRoom);
+                if (OnRoomChange != null)
+                    OnRoomChange(newRoom);
+
+                if (Configuration.DeleteNetworkInstantiatesOnRoomChange)
+                {
+                    NetworkView.DestroyAllViews();
+                }
             }
             else if (utilId == RPCUtils.AddView)
             {
@@ -338,7 +354,8 @@ namespace PNetU
                 }
                 else if (msg.MessageType == NetIncomingMessageType.DiscoveryResponse)
                 {
-                    OnDiscoveryResponse(msg);
+                    if (OnDiscoveryResponse != null) OnDiscoveryResponse(msg);
+                    peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.WarningMessage)
                 {
@@ -347,7 +364,7 @@ namespace PNetU
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ConnectionLatencyUpdated)
                 {
-                    var latency = msg.ReadFloat();
+                    Latency = msg.ReadFloat();
                     peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ErrorMessage)
@@ -357,16 +374,36 @@ namespace PNetU
                 }
                 else if (msg.MessageType == NetIncomingMessageType.StatusChanged)
                 {
-                    status = (NetConnectionStatus)msg.ReadByte();
+                    var lastStatus = m_status;
+                    m_status = (NetConnectionStatus)msg.ReadByte();
                     statusReason = msg.ReadString();
                     peer.Recycle(msg);
 
                     try
                     {
-                        if (status == NetConnectionStatus.Disconnected)
-                            OnDisconnectedFromServer();
-                        else if (status == NetConnectionStatus.Connected)
-                            OnConnectedToServer();
+                        if (m_status == NetConnectionStatus.Disconnected)
+                        {
+                            if (lastStatus != NetConnectionStatus.Disconnected)
+                            {
+                                if (OnDisconnectedFromServer != null)
+                                    OnDisconnectedFromServer();
+
+                                if (Configuration.DeleteNetworkInstantiatesOnDisconnect)
+                                {
+                                    NetworkView.DestroyAllViews();
+                                }
+                            }
+                            else
+                            {
+                                if (OnFailedToConnect != null)
+                                    OnFailedToConnect(statusReason);
+                            }
+                        }
+                        else if (m_status == NetConnectionStatus.Connected)
+                        {
+                            if (OnConnectedToServer != null)
+                                OnConnectedToServer();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -434,7 +471,7 @@ namespace PNetU
                 else if (msg.SequenceChannel == Channels.STATIC_RPC)
                 {
                     var rpcId = msg.ReadByte();
-                    ProcessRPC(rpcId, msg);
+                    if (ProcessRPC != null) ProcessRPC(rpcId, msg);
                 }
                 else if (msg.SequenceChannel == Channels.STATIC_UTILS)
                 {
@@ -447,7 +484,7 @@ namespace PNetU
             }
             catch (Exception er)
             {
-                Debug.LogError(er.Message + er.StackTrace);
+                Debug.LogError(er);
             }
         }
     }
