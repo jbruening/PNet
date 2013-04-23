@@ -15,6 +15,21 @@ namespace PNetS
     /// </summary>
     public static class Resources
     {
+        private static List<Type> componentTypes = new List<Type>();
+        private static IEnumerable<Type> GetComponentTypes()
+        {
+            if (componentTypes.Count == 0)
+            {
+                Type componentType = typeof(Component);
+                foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    var assemblyComponentTypes = assembly.GetTypes().Where(t => t.IsSubclassOf(componentType));
+                    componentTypes.AddRange(assemblyComponentTypes);
+                }
+            }
+            return componentTypes;
+        }
+
         /// <summary>
         /// the folder that Resources.Load pulls from. by default, it is a folder next to PNetS.dll called Resources
         /// </summary>
@@ -62,29 +77,22 @@ namespace PNetS
                 return ntrack;
             });
 
-            var componentType = typeof(Component);
-            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Type t in GetComponentTypes())
             {
-                foreach (Type t in a.GetTypes())
+                Type tLocal = t;
+                if (tLocal == typeof(NetworkView) && !allowNetworkInstantiateIfHasNetworkView)
                 {
-                    if (t.IsSubclassOf(componentType))
-                    {
-                        Type t1 = t;
-                        if (t1 == typeof(NetworkView) && !allowNetworkInstantiateIfHasNetworkView)
-                        {
-                            Debug.LogWarning("[Resources.Load] file {0} has a NetworkView component on it, but was run as to not network instantiate. It will not be networked.", actualFilePath);
-                        }
-                        GameObject dser1 = dser;
-                        config.AddActivator(t, () =>
-                        {
-                            Action awake;
-                            var ntrack = trackers.Pop();
-                            var ret = dser1.DeserializeAddComponent(t1, out awake, ntrack);
-                            awakes.Add(awake);
-                            return ret;
-                        });
-                    }
+                    Debug.LogWarning("[Resources.Load] file {0} has a NetworkView component on it, but was run as to not network instantiate. It will not be networked.", actualFilePath);
                 }
+                GameObject dser1 = dser;
+                config.AddActivator(tLocal, () =>
+                {
+                    Action awake;
+                    var ntrack = trackers.Pop();
+                    var ret = dser1.DeserializeAddComponent(tLocal, out awake, ntrack);
+                    awakes.Add(awake);
+                    return ret;
+                });
             }
 
             var serializer = new YamlSerializer(config);
