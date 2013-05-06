@@ -52,7 +52,7 @@ namespace PNetS
 
             var message = PNetServer.peer.CreateMessage();
             message.Write(RPCUtils.ChangeRoom);
-            message.Write(room.name);
+            message.Write(room.Name);
 
             connection.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }

@@ -27,10 +27,15 @@ namespace PNetS
         /// </summary>
         public List<NetworkView> actors { get { return m_Actors; } }
         List<bool> phases = new List<bool>();
+        
+        /// <summary>
+        /// use Name
+        /// </summary>
+        [Obsolete("Use Name", true)] public string name;
         /// <summary>
         /// name of this room
         /// </summary>
-        public string name;
+        public string Name { get; set; }
         /// <summary>
         /// Close the room
         /// </summary>
@@ -48,7 +53,7 @@ namespace PNetS
             }
             catch (Exception e)
             {
-                Debug.LogError("[Room Closing] {0}: {1}", name, e);
+                Debug.LogError("[Room Closing] {0}: {1}", Name, e);
             }
 
             foreach (var player in players)
@@ -347,7 +352,7 @@ namespace PNetS
             }
             else
             {
-                Debug.LogWarning("Room {1}: unhandled RPC {0}", rpcID, name);
+                Debug.LogWarning("Room {1}: unhandled RPC {0}", rpcID, Name);
                 info.continueForwarding = false;
             }
         }
@@ -521,7 +526,7 @@ namespace PNetS
         /// <returns></returns>
         public static Room CreateRoom(string name)
         {
-            return new Room(){name = name};
+            return new Room(){Name = name};
         }
 
         /// <summary>
@@ -597,8 +602,22 @@ namespace PNetS
                 }
             }catch(Exception e)
             {
-                Debug.LogError("[Room Update] {0}: {1}", name, e);
+                Debug.LogError("[Room Update] {0}: {1}", Name, e);
             }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>'s name.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
+        public override string ToString()
+        {
+            if (string.IsNullOrWhiteSpace(Name))
+                return "PNetS.Room";
+            return "Room " + Name;
         }
     }
 }

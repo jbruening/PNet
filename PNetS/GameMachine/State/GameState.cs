@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
+using PNet;
 
 namespace PNetS
 {
@@ -15,8 +16,7 @@ namespace PNetS
     {
         static double _frameTime = 0.020d;
         private const int LOOP_TIGHTNESS = 5;
-        static readonly Dictionary<int, GameObject> Objects = new Dictionary<int, GameObject>(256);
-        static readonly Stack<int> UseableIds = new Stack<int>(32);
+        static readonly IntDictionary<GameObject> GameObjects = new IntDictionary<GameObject>(256);
         static List<Action> _starteds = new List<Action>(8);
         internal static event Action RoomUpdates;
         internal static void AddStart(Action startMethod)
@@ -35,8 +35,7 @@ namespace PNetS
 
         internal static void RemoveObject(GameObject gobj)
         {
-            Objects.Remove(gobj.Id);
-            UseableIds.Push(gobj.Id);
+            GameObjects.Remove(gobj.Id);
         }
 
         /// <summary>
@@ -69,8 +68,7 @@ namespace PNetS
 
         internal static int AddGameObject(GameObject newObject)
         {
-            var newId = UseableIds.Count > 0 ? UseableIds.Pop() : Objects.Count;
-            Objects.Add(newId, newObject);
+            var newId = GameObjects.Add(newObject);
             return newId;
         }
 
@@ -93,11 +91,13 @@ namespace PNetS
                     });
             }
 
-            foreach (var o in Objects.Values)
+            for (int i = 0; i < GameObjects.Capacity; i++)
             {
+                GameObject get;
+                if (!GameObjects.TryGetValue(i, out get)) continue;
                 try
                 {
-                    o.Update();
+                    get.Update();
                 }
                 catch (Exception e)
                 {
@@ -116,14 +116,20 @@ namespace PNetS
 
             LoopRoutines();
 
-            foreach (var o in Objects.Values)
+            for (int i = 0; i < GameObjects.Capacity; i++ )
             {
-                try { o.LateUpdate(); }
-                catch (Exception e)
+                GameObject get;
+                if (!GameObjects.TryGetValue(i, out get)) continue;
+                try
+                {
+                    get.LateUpdate();
+                }
+                catch(Exception e)
                 {
                     Debug.LogError("[Late Update] {0}", e.ToString());
                 }
             }
+
         }
 
         /// <summary>
