@@ -173,8 +173,8 @@ namespace PNetS
                 connections.Remove(playerId);
             }
 
-            if (player.currentRoom != null)
-                player.currentRoom.RemovePlayer(player);
+            if (player.CurrentRoom != null)
+                player.CurrentRoom.RemovePlayer(player);
 
             OnPlayerDisconnected(player);
         }
@@ -245,15 +245,15 @@ namespace PNetS
                 else if (msg.SequenceChannel == Channels.OBJECT_RPC)
                 {
                     Player player = GetPlayer(msg.SenderConnection);
-                    if (player.currentRoom != null)
-                        player.currentRoom.IncomingObjectRPC(msg);
+                    if (player.CurrentRoom != null)
+                        player.CurrentRoom.IncomingObjectRPC(msg);
                 }
                 else if (msg.SequenceChannel == Channels.STATIC_RPC)
                 {
                     var rpcId = msg.ReadByte();
 
                     var player = GetPlayer(msg.SenderConnection);
-                    var currentRoom = player.currentRoom;
+                    var currentRoom = player.CurrentRoom;
                     if (currentRoom != null)
                     {
                         NetMessageInfo info = new NetMessageInfo(RPCMode.None, player);

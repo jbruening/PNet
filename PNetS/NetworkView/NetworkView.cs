@@ -19,16 +19,36 @@ namespace PNetS
         /// The owner
         /// </summary>
         [YamlSerialize(YamlSerializeMethod.Never)]
-        public Player owner { get; internal set; }
+        public Player owner
+        {
+            get { return _owner; }
+            internal set
+            {
+                _owner = value;
+
+                if (_isVisibleToAll)
+                {
+                    foreach (var player in room.players)
+                    {
+                        _connections.Add(player.connection);
+                        if (player != _owner)
+                            _allButOwner.Add(player.connection);
+                    }
+                }
+                else
+                {
+                    if (_owner != Player.Server)
+                        _connections.Add(_owner.connection);
+                }
+            }
+        }
+        private Player _owner;
+
         /// <summary>
         /// The room this is in
         /// </summary>
         [YamlSerialize(YamlSerializeMethod.Never)]
         public Room room { get { return gameObject.Room; } }
-        /// <summary>
-        /// The phase this is in
-        /// </summary>
-        public int phase { get; private set; }
 
         /// <summary>
         /// the identifier for the network view
@@ -36,55 +56,126 @@ namespace PNetS
         [YamlSerialize(YamlSerializeMethod.Never)]
         public NetworkViewId viewID = NetworkViewId.Zero;
         
-        private List<NetConnection> connections = new List<NetConnection>();
-        private List<NetConnection> allButOwner = new List<NetConnection>();
+        private readonly List<NetConnection> _connections = new List<NetConnection>();
+        [YamlSerialize(YamlSerializeMethod.Never)]
+        internal List<NetConnection> Connections { get { return _connections; } }
+        private readonly List<NetConnection> _allButOwner = new List<NetConnection>();
+        [YamlSerialize(YamlSerializeMethod.Never)]
+        internal List<NetConnection> AllButOwner { get { return _allButOwner; } }
 
         /// <summary>
-        /// move this to a new phase
+        /// Whether or not this object is visible to all players
+        /// if you set this to false, from being true, it will merely prevent it from showing up on any new players
+        /// use ClearSubscriptions if you want to remove it from all players
         /// </summary>
-        /// <param name="phase"></param>
-        public void MoveToPhase(int phase)
+        [YamlSerialize(YamlSerializeMethod.Never)]
+        public bool IsVisibleToAll
         {
-            //TODO: actually change the phase this is in for the room
-
-            this.phase = phase;
-            if (room == null)
+            get { return _isVisibleToAll; }
+            set
             {
-                Debug.LogError("Network view {0} is not in any room, but it attempted to change phases.", viewID.guid);
+                if (!_isVisibleToAll && value)
+                {
+                    var playersToAdd = new List<NetConnection>(room.players.Count);
+                    for (var i = 0; i < room.players.Count; i++)
+                    {
+                        if (!_connections.Contains(room.players[i].connection))
+                            playersToAdd.Add(room.players[i].connection);
+                    }
+
+                    room.SendNetworkInstantiate(playersToAdd, gameObject);
+                    _connections.AddRange(playersToAdd);
+                }
+            }
+        }
+        [YamlSerialize(YamlSerializeMethod.Assign)]
+        private bool _isVisibleToAll = true;
+        
+        /// <summary>
+        /// Subscribe a player to this
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="isSubscribed"></param>
+        public void SetPlayerSubscription(Player player, bool isSubscribed)
+        {
+            if (_isVisibleToAll)
+                return; //the object is already visible to the specified player.
+
+            if (player == owner)
+            {
+                Debug.LogWarning("[NetworkView.SetPlayerSubscription] Players are always subscribed to NetworkViews they own. Do not subscribe them to it.");
+                return;
+            }
+
+            if (player.CurrentRoom != room)
+            {
+                Debug.LogWarning("[NetworkView.SetPlayerSubscription] Players cannot be subscribed to objects not in the same room as them.");
+                return;
+            }
+
+            if (isSubscribed)
+            {
+                if (_connections.Contains(player.connection))
+                    return; //player is already subscribed
+                
+                _connections.Add(player.connection);
+                _allButOwner.Add(player.connection);
+
+                room.SendNetworkInstantiate(new List<NetConnection> {player.connection}, gameObject);
             }
             else
             {
-                UpdateConnections();
+                OnPlayerLeftRoom(player);
+                DestroyOnPlayer(player);
             }
         }
 
         /// <summary>
-        /// update the connections this should send to when rpc or serializing. usually you shouldn't use this
+        /// removes the object from all current players, except the owner, and clears the subscriptions
         /// </summary>
-        public void UpdateConnections()
+        public void ClearSubscriptions()
         {
-            connections = room.GetConnectionsInPhase(phase);
-            allButOwner = connections.Where(c => c != owner.connection).ToList();
+            var message = PNetServer.peer.CreateMessage(3);
+            message.Write(PNet.RPCUtils.Remove);
+            message.Write(viewID.guid);
+
+            if (_allButOwner.Count > 0)
+            {
+                PNetServer.peer.SendMessage(message, _allButOwner, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+            }
+
+            _allButOwner.Clear();
+            _connections.Clear();
+            if (owner != Player.Server)
+                _connections.Add(owner.connection);
+        }
+
+        void DestroyOnPlayer(Player player)
+        {
+            player.RPC(PNet.RPCUtils.Remove, viewID);
         }
 
         private void Destroy()
         {
-            //TODO: destroy this
+            _connections.Clear();
+            _allButOwner.Clear();
         }
 
         void OnPlayerEnteredRoom(Player player)
         {
-            if (player.IsInPhase(phase))
-                connections.Add(player.connection);
-            if (player != owner)
-                allButOwner.Add(player.connection);
+            if (_isVisibleToAll)
+            {
+                _connections.Add(player.connection);
+                if (player != owner)
+                    _allButOwner.Add(player.connection);
+            }
         }
         void OnPlayerLeftRoom(Player player)
         {
-            if (player.IsInPhase(phase))
-                connections.Remove(player.connection);
+            _connections.Remove(player.connection);
+            
             if (player != owner)
-                allButOwner.Remove(player.connection);
+                _allButOwner.Remove(player.connection);
         }
 
         private void OnInstantiationFinished(Player player)
@@ -124,7 +215,7 @@ namespace PNetS
             nView._customSecondaryFunction = customFunctionOnClient;
             RegisterNewView(ref nView);
 
-            SendSecondaryView(nView, connections);
+            SendSecondaryView(nView, _connections);
             return nView;
         }
 
@@ -291,7 +382,7 @@ namespace PNetS
         /// <param name="args"></param>
         public void RPC(byte rpcID, RPCMode mode, params INetSerializable[] args)
         {
-            if (connections.Count == 0)
+            if (_connections.Count == 0)
                 return;
 
             var size = 3;
@@ -318,7 +409,7 @@ namespace PNetS
         /// <param name="args"></param>
         public void RPC(byte rpcID, Player player, params INetSerializable[] args)
         {
-            if (connections.Count == 0)
+            if (_connections.Count == 0)
                 return;
 
             var size = 2;
@@ -415,9 +506,9 @@ namespace PNetS
                     List<NetConnection> conns;
 
                     if (ProcessSerializationConnections != null)
-                        conns = ProcessSerializationConnections(skipSerializationToOwner ? allButOwner : connections);
+                        conns = ProcessSerializationConnections(skipSerializationToOwner ? _allButOwner : _connections);
                     else
-                        conns = skipSerializationToOwner ? allButOwner : connections;
+                        conns = skipSerializationToOwner ? _allButOwner : _connections;
 
                     if (conns.Count > 0)
                     {
@@ -497,10 +588,10 @@ namespace PNetS
             if (mode != RPCMode.Owner)
             {
                 if (mode == RPCMode.All || mode == RPCMode.AllBuffered)
-                    PNetServer.peer.SendMessage(msg, connections, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+                    PNetServer.peer.SendMessage(msg, _connections, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
                 else
                 {
-                    var conns = connections.Where(c => c != originalSender).ToList();
+                    var conns = _connections.Where(c => c != originalSender).ToList();
                     if (conns.Count != 0)
                         PNetServer.peer.SendMessage(msg, conns, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
                 }
@@ -529,7 +620,7 @@ namespace PNetS
             var message = PNetServer.peer.CreateMessage();
             msg.Clone(message);
 
-            var conns = connections.Where(c => c != originalSender).ToList();
+            var conns = _connections.Where(c => c != originalSender).ToList();
             if (conns.Count != 0)
                 PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
         }

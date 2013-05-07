@@ -48,8 +48,10 @@ namespace PNetS
         /// <param name="position"> </param>
         /// <param name="rotation"> </param>
         /// <param name="allowNetworkInstantiateIfHasNetworkView"></param>
+        /// <param name="visibleToAll">makes all players in the room subscribed to the object</param>
+        /// <param name="owner">owner of the loaded object if network instantiated.  By default, it is the server</param>
         /// <returns></returns>
-        public static GameObject Load(string filePath, Room roomToInstantiateIn, bool allowNetworkInstantiateIfHasNetworkView = false, Vector3? position = null, Quaternion? rotation = null)
+        public static GameObject Load(string filePath, Room roomToInstantiateIn, bool allowNetworkInstantiateIfHasNetworkView = false, Vector3? position = null, Quaternion? rotation = null, bool visibleToAll = true, Player owner = null)
         {
             var dser = new GameObject();
             dser.Room = roomToInstantiateIn;
@@ -112,7 +114,7 @@ namespace PNetS
                 dser.Rotation = rotation.Value;
 
             if (allowNetworkInstantiateIfHasNetworkView && dser.GetComponent<NetworkView>() != null)
-                roomToInstantiateIn.ResourceNetworkInstantiate(dser);
+                roomToInstantiateIn.ResourceNetworkInstantiate(dser, visibleToAll, owner);
 
             return dser;
         }

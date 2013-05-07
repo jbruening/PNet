@@ -93,45 +93,42 @@ namespace PNetS
         /// <param name="position"></param>
         /// <param name="rotation"></param>
         /// <param name="owner"></param>
+        /// <param name="visibleToAll">if false, the object is only visible to the owner. Additional visiblity is achieved via setting the subscriptions on the networkview </param>
         /// <returns></returns>
-        public GameObject NetworkInstantiate(string resourcePath, Vector3 position, Quaternion rotation, Player owner)
+        public GameObject NetworkInstantiate(string resourcePath, Vector3 position, Quaternion rotation, Player owner, bool visibleToAll = true)
         {
             //TODO: actually get the object out of the resource path...
 
             var gobj = GameState.CreateGameObject(position, rotation);
             gobj.Room = this;
             gobj.Resource = resourcePath;
-            var netview = gobj.GetComponent<NetworkView>();
-
-            if (netview == null)
-            {
-                netview = gobj.AddComponent<NetworkView>();
-            }
+            var netview = gobj.GetComponent<NetworkView>() ?? gobj.AddComponent<NetworkView>();
 
             NetworkView.RegisterNewView(ref netview);
 
             netview.owner = owner;
-            netview.MoveToPhase(0);
 
             m_Actors.Add(netview);
 
-            SendNetworkInstantiate(GetConnectionsInPhase(owner.primaryPhase), gobj);
+            SendNetworkInstantiate(netview.Connections, gobj);
 
             return gobj;
         }
 
-        internal void ResourceNetworkInstantiate(GameObject resourceLoadedObject)
+        internal void ResourceNetworkInstantiate(GameObject resourceLoadedObject, bool visibleToAll, Player owner)
         {
             var loadedView = resourceLoadedObject.GetComponent<NetworkView>();
 
             NetworkView.RegisterNewView(ref loadedView);
 
-            loadedView.owner = Player.Server;
-            loadedView.MoveToPhase(loadedView.phase);
+            if (owner != null && owner.CurrentRoom == this)
+                loadedView.owner = owner;
+            else
+                loadedView.owner = Player.Server;
 
             m_Actors.Add(loadedView);
 
-            SendNetworkInstantiate(GetConnectionsInPhase(loadedView.phase), resourceLoadedObject);
+            SendNetworkInstantiate(loadedView.Connections, resourceLoadedObject);
         }
 
         /// <summary>
@@ -160,7 +157,7 @@ namespace PNetS
             //sceneObject.OnFinishedCreation();
         }
 
-        void SendNetworkInstantiate(List<NetConnection> connections, GameObject gobj)
+        internal void SendNetworkInstantiate(List<NetConnection> connections, GameObject gobj)
         {
             var netView = gobj.GetComponent<NetworkView>();
             if (netView == null)
@@ -207,34 +204,6 @@ namespace PNetS
             PNetServer.peer.SendMessage(msg, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
 
             
-        }
-
-        internal List<Player> GetPlayersInPhase(int phase)
-        {
-            List<Player> valid = new List<Player>(players.Count);
-            foreach (var player in players)
-            {
-                if (player.IsInPhase(phase))
-                {
-                    valid.Add(player);
-                }
-            }
-
-            return valid;
-        }
-
-        internal List<NetConnection> GetConnectionsInPhase(int phase)
-        {
-            List<NetConnection> valid = new List<NetConnection>(players.Count);
-            foreach (var player in players)
-            {
-                if (player.IsInPhase(phase))
-                {
-                    valid.Add(player.connection);
-                }
-            }
-
-            return valid;
         }
 
         internal void SendMessage(NetOutgoingMessage message)
@@ -436,7 +405,7 @@ namespace PNetS
 
         internal void AddPlayer(Player player)
         {
-            player.currentRoom = this;
+            player.CurrentRoom = this;
             m_Players.Add(player);
 
             // nobjs update
@@ -472,7 +441,7 @@ namespace PNetS
 
             OnPlayerExit(player);
 
-            player.currentRoom = null;
+            player.CurrentRoom = null;
         }
 
         /// <summary>

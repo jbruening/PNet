@@ -30,13 +30,16 @@ namespace PNetS
         public object Tag { get { return UserData; } set { UserData = value; } }
 
         internal NetConnection connection;
-        internal Room currentRoom = null;
-
+        /// <summary>
+        /// current room the player is in. can be null
+        /// </summary>
+        public Room CurrentRoom { get; internal set; }
+        
         internal Player()
         {
-            phaseSubscriptions.Add(0, true);
+            CurrentRoom = null;
+            
         }
-
 
         private Room newRoom;
         /// <summary>
@@ -47,8 +50,9 @@ namespace PNetS
         {
             newRoom = room;
 
-            if (currentRoom != null)
-                currentRoom.RemovePlayer(this);
+            if (CurrentRoom != null)
+                CurrentRoom.RemovePlayer(this);
+            CurrentRoom = null;
 
             var message = PNetServer.peer.CreateMessage();
             message.Write(RPCUtils.ChangeRoom);
@@ -80,24 +84,6 @@ namespace PNetS
         public void Disconnect(string reason)
         {
             connection.Disconnect(reason);
-        }
-
-        /// <summary>
-        /// when the player is changing phases
-        /// </summary>
-        public Action<List<bool>> phaseChanging = delegate { };
-
-        IntDictionary<bool> phaseSubscriptions = new IntDictionary<bool>();
-        internal int primaryPhase = 0;
-
-        /// <summary>
-        /// if the player is in the specified phase or not
-        /// </summary>
-        /// <param name="phase"></param>
-        /// <returns></returns>
-        public bool IsInPhase(int phase)
-        {
-            return phaseSubscriptions[phase];
         }
 
         /// <summary>
