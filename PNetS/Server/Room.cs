@@ -188,6 +188,13 @@ namespace PNetS
         /// <param name="view"></param>
         public void NetworkDestroy(NetworkView view)
         {
+            StartCoroutine(DoNetworkDestroy(view), true);
+        }
+
+        IEnumerator<YieldInstruction> DoNetworkDestroy(NetworkView view)
+        {
+            yield return null;
+
             m_Actors.Remove(view);
 
             GameObject.Destroy(view.gameObject);
@@ -200,10 +207,8 @@ namespace PNetS
 
             //send a destruction message to everyone, just in case.
             var connections = players.Select(p => p.connection).ToList();
-            if (connections.Count == 0) return;
+            if (connections.Count == 0) yield break;
             PNetServer.peer.SendMessage(msg, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
-
-            
         }
 
         internal void SendMessage(NetOutgoingMessage message)

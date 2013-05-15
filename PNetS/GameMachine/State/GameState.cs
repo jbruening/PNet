@@ -149,6 +149,7 @@ namespace PNetS
             FrameRoutineAdds.Add(toAdd);
         }
 
+        private static int _removeOffsetting = 0;
         internal static void RemoveRoutine(IEnumerator<YieldInstruction> toRemove)
         {
             var ind = Routines.FindIndex(c => object.ReferenceEquals(c, toRemove));
@@ -156,6 +157,7 @@ namespace PNetS
             if (ind != -1)
             {
                 Routines.RemoveAt(ind);
+                _removeOffsetting += 1;
             }
         }
 
@@ -187,11 +189,13 @@ namespace PNetS
                 }
 
 
+                i -= _removeOffsetting;
                 if (!remaining)
                 {
                     //remove it
                     Routines.RemoveAt(i);
                 }
+                _removeOffsetting = 0;
             }
             
             //add new routines
