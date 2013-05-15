@@ -64,12 +64,23 @@ namespace PNetS
         /// </summary>
         public Vector3 Right { get { return Rotation.Multiply(Vector3.UnitX); } }
 
+
+        private bool _markedForDestruction;
         /// <summary>
         /// Destroy this gameObject. THIS IS NOT NETWORKED SYNCED.
         /// </summary>
         /// <param name="gameObject"></param>
         public static void Destroy(GameObject gameObject)
         {
+            //prevent destroy from being called on a gameobject multiple times enqueing
+            if (gameObject._markedForDestruction) return;
+            gameObject._markedForDestruction = true;
+            GameState.DestroyDelays += () => { DestroyNow(gameObject); };
+        }
+
+        internal static void DestroyNow(GameObject gameObject)
+        {
+            gameObject._markedForDestruction = true; //just in case
             gameObject.OnDestroy();
             gameObject.components.ForEach(g => g.component.Dispose());
             gameObject.components = null;

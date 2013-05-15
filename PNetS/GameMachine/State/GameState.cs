@@ -19,6 +19,7 @@ namespace PNetS
         static readonly IntDictionary<GameObject> GameObjects = new IntDictionary<GameObject>(256);
         static List<Action> _starteds = new List<Action>(8);
         internal static event Action RoomUpdates;
+        internal static event Action DestroyDelays;
         internal static void AddStart(Action startMethod)
         {
             _starteds.Add(startMethod);
@@ -130,6 +131,17 @@ namespace PNetS
                 }
             }
 
+            if (DestroyDelays == null) return;
+            try
+            {
+                var frameDestructions = DestroyDelays;
+                DestroyDelays = null;
+                frameDestructions();
+            }
+            catch(Exception e)
+            {
+                Debug.LogError("[Destruction] {0}", e.ToString());
+            }
         }
 
         /// <summary>
