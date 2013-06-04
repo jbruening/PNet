@@ -392,7 +392,8 @@ namespace PNetU
                 NetworkView view;
                 if (allViews.TryGetValue(i, out view))
                 {
-                    Destroy(view.gameObject);
+                    if (view != null)
+                        Destroy(view.gameObject);
                 }
 
                 allViews.Remove(i);
