@@ -176,9 +176,11 @@ namespace PNetS
         internal static void LoopRoutines()
         {
             var toRemove = new List<int>(8);
-            
+
             for (var i = Routines.Count - 1; i >= 0; i--)
             {
+                //used for keeping track of routine removes during the routine
+                _removeOffsetting = 0;
                 var yield = Routines[i].Current;
                 var remaining = false;
 
@@ -207,7 +209,6 @@ namespace PNetS
                     //remove it
                     Routines.RemoveAt(i);
                 }
-                _removeOffsetting = 0;
             }
             
             //add new routines

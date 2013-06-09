@@ -11,3 +11,37 @@ Index: Design/FieldPropertyDescriptor.cs
          {
              this.fieldInfo = fieldInfo;
          }
+Index: Design/Vector3Converter.cs
+===================================================================
+--- Design/Vector3Converter.cs	(revision 47)
++++ Design/Vector3Converter.cs	(working copy)
+@@ -100,8 +100,15 @@
+         /// </exception>
+         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+         {
+-            var values = ConvertToValues<float>(context, culture, value);
+-            return values != null ? new Vector3(values) : base.ConvertFrom(context, culture, value);
++            try
++            {
++                var values = ConvertToValues<float>(context, culture, value);
++                return values != null ? new Vector3(values) : base.ConvertFrom(context, culture, value);
++            }
++            catch(Exception e)
++            {
++                throw e;
++            }
+         }
+ 
+         /// <summary>
+Index: Half.cs
+===================================================================
+--- Half.cs	(revision 47)
++++ Half.cs	(working copy)
+@@ -122,6 +122,7 @@
+         public ushort RawValue
+         {
+             get { return value; }
++            set { this.value = value; }
+         }
+ 
+         /// <summary>
