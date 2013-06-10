@@ -46,6 +46,7 @@
     <Compile Include="INetSerializable.cs" />
     <Compile Include="IntDictionary.cs" />
     <Compile Include="LidgrenExtensions.cs" />
+    <Compile Include="ObjectArraySerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RPCUtils.cs" />
   </ItemGroup>
