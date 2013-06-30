@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 using PNet;
 using PNetU;
 using Lidgren.Network;
-using System.Xml.Serialization;
 
 /// <summary>
 /// Objects that exist in a scene with pre-synchronized network id's

@@ -23,8 +23,19 @@ namespace PNetS
                 Type componentType = typeof(Component);
                 foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    var assemblyComponentTypes = assembly.GetTypes().Where(t => t.IsSubclassOf(componentType));
-                    componentTypes.AddRange(assemblyComponentTypes);
+                    try
+                    {
+                        var assemblyComponentTypes = assembly.GetTypes().Where(t => t.IsSubclassOf(componentType));
+                        componentTypes.AddRange(assemblyComponentTypes);
+                    }catch(ReflectionTypeLoadException exception)
+                    {
+                        var sb = new StringBuilder();
+                        foreach(var type in exception.LoaderExceptions)
+                        {
+                            sb.AppendLine(type.ToString());
+                        }
+                        Debug.LogError("Resources GetComponentTypes failed for the following types: {0}", sb.ToString());
+                    }
                 }
             }
             return componentTypes;
