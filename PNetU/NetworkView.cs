@@ -110,6 +110,18 @@ namespace PNetU
             }
         }
 
+        void OnEnable()
+        {
+            //the behaviour has become active again. Check if we have serialization running, and if not, start it up again.
+            //otherwise a disable/enable of the behaviour/gameobject will kill the serialization.
+
+            if (m_StateSynchronization != NetworkStateSynchronization.Off && !m_IsSerializing)
+            {
+                m_IsSerializing = true;
+                StartCoroutine(Serialize());
+            }
+        }
+
         /// <summary>
         /// subscribe to this in order to deserialize streaming data
         /// </summary>

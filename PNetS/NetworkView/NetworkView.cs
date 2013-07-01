@@ -165,9 +165,12 @@ namespace PNetS
         {
             if (_isVisibleToAll)
             {
+                //we already have the player added to the connections list, as it was set when we set the owner.
+                if (owner == player)
+                    return;
+
                 _connections.Add(player.connection);
-                if (player != owner)
-                    _allButOwner.Add(player.connection);
+                _allButOwner.Add(player.connection);
             }
         }
         void OnPlayerLeftRoom(Player player)
