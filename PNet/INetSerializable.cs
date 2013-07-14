@@ -197,6 +197,7 @@ namespace PNet
             message.ReadBytes(size, out Bytes);
         }
 
+        /// <summary />
         public int AllocSize { get { return Bytes.Length + 4; } }
     }
 }

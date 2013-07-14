@@ -4,7 +4,6 @@ namespace PNet
 {
     /// <summary>
     /// A serializer for an array of INetSerializable
-    /// WARNING: DOES NOT SAVE INDICES IF THERE ARE NULL VALUES
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class ObjectArraySerializer<T> : INetSerializable
@@ -14,6 +13,17 @@ namespace PNet
         /// items
         /// </summary>
         public T[] items;
+
+        /// <summary>
+        /// Whether or not the index is preserved with an array with nulls
+        /// Takes an additional bit per index
+        /// only makes sense for nullable types
+        /// </summary>
+        public bool PreserveIndex = false;
+
+// ReSharper disable StaticFieldInGenericType
+        private static readonly bool IsValueType = typeof (T).IsValueType;
+// ReSharper restore StaticFieldInGenericType
 
         /// <summary>
         /// Create a new serializer
@@ -48,7 +58,7 @@ namespace PNet
             get
             {
                 if (items != null && items.Length >= 1)
-                    return 4 + items[0].AllocSize * items.Length;
+                    return (4 + items[0].AllocSize + (PreserveIndex ? 1 : 0))  * items.Length;
                 return 0;
             }
         }
@@ -64,6 +74,13 @@ namespace PNet
 
             for (int i = 0; i < length; i++)
             {
+                var hasValue = true;
+                if (PreserveIndex && !IsValueType)
+                {
+                    hasValue = message.ReadBoolean();
+                }
+                if (!hasValue) continue;
+
                 var t = new T();
                 t.OnDeserialize(message);
                 items[i] = t;
@@ -84,7 +101,21 @@ namespace PNet
 
             message.Write(items.Length);
             foreach (var item in items)
-                item.OnSerialize(message);
+            {
+                if (!IsValueType)
+                {
+                    if (PreserveIndex)
+                    {
+                        message.Write(item != null);
+                    }
+                    if (item != null)
+                        item.OnSerialize(message);
+                }
+                else
+                {
+                    item.OnSerialize(message);
+                }
+            }
         }
     }
 }
