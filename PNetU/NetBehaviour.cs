@@ -6,22 +6,17 @@ using UnityEngine;
 /// </summary>
 public class NetBehaviour : MonoBehaviour
 {
-    PNetU.NetworkView m_netView;
+    PNetU.NetworkView _netView;
 
     /// <summary>
     /// Get the PNetU.NetworkView attached to the gameObject
     /// </summary>
     public PNetU.NetworkView netView
     {
-        get
-        {
-            if (m_netView == null)
-                m_netView = GetComponent<PNetU.NetworkView>();
-            return m_netView;
-        }
+        get { return _netView ?? (_netView = GetComponent<PNetU.NetworkView>()); }
         internal set
         {
-            m_netView = value;
+            _netView = value;
         }
     }
     internal void CallFinished() { OnFinishedCreating(); }

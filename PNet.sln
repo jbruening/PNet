@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PNetU", "PNetU\PNetU.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PNetS", "PNetS\PNetS.csproj", "{9167E35B-50F3-4980-B1AC-FA42828F6804}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PNetC", "PNetC\PNetC.csproj", "{314D16A0-FF83-4D3D-919E-8255D8BC9728}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,16 @@ Global
 		{9167E35B-50F3-4980-B1AC-FA42828F6804}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{9167E35B-50F3-4980-B1AC-FA42828F6804}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{9167E35B-50F3-4980-B1AC-FA42828F6804}.Release|x86.ActiveCfg = Release|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Release|Any CPU.Build.0 = Release|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

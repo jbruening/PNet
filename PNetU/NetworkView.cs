@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using PNetC;
 using UnityEngine;
 using Lidgren.Network;
 using PNet;
 using System.Collections;
 using System.Reflection;
+using Debug = UnityEngine.Debug;
+using NetworkStateSynchronization = UnityEngine.NetworkStateSynchronization;
 using Object = UnityEngine.Object;
 
 namespace PNetU
@@ -17,7 +20,7 @@ namespace PNetU
     [AddComponentMenu("PNet/Network View")]
     public class NetworkView : MonoBehaviour
     {
-        
+        private PNetC.NetworkView _networkView;
 
         /// <summary>
         /// Send an rpc
@@ -27,15 +30,7 @@ namespace PNetU
         /// <param name="args"></param>
         public void RPC(byte rpcID, UnityEngine.RPCMode mode, params INetSerializable[] args)
         {
-            var size = 2;
-            RPCUtils.AllocSize(ref size, args);
-
-            var message = Net.peer.CreateMessage(size);
-            message.Write(viewID.guid);
-            message.Write(rpcID);
-            RPCUtils.WriteParams(ref message, args);
-
-            Net.peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, (int)mode + Channels.BEGIN_RPCMODES);
+            _networkView.RPC(rpcID, mode.ToPNetCMode(), args);
         }
 
         /// <summary>
@@ -45,15 +40,7 @@ namespace PNetU
         /// <param name="args"></param>
         public void RPCToOwner(byte rpcID, params INetSerializable[] args)
         {
-            var size = 3;
-            RPCUtils.AllocSize(ref size, args);
-
-            var message = Net.peer.CreateMessage(size);
-            message.Write(viewID.guid);
-            message.Write(rpcID);
-            RPCUtils.WriteParams(ref message, args);
-
-            Net.peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+            _networkView.RPCToOwner(rpcID, args);
         }
 
         #region serialization
@@ -165,6 +152,8 @@ namespace PNetU
                 SubscribeMarkedRPCsOnComponent(component);
                 SubscribeSynchronizedFields(component);
             }
+
+
         }
 
         /// <summary>
@@ -243,9 +232,6 @@ namespace PNetU
             }
         }
 
-        Dictionary<byte, Action<NetIncomingMessage>> RPCProcessors = new Dictionary<byte,Action<NetIncomingMessage>>();
-        IntDictionary<Action<NetIncomingMessage>> FieldProcessors = new IntDictionary<Action<NetIncomingMessage>>();
-
         /// <summary>
         /// Subscribe to an rpc
         /// </summary>
@@ -255,37 +241,7 @@ namespace PNetU
         /// <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
         public bool SubscribeToRPC(byte rpcID, Action<NetIncomingMessage> rpcProcessor, bool overwriteExisting = true)
         {
-            if (rpcProcessor == null)
-                throw new ArgumentNullException("rpcProcessor", "the processor delegate cannot be null");
-            if (overwriteExisting)
-            {
-                RPCProcessors[rpcID] = rpcProcessor;
-                return true;
-            }
-            else
-            {
-                Action<NetIncomingMessage> checkExist;
-                if (RPCProcessors.TryGetValue(rpcID, out checkExist))
-                {
-                    return false;
-                }
-                else
-                {
-                    RPCProcessors.Add(rpcID, checkExist);
-                    return true;
-                }
-            }
-        }
-
-        internal void SubscribeToSynchronizedField<T>(SynchronizedField<T> field)
-        {
-            int fieldId = FieldProcessors.Add(field.OnReceiveValue);
-            field.FieldId = (byte)fieldId;
-        }
-
-        internal void UnsubscribeSynchronizedField(int fieldId)
-        {
-            FieldProcessors.Remove(fieldId);
+            return _networkView.SubscribeToRPC(rpcID, rpcProcessor, overwriteExisting);
         }
 
         /// <summary>
@@ -294,42 +250,7 @@ namespace PNetU
         /// <param name="rpcID"></param>
         public void UnsubscribeFromRPC(byte rpcID)
         {
-            RPCProcessors.Remove(rpcID);
-        }
-
-        internal void CallRPC(byte rpcID, NetIncomingMessage message)
-        {
-            Action<NetIncomingMessage> processor;
-            if (RPCProcessors.TryGetValue(rpcID, out processor))
-            {
-                if (processor != null)
-                    processor(message);
-                else
-                {
-                    //Debug.LogWarning("RPC processor for " + rpcID + " was null. Automatically cleaning up. Please be sure to clean up after yourself in the future.");
-                    RPCProcessors.Remove(rpcID);
-                }
-            }
-            else
-            {
-                Debug.LogWarning("NetworkView on " + gameObject.name + ": unhandled RPC " + rpcID);
-            }
-        }
-
-        internal void SetSynchronizedField(byte fieldID, NetIncomingMessage message)
-        {
-            Action<NetIncomingMessage> processor;
-            if (FieldProcessors.HasValue(fieldID))
-            {
-                processor = FieldProcessors[fieldID];
-
-                if (processor != null)
-                    processor(message);
-                else
-                    FieldProcessors.Remove(fieldID);
-            }
-            else
-                Debug.LogWarning("Unhandled synchronized field " + fieldID);
+            _networkView.UnsubscribeFromRPC(rpcID);
         }
 
         /// <summary>
@@ -343,8 +264,6 @@ namespace PNetU
 
         private void Destroy()
         {
-            RPCProcessors = null;
-            FieldProcessors = null;
             Destroy(gameObject);
         }
 
@@ -365,7 +284,7 @@ namespace PNetU
         /// <returns></returns>
         public static NetworkView Find(NetworkViewId viewID)
         {
-            return allViews[viewID.guid];
+            return PNetC.NetworkView.Find(viewID);
         }
 
         /// <summary>
@@ -376,45 +295,8 @@ namespace PNetU
         /// <returns></returns>
         public static bool Find(ref NetIncomingMessage message, out NetworkView view)
         {
-            var id = NetworkViewId.Deserialize(message);
-
-            return Find(id, out view);
-        }
-
-        internal static bool Find(ushort id, out NetworkView view)
-        {
-            view = allViews[id];
-            if (view != null)
-                return true;
-            return false;
-        }
-
-        internal static void RemoveView(ushort viewId)
-        {
-            allViews.Remove(viewId);
-        }
-
-        static IntDictionary<NetworkView> allViews = new IntDictionary<NetworkView>();
-
-        internal static void DestroyAllViews()
-        {
-            var cap = allViews.Capacity;
-            for(int i = 0; i < cap; i++)
-            {
-                NetworkView view;
-                if (allViews.TryGetValue(i, out view))
-                {
-                    if (view != null)
-                        Destroy(view.gameObject);
-                }
-
-                allViews.Remove(i);
-            }
-        }
-
-        internal static void RegisterView(NetworkView view, ushort viewId)
-        {
-            allViews.Add(viewId, view);
+            PNetC.NetworkView foundView;
+            return PNetC.NetworkView.Find(ref message, out foundView);
         }
 
         /// <summary>

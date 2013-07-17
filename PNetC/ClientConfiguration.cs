@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PNetU
+namespace PNetC
 {
     /// <summary>
     /// Configuration for the client

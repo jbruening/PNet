@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using PNet;
 using Lidgren.Network;
 
-namespace PNetU
+namespace PNetC
 {
     /// <summary>
     /// Creates a field which updates it's value on the network when changed
@@ -18,7 +17,7 @@ namespace PNetU
     {
         internal byte FieldId;
         private T m_value;
-        private PNetU.NetworkView m_netView;
+        private NetworkView m_netView;
 
         /// <summary>
         /// Gets called when a new value is received over the network
@@ -126,7 +125,7 @@ namespace PNetU
                 int msgSize = serializedData.Length + 3;
                 NetOutgoingMessage msg = Net.peer.CreateMessage(msgSize);
 
-                msg.Write(m_netView.viewID.guid);
+                msg.Write(m_netView.ViewID.guid);
                 msg.Write(FieldId);
                 msg.Write(serializedData);
 

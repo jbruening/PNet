@@ -1,41 +1,43 @@
 ﻿using System;
-using PNet;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace PNetS
+namespace PNetC
 {
     /// <summary>
-    /// Console recipient for the log
+    /// Logger, but logs to nowhere
     /// </summary>
-    public sealed class DefaultConsoleLogger : ILogger
+    public sealed class NullLogger : ILogger
     {
         /// <summary>
-        /// Info
+        /// informational message
         /// </summary>
         /// <param name="info"></param>
         /// <param name="args"></param>
         public void Info(string info, params object[] args)
         {
-            Console.WriteLine(info, args);
+            
         }
 
         /// <summary>
-        /// Warning
+        /// warning message
         /// </summary>
         /// <param name="info"></param>
         /// <param name="args"></param>
         public void Warning(string info, params object[] args)
         {
-            Console.WriteLine(info, args);
+            
         }
 
         /// <summary>
-        /// error
+        /// error message
         /// </summary>
         /// <param name="info"></param>
         /// <param name="args"></param>
         public void Error(string info, params object[] args)
         {
-            Console.WriteLine(info, args);
+            
         }
     }
 }

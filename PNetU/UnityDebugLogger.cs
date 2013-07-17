@@ -1,41 +1,40 @@
-﻿using System;
-using PNet;
+﻿using PNetC;
 
-namespace PNetS
+namespace PNetU
 {
     /// <summary>
-    /// Console recipient for the log
+    /// Logs to standard UnityEngine.Debug class
     /// </summary>
-    public sealed class DefaultConsoleLogger : ILogger
+    public sealed class UnityDebugLogger : ILogger
     {
         /// <summary>
-        /// Info
+        /// informational message
         /// </summary>
         /// <param name="info"></param>
         /// <param name="args"></param>
         public void Info(string info, params object[] args)
         {
-            Console.WriteLine(info, args);
+            UnityEngine.Debug.Log(string.Format(info, args));
         }
 
         /// <summary>
-        /// Warning
+        /// warning message
         /// </summary>
         /// <param name="info"></param>
         /// <param name="args"></param>
         public void Warning(string info, params object[] args)
         {
-            Console.WriteLine(info, args);
+            UnityEngine.Debug.LogWarning(string.Format(info, args));
         }
 
         /// <summary>
-        /// error
+        /// error message
         /// </summary>
         /// <param name="info"></param>
         /// <param name="args"></param>
         public void Error(string info, params object[] args)
         {
-            Console.WriteLine(info, args);
+            UnityEngine.Debug.LogError(string.Format(info, args));
         }
     }
 }
