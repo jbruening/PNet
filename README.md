@@ -35,3 +35,13 @@ Some differences from the Unity Network class on the client
   * Scripts with Rpc marks need to be attached to the prefab on the client before it is instantiated, as that is when the attributes are found and subscribed. If you want to attach a component afterward, you can use the NetworkView.SubscribeToRPC method.  The server, however, will continue to subscribe marked methods after object instantiation, so you do not need to use NetworkView.SubscribeToRPC
 
 Yaml serialization/deserialization for the server's Resources.Load and GameObject.Serialize is performed using this library: https://github.com/jbruening/YamlSerializer-Fork
+
+License: PNet is distributed under the MIT license as following:
+
+The MIT License (MIT) Copyright (c) 2012 Justin Bruening jubruening@gmail.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
