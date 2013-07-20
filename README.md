@@ -36,7 +36,9 @@ Some differences from the Unity Network class on the client
 
 Yaml serialization/deserialization for the server's Resources.Load and GameObject.Serialize is performed using this library: https://github.com/jbruening/YamlSerializer-Fork
 
-License: PNet is distributed under the MIT license as following:
+License: 
+---
+PNet is distributed under the MIT license as following:
 
 The MIT License (MIT) Copyright (c) 2012 Justin Bruening jubruening@gmail.com
 
