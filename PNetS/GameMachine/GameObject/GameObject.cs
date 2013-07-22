@@ -9,7 +9,7 @@ using SlimMath;
 
 namespace PNetS
 {
-    public sealed partial class GameObject
+    public sealed partial class GameObject : IDisposable
     {
         /// <summary>
         /// create a new game object
@@ -85,6 +85,7 @@ namespace PNetS
             gameObject.components.ForEach(g => g.component.Dispose());
             gameObject.components = null;
             GameState.RemoveObject(gameObject);
+            (gameObject as IDisposable).Dispose();
         }
 
         /// <summary>
@@ -106,6 +107,18 @@ namespace PNetS
             if (string.IsNullOrWhiteSpace(Name))
                 return "PnetS.GameObject";
             return "GameObject " + Name;
+        }
+
+        /// <summary>
+        /// whether or not IDisposable.Dispose has been run.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
+        /// <summary>
+        /// Dispose the gameobject
+        /// </summary>
+        void IDisposable.Dispose()
+        {
+            IsDisposed = true;
         }
     }
 
