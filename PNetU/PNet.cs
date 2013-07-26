@@ -290,7 +290,6 @@ namespace PNetU
                 if (NetworkView.Find(viewId, out find))
                 {
                     find.DoOnRemove();
-                    UnityEngine.Object.Destroy(find);
                 }
 
                 NetworkView.RemoveView(viewId);

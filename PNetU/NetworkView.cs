@@ -341,11 +341,15 @@ namespace PNetU
         /// </summary>
         public event Action OnFinishedCreation = delegate { };
 
+        /// <summary>
+        /// Whether or not to destroy the gameobject this is attached to when destroying the networkview
+        /// </summary>
+        public bool DestroyGameObjectOnNetworkDestroy = true;
+
         private void Destroy()
         {
-            RPCProcessors = null;
+            RPCProcessors.Clear();
             FieldProcessors = null;
-            Destroy(gameObject);
         }
 
         #region NetworkViewID
@@ -405,7 +409,7 @@ namespace PNetU
                 if (allViews.TryGetValue(i, out view))
                 {
                     if (view != null)
-                        Destroy(view.gameObject);
+                        view.DoOnRemove();
                 }
 
                 allViews.Remove(i);
@@ -431,7 +435,29 @@ namespace PNetU
 
         internal void DoOnRemove()
         {
-            if (OnRemove != null) OnRemove();
+            if (DestroyGameObjectOnNetworkDestroy)
+            {
+                if (Debug.isDebugBuild)
+                    Debug.Log("Network Destruction. Destroying networkview and gameobject");
+                Destroy(gameObject);
+            }
+            else
+            {
+                if (Debug.isDebugBuild)
+                    Debug.Log("Network destruction. Only destroying networkview", gameObject);
+                Destroy(this);
+            }
+
+            if (OnRemove == null) return;
+            
+            try
+            {
+                OnRemove();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e, gameObject);
+            }
         }
     }
 }
