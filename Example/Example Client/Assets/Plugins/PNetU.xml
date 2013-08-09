@@ -214,6 +214,11 @@
             </summary>
             <param name="rpcID"></param>
         </member>
+        <member name="F:PNetU.NetworkView.DestroyGameObjectOnNetworkDestroy">
+            <summary>
+            Whether or not to destroy the gameobject this is attached to when destroying the networkview
+            </summary>
+        </member>
         <member name="F:PNetU.NetworkView.viewID">
             <summary>
             identifier for the network view

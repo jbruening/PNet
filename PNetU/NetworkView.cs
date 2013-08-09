@@ -346,7 +346,7 @@ namespace PNetU
         /// </summary>
         public bool DestroyGameObjectOnNetworkDestroy = true;
 
-        private void Destroy()
+        private void OnDestroy()
         {
             RPCProcessors.Clear();
             FieldProcessors = null;

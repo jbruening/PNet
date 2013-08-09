@@ -261,51 +261,8 @@
             </summary>
             <param name="message"></param>
         </member>
-        <member name="T:PNet.ObjectArraySerializer`1">
-            <summary>
-            A serializer for an array of INetSerializable
-            WARNING: DOES NOT SAVE INDICES IF THERE ARE NULL VALUES
-            </summary>
-            <typeparam name="T"></typeparam>
-        </member>
-        <member name="F:PNet.ObjectArraySerializer`1.items">
-            <summary>
-            items
-            </summary>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.#ctor">
-            <summary>
-            Create a new serializer
-            </summary>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.#ctor(`0[])">
-            <summary>
-            Create a new serializer from the specified array
-            </summary>
-            <param name="newItems"></param>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.#ctor(System.Collections.Generic.List{`0})">
-            <summary>
-            Create a new serializer from the specified list
-            </summary>
-            <param name="newItems"></param>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
-            <summary>
-            Deserialize the array from the message
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            Serialize the array to the message
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="P:PNet.ObjectArraySerializer`1.AllocSize">
-            <summary>
-            Size when writing to the stream
-            </summary>
+        <member name="P:PNet.ByteArraySerializer.AllocSize">
+            <summary />
         </member>
         <member name="T:PNet.IntDictionary`1">
             <summary>
@@ -504,6 +461,58 @@
         <member name="F:PNet.Channels.SYNCHED_FIELD">
             <summary>
             channel for synchronized fields
+            </summary>
+        </member>
+        <member name="T:PNet.ObjectArraySerializer`1">
+            <summary>
+            A serializer for an array of INetSerializable
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="F:PNet.ObjectArraySerializer`1.items">
+            <summary>
+            items
+            </summary>
+        </member>
+        <member name="F:PNet.ObjectArraySerializer`1.PreserveIndex">
+            <summary>
+            Whether or not the index is preserved with an array with nulls
+            Takes an additional bit per index
+            only makes sense for nullable types
+            </summary>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor">
+            <summary>
+            Create a new serializer
+            </summary>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor(`0[])">
+            <summary>
+            Create a new serializer from the specified array
+            </summary>
+            <param name="newItems"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor(System.Collections.Generic.List{`0})">
+            <summary>
+            Create a new serializer from the specified list
+            </summary>
+            <param name="newItems"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            Deserialize the array from the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            Serialize the array to the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.ObjectArraySerializer`1.AllocSize">
+            <summary>
+            Size when writing to the stream
             </summary>
         </member>
         <member name="T:PNet.LidgrenExtensions">
