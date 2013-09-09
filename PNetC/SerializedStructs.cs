@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Lidgren.Network;
 using PNet;
+using System.Globalization;
 
 namespace PNetC
 {
@@ -30,6 +31,15 @@ namespace PNetC
         {
             get { return 16; }
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0}, {1}, {2}, {3}", 
+                X.ToString(CultureInfo.InvariantCulture),
+                Y.ToString(CultureInfo.InvariantCulture),
+                Z.ToString(CultureInfo.InvariantCulture),
+                W.ToString(CultureInfo.InvariantCulture));
+        }
     }
 
     public struct Vector3 : INetSerializable
@@ -52,6 +62,14 @@ namespace PNetC
         public int AllocSize
         {
             get { return 12; }
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}, {1}, {2}", 
+                X.ToString(CultureInfo.InvariantCulture), 
+                Y.ToString(CultureInfo.InvariantCulture), 
+                Z.ToString(CultureInfo.InvariantCulture));
         }
     }
 }

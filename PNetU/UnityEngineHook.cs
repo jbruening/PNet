@@ -1,33 +1,101 @@
 ﻿using System;
-using PNetC;
+using System.Collections.Generic;
 using UnityEngine;
 using NetworkView = PNetC.NetworkView;
 using Object = UnityEngine.Object;
-using Quaternion = PNetC.Quaternion;
-using Vector3 = PNetC.Vector3;
 
-/// <summary>
-/// network hooking into the Update method of unity. Don't put in the scene.
-/// </summary>
-internal class UnityEngineHook : MonoBehaviour, PNetC.IEngineHook
+namespace PNetU
 {
     /// <summary>
-    /// Run every frame, as long as the script is enabled
+    /// network hooking into the Update method of unity. Don't put in the scene.
     /// </summary>
-    void Update()
+    internal class UnityEngineHook : MonoBehaviour, PNetC.IEngineHook
     {
-        if (EngineUpdate != null)
-            EngineUpdate();
-    }
+        /// <summary>
+        /// Run every frame, as long as the script is enabled
+        /// </summary>
+        void Update()
+        {
+            if (EngineUpdate != null)
+                EngineUpdate();
+        }
 
-    void OnDestroy()
-    {
-        PNetC.Net.Disconnect();
-    }
+        void OnDestroy()
+        {
+            PNetC.Net.Disconnect();
+        }
 
-    public event Action EngineUpdate;
-    public void Instantiate(string path, NetworkView newView, Vector3 location, Quaternion rotation)
-    {
-        
+        public event Action EngineUpdate;
+
+        internal static Dictionary<string, GameObject> ResourceCache = new Dictionary<string, GameObject>();
+        public object Instantiate(string path, PNetC.NetworkView newView, PNetC.Vector3 location, PNetC.Quaternion rotation)
+        {
+            GameObject gobj;
+            bool isCached = false;
+            if (Net.resourceCaching && (isCached = ResourceCache.ContainsKey(path)))
+                gobj = ResourceCache[path];
+            else
+                gobj = Resources.Load(path) as GameObject;
+
+            if (Net.resourceCaching && !isCached)
+                ResourceCache.Add(path, gobj);
+
+            var instance = (GameObject)GameObject.Instantiate(gobj, new Vector3(location.X, location.Y, location.Z), new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W));
+
+            if (instance == null)
+            {
+                Debug.LogWarning("could not find prefab " + path + " to instantiate");
+                return null;
+            }
+
+            if (Debug.isDebugBuild)
+            {
+                Debug.Log(string.Format("network instantiate of {0}. Loc: {1} Rot: {2}", path, location, rotation));
+            }
+
+            //look for a networkview..
+
+            var view = instance.GetComponent<NetworkView>();
+
+            if (view)
+            {
+                view.SetNetworkView(newView);
+
+                var nBehaviours = instance.GetComponents<NetBehaviour>();
+
+                foreach (var behave in nBehaviours)
+                {
+                    behave.netView = view;
+
+                    view.OnFinishedCreation += behave.CallFinished;
+                }
+
+                view.DoOnFinishedCreation();
+
+                return view;
+            }
+            return null;
+        }
+
+        public object AddNetworkView(PNetC.NetworkView view, PNetC.NetworkView newView, string customFunction)
+        {
+            var uview = view.Container as NetworkView;
+
+            if (uview == null)
+            {
+                Debug.LogError("Could not attach extra networkview because we could not pull the source");
+                return null;
+            }
+
+            var unewView = uview.gameObject.AddComponent<NetworkView>();
+            unewView.SetNetworkView(newView);
+
+            if (Debug.isDebugBuild)
+            {
+                Debug.Log("Attached extra networkview " + newView.ViewID.guid, uview.gameObject);
+            }
+
+            return unewView;
+        }
     }
 }

@@ -221,15 +221,20 @@ namespace PNetC
                 view.ViewID = new NetworkViewId(){guid = viewId, IsMine = PlayerId == ownerId};
                 view.OwnerId = ownerId;
 
+                object netviewContainer = null;
+
                 try
                 {
-                    SingletonEngineHook.Instantiate(resourcePath, view, position, rotation);
+                     netviewContainer = SingletonEngineHook.Instantiate(resourcePath, view, position, rotation);
                 }
                 catch(Exception e)
                 {
                     Debug.LogError("[SingletonEngineHook.Instantiate] {0}", e);
                 }
+                view.Container = netviewContainer;
+
                 view.DoOnFinishedCreation();
+                
                 FinishedInstantiate(viewId);
             }
             else if (utilId == RPCUtils.Remove)
@@ -246,7 +251,8 @@ namespace PNetC
             {
                 var newRoom = msg.ReadString();
 
-                NetworkedSceneObject.sceneObjects = new Dictionary<int, NetworkedSceneObject>();
+                NetworkedSceneObject.ChangeScene();
+
                 if (OnRoomChange != null)
                 {
                     try
@@ -281,8 +287,19 @@ namespace PNetC
                     newView.IsMine = view.IsMine;
                     newView.OwnerId = view.OwnerId;
 
-                    if (runCustomFunction)
-                        view.DoOnAddedNetworkView(customFunction, newView);
+                    object container = null;
+                    try
+                    {
+                        container = SingletonEngineHook.AddNetworkView(view, newView, customFunction);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("[SingletonEngineHook.AddNetworkView] {0}", e);
+                    }
+                    if (container != null)
+                    {
+                        newView.Container = container;
+                    }
                 }
             }
             else if (utilId == RPCUtils.SetPlayerId)
@@ -377,6 +394,12 @@ namespace PNetC
             }
         }
 
+        internal static NetOutgoingMessage CreateMessage(int initialCapacity)
+        {
+            return Peer.CreateMessage(initialCapacity);
+        }
+
+
         private static void Consume(NetIncomingMessage msg)
         {
             try
@@ -421,9 +444,7 @@ namespace PNetC
                 {
                     var viewId = msg.ReadUInt16();
                     var rpcId = msg.ReadByte();
-                    NetworkedSceneObject find;
-                    if (NetworkedSceneObject.sceneObjects.TryGetValue(viewId, out find))
-                        find.CallRPC(rpcId, msg);
+                    NetworkedSceneObject.CallRPC(viewId, rpcId, msg);
                 }
                 else if (msg.SequenceChannel == Channels.STATIC_RPC)
                 {

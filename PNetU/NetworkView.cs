@@ -18,9 +18,19 @@ namespace PNetU
     /// network synchronization
     /// </summary>
     [AddComponentMenu("PNet/Network View")]
-    public class NetworkView : MonoBehaviour
+    public partial class NetworkView : MonoBehaviour
     {
         private PNetC.NetworkView _networkView;
+        internal void SetNetworkView(PNetC.NetworkView networkView)
+        {
+            _networkView = networkView;
+            IsMine = networkView.IsMine;
+            OwnerId = networkView.OwnerId;
+            viewID = networkView.ViewID;
+
+            _networkView.OnDeserializeStream += StreamDeserializeCaller;
+            _networkView.OnRemove += DoOnRemove;
+        }
 
         /// <summary>
         /// Send an rpc
@@ -46,9 +56,9 @@ namespace PNetU
         #region serialization
         void Start()
         {
-            if (m_StateSynchronization != NetworkStateSynchronization.Off && !m_IsSerializing)
+            if (_stateSynchronization != NetworkStateSynchronization.Off && !_isSerializing)
             {
-                m_IsSerializing = true;
+                _isSerializing = true;
                 StartCoroutine(Serialize());
             }
         }
@@ -71,8 +81,8 @@ namespace PNetU
         }
         Action<NetOutgoingMessage> OnSerializeStream = delegate { };
 
-        private NetworkStateSynchronization m_StateSynchronization = NetworkStateSynchronization.Off;
-        private bool m_IsSerializing = false;
+        private NetworkStateSynchronization _stateSynchronization = NetworkStateSynchronization.Off;
+        private bool _isSerializing = false;
         /// <summary>
         /// method of serialization
         /// </summary>
@@ -80,19 +90,20 @@ namespace PNetU
         {
             get
             {
-                return m_StateSynchronization;
+                return _stateSynchronization;
             }
             set
             {
-                m_StateSynchronization = value;
-                if (m_StateSynchronization != NetworkStateSynchronization.Off && !m_IsSerializing)
+                _stateSynchronization = value;
+                _networkView.StateSynchronization = _stateSynchronization.ToPNetC();
+                if (_stateSynchronization != NetworkStateSynchronization.Off && !_isSerializing)
                 {
-                    m_IsSerializing = true;
+                    _isSerializing = true;
                     StartCoroutine(Serialize());
                 }
-                else if (m_StateSynchronization == NetworkStateSynchronization.Off && m_IsSerializing)
+                else if (_stateSynchronization == NetworkStateSynchronization.Off && _isSerializing)
                 {
-                    m_IsSerializing = false;
+                    _isSerializing = false;
                 }
             }
         }
@@ -102,12 +113,21 @@ namespace PNetU
             //the behaviour has become active again. Check if we have serialization running, and if not, start it up again.
             //otherwise a disable/enable of the behaviour/gameobject will kill the serialization.
 
-            if (m_StateSynchronization != NetworkStateSynchronization.Off && !m_IsSerializing)
+            if (_stateSynchronization != NetworkStateSynchronization.Off && !_isSerializing)
             {
-                m_IsSerializing = true;
+                _isSerializing = true;
                 StartCoroutine(Serialize());
             }
         }
+
+        private void StreamDeserializeCaller(NetIncomingMessage msg)
+        {
+            if (OnDeserializeStream != null)
+            {
+                OnDeserializeStream(msg);
+            }
+        }
+
 
         /// <summary>
         /// subscribe to this in order to deserialize streaming data
@@ -116,21 +136,14 @@ namespace PNetU
 
         IEnumerator Serialize()
         {
-            while (m_IsSerializing)
+            while (_isSerializing)
             {
                 if (SerializationTime < 0.01f)
                     SerializationTime = 0.01f;
 
-                if (Net.status == NetConnectionStatus.Connected && this.enabled)
+                if (this.enabled)
                 {
-                    var nMessage = Net.peer.CreateMessage(defaultStreamSize);
-                    nMessage.Write(viewID.guid);
-                    OnSerializeStream(nMessage);
-
-                    if (m_StateSynchronization == NetworkStateSynchronization.Unreliable)
-                        Net.peer.SendMessage(nMessage, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
-                    else if (m_StateSynchronization == NetworkStateSynchronization.ReliableDeltaCompressed)
-                        Net.peer.SendMessage(nMessage, NetDeliveryMethod.ReliableOrdered, Channels.RELIABLE_STREAM);
+                    _networkView.DoStreamSerialize();
                 }
                 yield return new WaitForSeconds(SerializationTime);
             }
@@ -269,6 +282,8 @@ namespace PNetU
 
         private void OnDestroy()
         {
+            _networkView.OnDeserializeStream -= StreamDeserializeCaller;
+            _networkView.OnRemove -= DoOnRemove;
             Destroy(gameObject);
         }
 
@@ -281,29 +296,7 @@ namespace PNetU
         /// identifier for the network view
         /// </summary>
         public NetworkViewId viewID = NetworkViewId.Zero;
-
-        /// <summary>
-        /// find a network view based on the given NetworkViewId
-        /// </summary>
-        /// <param name="viewID"></param>
-        /// <returns></returns>
-        public static NetworkView Find(NetworkViewId viewID)
-        {
-            return PNetC.NetworkView.Find(viewID);
-        }
-
-        /// <summary>
-        /// find a networkview based on a networkviewid that was serialized into an rpc
-        /// </summary>
-        /// <param name="message">uses deserialize, so the read location does advance</param>
-        /// <param name="view"></param>
-        /// <returns></returns>
-        public static bool Find(ref NetIncomingMessage message, out NetworkView view)
-        {
-            PNetC.NetworkView foundView;
-            return PNetC.NetworkView.Find(ref message, out foundView);
-        }
-
+        
         /// <summary>
         /// ID of the owner. 0 is the server.
         /// </summary>
@@ -314,6 +307,7 @@ namespace PNetU
         internal void DoOnFinishedCreation()
         {
             if (OnFinishedCreation != null) OnFinishedCreation();
+            OnFinishedCreation = null;
         }
 
         internal void DoOnRemove()

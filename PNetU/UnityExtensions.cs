@@ -114,5 +114,16 @@ namespace PNetU
                 default: return PNetC.RPCMode.Server;
             }
         }
+
+        internal static PNetC.NetworkStateSynchronization ToPNetC(this UnityEngine.NetworkStateSynchronization state)
+        {
+            switch (state)
+            {
+                case NetworkStateSynchronization.Off: return PNetC.NetworkStateSynchronization.Off;
+                case NetworkStateSynchronization.ReliableDeltaCompressed: return PNetC.NetworkStateSynchronization.ReliableDeltaCompressed;
+                case NetworkStateSynchronization.Unreliable: return PNetC.NetworkStateSynchronization.Unreliable;
+                default: return PNetC.NetworkStateSynchronization.Off;
+            }
+        }
     }
 }

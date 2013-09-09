@@ -24,7 +24,6 @@ namespace PNetU
         /// logging level. UNUSED
         /// </summary>
         public static NetworkLogLevel logLevel;
-        internal static Dictionary<string, GameObject> ResourceCache = new Dictionary<string, GameObject>();
         /// <summary>
         /// resource caching for instantiation
         /// </summary>
@@ -54,87 +53,28 @@ namespace PNetU
 
             if (utilId == RPCUtils.TimeUpdate)
             {
-
             }
-            else if (utilId == RPCUtils.Instantiate)
-            {
-                //read the path...
-                var resourcePath = msg.ReadString();
-                var viewId = msg.ReadUInt16();
-                var ownerId = msg.ReadUInt16();
+            //}
+            //else if (utilId == RPCUtils.AddView)
+            //{
+            //    var addToId = msg.ReadUInt16();
+            //    var idToAdd = msg.ReadUInt16();
+            //    string customFunction;
+            //    var runCustomFunction = msg.ReadString(out customFunction);
 
-                GameObject gobj;
-                bool isCached = false;
-                if (resourceCaching && (isCached = ResourceCache.ContainsKey(resourcePath)))
-                    gobj = ResourceCache[resourcePath];
-                else
-                    gobj = Resources.Load(resourcePath) as GameObject;
+            //    NetworkView view;
+            //    if (NetworkView.Find(addToId, out view))
+            //    {
+            //        var newView = view.gameObject.AddComponent<NetworkView>();
+            //        NetworkView.RegisterView(newView, idToAdd);
+            //        newView.viewID = new NetworkViewId() { guid = idToAdd, IsMine = view.IsMine };
+            //        newView.IsMine = view.IsMine;
+            //        newView.OwnerId = view.OwnerId;
 
-                if (resourceCaching && !isCached)
-                    ResourceCache.Add(resourcePath, gobj);
-
-                var instance = (GameObject)GameObject.Instantiate(gobj);
-
-                if (instance == null)
-                {
-                    Debug.LogWarning("could not find prefab " + resourcePath + " to instantiate");
-                    return;
-                }
-
-                var trans = instance.transform;
-
-                trans.position = Vector3Serializer.Deserialize(msg);
-                trans.rotation = QuaternionSerializer.Deserialize(msg);
-                if (Debug.isDebugBuild)
-                {
-                    Debug.Log(string.Format("network instantiate of {0}. Loc: {1} Rot: {2}", resourcePath, trans.position, trans.rotation));
-                }
-
-                //look for a networkview..
-
-                var view = instance.GetComponent<NetworkView>();
-
-                if (view)
-                {
-                    NetworkView.RegisterView(view, viewId);
-                    view.viewID = new NetworkViewId() { guid = viewId, IsMine = PlayerId == ownerId};
-                    view.IsMine = PlayerId == ownerId;
-                    view.OwnerId = ownerId;
-
-                    var nBehaviours = instance.GetComponents<NetBehaviour>();
-
-                    foreach (var behave in nBehaviours)
-                    {
-                        behave.netView = view;
-
-                        view.OnFinishedCreation += behave.CallFinished;
-                    }
-
-                    view.DoOnFinishedCreation();
-
-                    FinishedInstantiate(view.viewID.guid);
-                }
-            }
-            else if (utilId == RPCUtils.AddView)
-            {
-                var addToId = msg.ReadUInt16();
-                var idToAdd = msg.ReadUInt16();
-                string customFunction;
-                var runCustomFunction = msg.ReadString(out customFunction);
-
-                NetworkView view;
-                if (NetworkView.Find(addToId, out view))
-                {
-                    var newView = view.gameObject.AddComponent<NetworkView>();
-                    NetworkView.RegisterView(newView, idToAdd);
-                    newView.viewID = new NetworkViewId() { guid = idToAdd, IsMine = view.IsMine };
-                    newView.IsMine = view.IsMine;
-                    newView.OwnerId = view.OwnerId;
-
-                    if (runCustomFunction)
-                        view.gameObject.SendMessage(customFunction, newView, SendMessageOptions.RequireReceiver);
-                }
-            }
+            //        if (runCustomFunction)
+            //            view.gameObject.SendMessage(customFunction, newView, SendMessageOptions.RequireReceiver);
+            //    }
+            //}
         }
     }
 }

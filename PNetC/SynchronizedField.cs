@@ -56,7 +56,7 @@ namespace PNetC
         /// Initializes the synchronized field
         /// </summary>
         /// <param name="netView">The NetworkView this value belongs to</param>
-        internal SynchronizedField(PNetU.NetworkView netView)
+        internal SynchronizedField(NetworkView netView)
         {
             if (netView == null)
             {
@@ -75,7 +75,7 @@ namespace PNetC
             SendUpdatedValue();
         }
 
-        internal static SynchronizedField<T> Create(PNetU.NetworkView netView)
+        internal static SynchronizedField<T> Create(NetworkView netView)
         {
             return new SynchronizedField<T>(netView);
         }
@@ -123,13 +123,13 @@ namespace PNetC
             {
                 byte[] serializedData = SerializeValue(m_value);
                 int msgSize = serializedData.Length + 3;
-                NetOutgoingMessage msg = Net.peer.CreateMessage(msgSize);
+                NetOutgoingMessage msg = Net.Peer.CreateMessage(msgSize);
 
                 msg.Write(m_netView.ViewID.guid);
                 msg.Write(FieldId);
                 msg.Write(serializedData);
 
-                Net.peer.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
+                Net.Peer.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
             }
             catch
             {

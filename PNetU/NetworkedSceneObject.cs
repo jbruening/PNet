@@ -17,31 +17,16 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// </summary>
     public int NetworkID = 0;
 
+    PNetC.NetworkedSceneObject sceneObject;
+
     private bool _lastEnableState;
     private static bool _hasResetDictionary = false;
     void Awake()
     {
-        if (!_hasResetDictionary)
-        {
-            sceneObjects = new Dictionary<int, NetworkedSceneObject>();
-            _hasResetDictionary = true;
-        }
-
-
-        _lastEnableState = this.enabled;
-        this.enabled = true;
-        
-    }
-
-    void Start()
-    {
-        sceneObjects[NetworkID] = this;
-        this.enabled = _lastEnableState;
+        sceneObject = new PNetC.NetworkedSceneObject(NetworkID);
     }
 
     #region RPC Processing
-    Dictionary<byte, Action<NetIncomingMessage>> RPCProcessors = new Dictionary<byte, Action<NetIncomingMessage>>();
-
     /// <summary>
     /// Subscribe to an rpc
     /// </summary>
@@ -51,26 +36,7 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
     public bool SubscribeToRPC(byte rpcID, Action<NetIncomingMessage> rpcProcessor, bool overwriteExisting = true)
     {
-        if (rpcProcessor == null)
-            throw new ArgumentNullException("rpcProcessor", "the processor delegate cannot be null");
-        if (overwriteExisting)
-        {
-            RPCProcessors[rpcID] = rpcProcessor;
-            return true;
-        }
-        else
-        {
-            Action<NetIncomingMessage> checkExist;
-            if (RPCProcessors.TryGetValue(rpcID, out checkExist))
-            {
-                return false;
-            }
-            else
-            {
-                RPCProcessors.Add(rpcID, checkExist);
-                return true;
-            }
-        }
+        return sceneObject.SubscribeToRPC(rpcID, rpcProcessor, overwriteExisting);
     }
 
     /// <summary>
@@ -79,28 +45,8 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// <param name="rpcID"></param>
     public void UnsubscribeFromRPC(byte rpcID)
     {
-        RPCProcessors.Remove(rpcID);
+        sceneObject.UnsubscribeFromRPC(rpcID);
     }
-
-    internal void CallRPC(byte rpcID, NetIncomingMessage message)
-    {
-        Action<NetIncomingMessage> processor;
-        if (RPCProcessors.TryGetValue(rpcID, out processor))
-        {
-            if (processor != null)
-                processor(message);
-            else
-            {
-                Debug.LogWarning("RPC processor for " + rpcID + " was null. Automatically cleaning up. Please be sure to clean up after yourself in the future.");
-                RPCProcessors.Remove(rpcID);
-            }
-        }
-        else
-        {
-            Debug.LogWarning("NetworkedSceneObject on " + gameObject.name + ": unhandled RPC " + rpcID);
-        }
-    }
-
     #endregion
 
     /// <summary>
@@ -110,15 +56,7 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// <param name="args"></param>
     public void RPC(byte rpcID, params INetSerializable[] args)
     {
-        var size = 3;
-        RPCUtils.AllocSize(ref size, args);
-
-        var message = Net.peer.CreateMessage(size);
-        message.Write((ushort)NetworkID);
-        message.Write(rpcID);
-        RPCUtils.WriteParams(ref message, args);
-
-        Net.peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OBJECT_RPC);
+        sceneObject.RPC(rpcID, args);
     }
 
     /// <summary>
@@ -128,8 +66,7 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     public string Serialize()
     {
         var sb = new StringBuilder();
-        sb.AppendLine("-NetworkedSceneObject-");
-        sb.Append("id: ").Append(NetworkID).AppendLine(";");
+        sb.AppendLine(sceneObject.Serialize());
         sb.Append("type:").Append(this.GetType().Name).AppendLine(";");
         sb.Append("data:").Append(SerializeObjectData()).AppendLine(";");
         sb.Append("pos:").Append(transform.position.ToString()).AppendLine(";");
@@ -143,10 +80,4 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// </summary>
     /// <returns></returns>
     protected abstract string SerializeObjectData();
-
-    void OnDestroy()
-    {
-        _hasResetDictionary = false;
-    }
-    internal static Dictionary<int, NetworkedSceneObject> sceneObjects = new Dictionary<int, NetworkedSceneObject>();
 }
