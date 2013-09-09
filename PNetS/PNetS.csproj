@@ -55,6 +55,7 @@
     <Compile Include="Log\NullLogger.cs" />
     <Compile Include="NetworkView\NetworkedSceneObject.cs" />
     <Compile Include="NetworkView\NetworkedSceneView.cs" />
+    <Compile Include="NetworkView\NetworkView.RPC.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="ServerConfiguration.cs" />
     <Compile Include="Server\PNetServer.Update.cs" />

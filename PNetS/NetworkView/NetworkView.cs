@@ -376,58 +376,6 @@ namespace PNetS
 
         #endregion
 
-        #region RPC sending
-        /// <summary>
-        /// Send a message to the specified recipients
-        /// </summary>
-        /// <param name="rpcID"></param>
-        /// <param name="mode"></param>
-        /// <param name="args"></param>
-        public void RPC(byte rpcID, RPCMode mode, params INetSerializable[] args)
-        {
-            if (_connections.Count == 0)
-                return;
-
-            var size = 3;
-            RPCUtils.AllocSize(ref size, args);
-
-            var message = PNetServer.peer.CreateMessage(size);
-            message.Write(viewID.guid);
-            message.Write(rpcID);
-            RPCUtils.WriteParams(ref message, args);
-
-            if (mode == RPCMode.AllBuffered || mode == RPCMode.OthersBuffered)
-            {
-                Buffer(message);
-            }
-
-            SendMessage(message, mode);
-        }
-
-        /// <summary>
-        /// send a message to the specified player
-        /// </summary>
-        /// <param name="rpcID"></param>
-        /// <param name="player"></param>
-        /// <param name="args"></param>
-        public void RPC(byte rpcID, Player player, params INetSerializable[] args)
-        {
-            if (_connections.Count == 0)
-                return;
-
-            var size = 2;
-            RPCUtils.AllocSize(ref size, args);
-
-            var message = PNetServer.peer.CreateMessage(size);
-            message.Write(viewID.guid);
-            message.Write(rpcID);
-            RPCUtils.WriteParams(ref message, args);
-
-            PNetServer.peer.SendMessage(message, player.connection, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
-        }
-
-        #endregion
-
         #region Serialization
         /// <summary>
         /// Time between each stream serialization
@@ -590,11 +538,18 @@ namespace PNetS
         {
             if (mode != RPCMode.Owner)
             {
-                if (mode == RPCMode.All || mode == RPCMode.AllBuffered)
+                //all and other are identical if originalsender is null.
+                if (mode == RPCMode.All || mode == RPCMode.AllBuffered || originalSender == null)
                     PNetServer.peer.SendMessage(msg, _connections, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
                 else
                 {
-                    var conns = _connections.Where(c => c != originalSender).ToList();
+                    var conns = new List<NetConnection>(_connections.Count);
+                    //LINQ and foreach are slow, and this is called a lot.
+                    for(var i = 0; i < _connections.Count;i++)
+                    {
+                        if (_connections[i] != originalSender)
+                            conns.Add(_connections[i]);
+                    }
                     if (conns.Count != 0)
                         PNetServer.peer.SendMessage(msg, conns, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
                 }
