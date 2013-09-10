@@ -33,48 +33,10 @@ namespace PNetU
         {
             EngineHookFactory.CreateEngineHook += () =>
                 {
-                    //do we have an engine hook?
-                    if (SingletonEngineHook == null)
-                    {
-                        var gobj = new GameObject("PNetU Singleton Engine Hook");
-                        SingletonEngineHook = gobj.AddComponent<UnityEngineHook>();
-                        Object.DontDestroyOnLoad(gobj);
-                        //gobj.hideFlags = HideFlags.DontSave;
-                    }
-                    return SingletonEngineHook;
+                    return UnityEngineHook.Instance;
                 };
 
             PNetC.Debug.logger = new UnityDebugLogger();
-        }
-
-        private static void ProcessUtils(NetIncomingMessage msg)
-        {
-            var utilId = msg.ReadByte();
-
-            if (utilId == RPCUtils.TimeUpdate)
-            {
-            }
-            //}
-            //else if (utilId == RPCUtils.AddView)
-            //{
-            //    var addToId = msg.ReadUInt16();
-            //    var idToAdd = msg.ReadUInt16();
-            //    string customFunction;
-            //    var runCustomFunction = msg.ReadString(out customFunction);
-
-            //    NetworkView view;
-            //    if (NetworkView.Find(addToId, out view))
-            //    {
-            //        var newView = view.gameObject.AddComponent<NetworkView>();
-            //        NetworkView.RegisterView(newView, idToAdd);
-            //        newView.viewID = new NetworkViewId() { guid = idToAdd, IsMine = view.IsMine };
-            //        newView.IsMine = view.IsMine;
-            //        newView.OwnerId = view.OwnerId;
-
-            //        if (runCustomFunction)
-            //            view.gameObject.SendMessage(customFunction, newView, SendMessageOptions.RequireReceiver);
-            //    }
-            //}
         }
     }
 }

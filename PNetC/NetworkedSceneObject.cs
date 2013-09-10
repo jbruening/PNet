@@ -23,12 +23,16 @@ namespace PNetC
             }
         }
 
-        public NetworkedSceneObject(int _networkID)
+        public NetworkedSceneObject(int networkID)
         {
+            _networkID = networkID;
             sceneObjects[_networkID] = this;
         }
         
-        internal static void ChangeScene()
+        /// <summary>
+        /// Should be called by implementing engine upon a scene change, if relevent
+        /// </summary>
+        public static void ClearSceneIDs()
         {
             sceneObjects.Clear();
         }

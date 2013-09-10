@@ -7,10 +7,37 @@ using Object = UnityEngine.Object;
 namespace PNetU
 {
     /// <summary>
-    /// network hooking into the Update method of unity. Don't put in the scene.
+    /// network hooking into the Update method of unity
     /// </summary>
     internal class UnityEngineHook : MonoBehaviour, PNetC.IEngineHook
     {
+        static UnityEngineHook _instance;
+        public static UnityEngineHook Instance 
+        { 
+            get 
+            {
+                if (_instance == null)
+                {
+                    var gobj = new GameObject("PNetU Singleton Engine Hook");
+                    _instance = gobj.AddComponent<UnityEngineHook>();
+                    //gobj.hideFlags = HideFlags.DontSave;
+                    Object.DontDestroyOnLoad(gobj);
+                }
+                return _instance; 
+            } 
+        }
+        void Awake()
+        {
+            if (_instance == null)
+            {
+                _instance = this;
+                Object.DontDestroyOnLoad(gameObject);
+            }
+
+            if (_instance != this)
+                Destroy(this);
+        }
+
         /// <summary>
         /// Run every frame, as long as the script is enabled
         /// </summary>
@@ -22,7 +49,8 @@ namespace PNetU
 
         void OnDestroy()
         {
-            PNetC.Net.Disconnect();
+            if (_instance == this)
+                PNetC.Net.Disconnect();
         }
 
         public event Action EngineUpdate;
@@ -56,25 +84,23 @@ namespace PNetU
             //look for a networkview..
 
             var view = instance.GetComponent<NetworkView>();
+            if (view == null)
+                view = instance.AddComponent<NetworkView>();
 
-            if (view)
+            view.SetNetworkView(newView);
+
+            var nBehaviours = instance.GetComponents<NetBehaviour>();
+
+            foreach (var behave in nBehaviours)
             {
-                view.SetNetworkView(newView);
+                behave.netView = view;
 
-                var nBehaviours = instance.GetComponents<NetBehaviour>();
-
-                foreach (var behave in nBehaviours)
-                {
-                    behave.netView = view;
-
-                    view.OnFinishedCreation += behave.CallFinished;
-                }
-
-                view.DoOnFinishedCreation();
-
-                return view;
+                view.OnFinishedCreation += behave.CallFinished;
             }
-            return null;
+
+            view.DoOnFinishedCreation();
+
+            return view;
         }
 
         public object AddNetworkView(PNetC.NetworkView view, PNetC.NetworkView newView, string customFunction)

@@ -19,8 +19,6 @@ public abstract class NetworkedSceneObject : MonoBehaviour
 
     PNetC.NetworkedSceneObject sceneObject;
 
-    private bool _lastEnableState;
-    private static bool _hasResetDictionary = false;
     void Awake()
     {
         sceneObject = new PNetC.NetworkedSceneObject(NetworkID);

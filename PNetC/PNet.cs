@@ -251,8 +251,6 @@ namespace PNetC
             {
                 var newRoom = msg.ReadString();
 
-                NetworkedSceneObject.ChangeScene();
-
                 if (OnRoomChange != null)
                 {
                     try
@@ -300,6 +298,10 @@ namespace PNetC
                     {
                         newView.Container = container;
                     }
+                }
+                else
+                {
+                    Debug.LogError("Attempted to add a network view to id {0}, but it could not be found");
                 }
             }
             else if (utilId == RPCUtils.SetPlayerId)
