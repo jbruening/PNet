@@ -8,6 +8,8 @@ using SlimMath;
 using Lidgren.Network;
 using PNet;
 using System.ComponentModel;
+using System.Threading;
+using System.Diagnostics;
 
 namespace PNetS
 {
@@ -448,6 +450,11 @@ namespace PNetS
             player.CurrentRoom = null;
         }
 
+        internal void AddGameObject()
+        {
+            //TODO: add gameobject to update thread
+        }
+
         /// <summary>
         /// in order to actually start a coroutine chain, you need to set IsRootRoutine to true on the first call in a coroutine call chain.
         /// </summary>
@@ -490,6 +497,11 @@ namespace PNetS
         private Room()
         {
             GameState.RoomUpdates+= Update;
+            
+
+            //create a thread to run stuff on.
+            _updateThread = new Thread(UpdateThreadCycle);
+            _threadWatch = new Stopwatch();
         }
 
         /// <summary>
@@ -499,7 +511,30 @@ namespace PNetS
         /// <returns></returns>
         public static Room CreateRoom(string name)
         {
-            return new Room(){Name = name};
+            var room = new Room() { Name = name };
+            
+
+            return room;
+        }
+
+        Thread _updateThread;
+        readonly Stopwatch _threadWatch;
+        double _timeSinceStartup;
+        double _lastFrameTime;
+
+        public double Time { get { return _timeSinceStartup; } }
+        public double DeltaTime { get { return _timeSinceStartup - _lastFrameTime; } }
+
+        void UpdateThreadCycle()
+        {
+            _threadWatch.Start();
+            while (!GameState.QuitState)
+            {
+                if (_threadWatch.Elapsed.TotalSeconds - _timeSinceStartup > GameState._frameTime)
+                    Update();
+                else
+                    Thread.Sleep(GameState.LOOP_TIGHTNESS);
+            }
         }
 
         /// <summary>
@@ -567,6 +602,9 @@ namespace PNetS
         private readonly List<RoomBehaviour> _roomBehaviours = new List<RoomBehaviour>();
         internal void Update()
         {
+            _lastFrameTime = _timeSinceStartup;
+            _timeSinceStartup = _threadWatch.Elapsed.TotalSeconds;
+
             try
             {
                 for (int i = 0; i < _roomBehaviours.Count; ++i)
@@ -577,6 +615,8 @@ namespace PNetS
             {
                 Debug.LogError("[Room Update] {0}: {1}", Name, e);
             }
+
+            //TODO: update all the game objects
         }
 
         /// <summary>

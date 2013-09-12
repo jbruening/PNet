@@ -14,9 +14,10 @@ namespace PNetS
     /// </summary>
     public static class GameState
     {
-        static double _frameTime = 0.020d;
-        private const int LOOP_TIGHTNESS = 5;
+        internal static double _frameTime = 0.020d;
+        internal const int LOOP_TIGHTNESS = 5;
         static readonly IntDictionary<GameObject> GameObjects = new IntDictionary<GameObject>(256);
+        static object gameObjectLocker = new object();
         static List<Action> _starteds = new List<Action>(8);
         internal static event Action RoomUpdates;
         internal static event Action DestroyDelays;
@@ -27,6 +28,7 @@ namespace PNetS
         static readonly Stopwatch Watch = new Stopwatch();
 
         internal static void Quit() { _quit = true; }
+        internal static bool QuitState { get { return _quit; } }
         static bool _quit = true;
                
 
@@ -36,7 +38,20 @@ namespace PNetS
 
         internal static void RemoveObject(GameObject gobj)
         {
-            GameObjects.Remove(gobj.Id);
+            lock (gameObjectLocker)
+            {
+                GameObjects.Remove(gobj.Id);
+            }
+        }
+
+        internal static int AddGameObject(GameObject newObject)
+        {
+            int newId;
+            lock (gameObjectLocker)
+            {
+                newId = GameObjects.Add(newObject);
+            }
+            return newId;
         }
 
         /// <summary>
@@ -56,7 +71,8 @@ namespace PNetS
             {
                 if (Watch.Elapsed.TotalSeconds - TimeSinceStartup > _frameTime)
                     Update();
-                Thread.Sleep(LOOP_TIGHTNESS);
+                else
+                    Thread.Sleep(LOOP_TIGHTNESS);
             }
         }
 
@@ -65,12 +81,6 @@ namespace PNetS
             var gameObject = new GameObject {Position = position, Rotation = rotation};
 
             return gameObject;
-        }
-
-        internal static int AddGameObject(GameObject newObject)
-        {
-            var newId = GameObjects.Add(newObject);
-            return newId;
         }
 
         static void Update()

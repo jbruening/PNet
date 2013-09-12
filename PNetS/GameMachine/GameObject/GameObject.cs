@@ -41,11 +41,21 @@ namespace PNetS
             internal set { _resource = value; }
         }
 
+
+        private Room _room;
         /// <summary>
         /// room this gameobject is in
         /// </summary>
         [YamlSerialize(YamlSerializeMethod.Never)]
-        public Room Room { get; internal set; }
+        public Room Room
+        {
+            get { return _room; }
+            internal set
+            {
+                _room = value;
+                _room.AddGameObject(this);
+            }
+        }
         /// <summary>
         /// world position
         /// </summary>
