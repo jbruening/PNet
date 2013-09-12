@@ -11,7 +11,7 @@ namespace PNetC
     /// <summary>
     /// Networking class
     /// </summary>
-    public class Net
+    public static class Net
     {
         /// <summary>
         /// When finished connecting to the server
@@ -80,10 +80,16 @@ namespace PNetC
         public static Action<NetOutgoingMessage> WriteHailMessage = delegate { };
 
         internal static NetClient Peer;
-        protected static NetClient NetClient{get { return Peer; }}
-        internal static ushort PlayerId;
+        static NetClient NetClient{get { return Peer; }}
+        /// <summary>
+        /// The Network ID of this client
+        /// </summary>
+        public static ushort PlayerId { get; private set; }
         static NetPeerConfiguration _config;
-        protected static IEngineHook SingletonEngineHook;
+        /// <summary>
+        /// 
+        /// </summary>
+        public static IEngineHook SingletonEngineHook { get; private set; }
 
         static Net()
         {
@@ -105,7 +111,7 @@ namespace PNetC
         /// <summary>
         /// the current configuration
         /// </summary>
-        public static ClientConfiguration Configuration { get; protected set; }
+        public static ClientConfiguration Configuration { get; private set; }
 
         /// <summary>
         /// last received latency value from the lidgren's calculations

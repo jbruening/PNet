@@ -22,7 +22,7 @@ namespace PNetC
 
     public static class EngineHookFactory
     {
-        public static event Func<IEngineHook> CreateEngineHook;
+        public static Func<IEngineHook> CreateEngineHook;
 
         internal static IEngineHook DoCreateEngineHook()
         {

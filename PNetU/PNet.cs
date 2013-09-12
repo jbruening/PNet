@@ -9,34 +9,30 @@ using PNet;
 using System.ComponentModel;
 using Debug = UnityEngine.Debug;
 using NetworkLogLevel = UnityEngine.NetworkLogLevel;
-using Object = UnityEngine.Object;
-using Quaternion = UnityEngine.Quaternion;
-using Vector3 = UnityEngine.Vector3;
 
 namespace PNetU
 {
     /// <summary>
     /// Networking class
     /// </summary>
-    public sealed class Net : PNetC.Net
+    public static class Net
     {
         /// <summary>
-        /// logging level. UNUSED
+        /// Bind unity things to PNetC.Net
         /// </summary>
-        public static NetworkLogLevel logLevel;
+        public static void SetupUnity()
+        {
+            EngineHookFactory.CreateEngineHook = () =>
+            {
+                return UnityEngineHook.Instance;
+            };
+
+            PNetC.Debug.logger = new UnityDebugLogger();
+        }
+
         /// <summary>
         /// resource caching for instantiation
         /// </summary>
         public static bool resourceCaching;
-
-        static Net()
-        {
-            EngineHookFactory.CreateEngineHook += () =>
-                {
-                    return UnityEngineHook.Instance;
-                };
-
-            PNetC.Debug.logger = new UnityDebugLogger();
-        }
     }
 }

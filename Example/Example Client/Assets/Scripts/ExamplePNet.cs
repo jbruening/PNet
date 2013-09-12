@@ -1,5 +1,6 @@
 using Lidgren.Network;
-using PNetU;
+using PNetC;
+using Debug = UnityEngine.Debug;
 using UnityEngine;
 
 public class ExamplePNet : MonoBehaviour
@@ -20,6 +21,8 @@ public class ExamplePNet : MonoBehaviour
 
         DontDestroyOnLoad(this);
 
+        PNetU.Net.SetupUnity();
+
         Net.OnRoomChange += OnRoomChange;
         Net.OnDisconnectedFromServer += OnDisconnectedFromServer;
         Net.WriteHailMessage = WriteHailMessage;
@@ -29,6 +32,7 @@ public class ExamplePNet : MonoBehaviour
     private void WriteHailMessage(NetOutgoingMessage netOutgoingMessage)
     {
         //TODO: serialize authentication information to the netoutgoingMessage
+        //The data written here is what is in the ApproveConnection delegate on the server
     }
 
     //This is run whenever a room has a Room or server RPC is run
@@ -37,6 +41,9 @@ public class ExamplePNet : MonoBehaviour
         Debug.Log("Room rpc " + b + " received");
 
         //TODO: deserialize data from the msg object
+        //this can be done via if/else, switches, or Dictionary<byte, Action<NetIncomingMessage>>.
+        //The dictionary is recommended for its cleanness
+        //the if/else is fastest if you only have a few Room/Server RPCs
     }
 
     private void OnDisconnectedFromServer()
@@ -50,6 +57,15 @@ public class ExamplePNet : MonoBehaviour
 
         //TODO: technically, this should be called after we actually switch scenes, but because we're not changing scenes, we'll call it right now
         Net.FinishedRoomChange();
+    }
+
+    private void OnDestroy()
+    {
+        //This is required for cleanup, as unity can't clean up delegates very well
+        Net.OnRoomChange -= OnRoomChange;
+        Net.OnDisconnectedFromServer -= OnDisconnectedFromServer;
+        Net.WriteHailMessage = null;
+        Net.ProcessRPC -= ProcessRpc;
     }
 
     // Use this for initialization

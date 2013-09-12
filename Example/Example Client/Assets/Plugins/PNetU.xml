@@ -94,63 +94,6 @@
             16 bytes
             </summary>
         </member>
-        <member name="T:PNetU.UnityExtensions">
-            <summary>
-            Extensions for unity stuff
-            </summary>
-        </member>
-        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Quaternion,Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            Serialize the quaternion to the message
-            </summary>
-            <param name="quaternion"></param>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Vector3,Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            serialize the vector3 to the message
-            </summary>
-            <param name="vector3"></param>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color)">
-            <summary>
-            Get the 3 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color)">
-            <summary>
-            Get the 4 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color32)">
-            <summary>
-            Get the 3 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color32)">
-            <summary>
-            Get the 4 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="T:EngineUpdateHook">
-            <summary>
-            network hooking into the Update method of unity. Don't put in the scene.
-            </summary>
-        </member>
-        <member name="M:EngineUpdateHook.Update">
-            <summary>
-            Run every frame, as long as the script is enabled
-            </summary>
-        </member>
         <member name="T:PNetU.NetworkView">
             <summary>
             network synchronization
@@ -214,6 +157,11 @@
             </summary>
             <param name="rpcID"></param>
         </member>
+        <member name="F:PNetU.NetworkView.DestroyGameObjectOnNetworkDestroy">
+            <summary>
+            Whether or not to destroy the gameobject this is attached to when destroying the networkview
+            </summary>
+        </member>
         <member name="F:PNetU.NetworkView.viewID">
             <summary>
             identifier for the network view
@@ -259,115 +207,34 @@
             ID of the owner. 0 is the server.
             </summary>
         </member>
+        <member name="T:NetBehaviour">
+            <summary>
+            Simple class to override instead of monobehaviour, has some extra network functions
+            </summary>
+        </member>
+        <member name="M:NetBehaviour.OnFinishedCreating">
+            <summary>
+            Called once the network view has finished attaching and instantiating
+            </summary>
+        </member>
+        <member name="P:NetBehaviour.netView">
+            <summary>
+            Get the PNetU.NetworkView attached to the gameObject
+            </summary>
+        </member>
         <member name="T:PNetU.Net">
             <summary>
             Networking class
             </summary>
         </member>
-        <member name="F:PNetU.Net.logLevel">
+        <member name="M:PNetU.Net.SetupUnity">
             <summary>
-            logging level. UNUSED
+            Bind unity things to PNetC.Net
             </summary>
         </member>
         <member name="F:PNetU.Net.resourceCaching">
             <summary>
             resource caching for instantiation
-            </summary>
-        </member>
-        <member name="F:PNetU.Net.isMessageQueueRunning">
-            <summary>
-            pause the processing of the network queue
-            </summary>
-        </member>
-        <member name="F:PNetU.Net.WriteHailMessage">
-            <summary>
-            The function to use for writing the connect data (username/password/etc)
-            </summary>
-        </member>
-        <member name="M:PNetU.Net.Connect(System.String,System.Int32,System.Int32)">
-            <summary>
-            Connect to the specified ip on the specified port
-            </summary>
-            <param name="ip"></param>
-            <param name="port"></param>
-            <param name="bindport">port to actually listen on. Default is just the first available port</param>
-        </member>
-        <member name="M:PNetU.Net.Connect(PNetU.ClientConfiguration)">
-            <summary>
-            Connect with the specified configuration
-            </summary>
-            <param name="configuration"></param>
-        </member>
-        <member name="M:PNetU.Net.Disconnect">
-            <summary>
-            Disconnect if connected
-            </summary>
-        </member>
-        <member name="M:PNetU.Net.RPC(System.Byte,PNet.INetSerializable[])">
-            <summary>
-            Send an rpc to the server
-            </summary>
-            <param name="rpcId"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetU.Net.FinishedRoomChange">
-            <summary>
-            Run once the room changing has completed (tells the server you're actually ready to be in a room)
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnConnectedToServer">
-            <summary>
-            When finished connecting to the server
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnDisconnectedFromServer">
-            <summary>
-            When disconnected from the server
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnFailedToConnect">
-            <summary>
-            When we've failed to connect
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnRoomChange">
-            <summary>
-            When the room is changing
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.ProcessRPC">
-            <summary>
-            subscribe to this in order to receive static RPC's from the server. you need to manually process them.
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnDiscoveryResponse">
-            <summary>
-            When a discovery response is received
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.status">
-            <summary>
-            latest status
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.statusReason">
-            <summary>
-            reason for the most latest status
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.time">
-            <summary>
-            Not currently set
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.Configuration">
-            <summary>
-            the current configuration
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.Latency">
-            <summary>
-            last received latency value from the lidgren's calculations
             </summary>
         </member>
         <member name="T:NetworkedSceneObject">
@@ -414,132 +281,87 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:NetBehaviour">
+        <member name="T:PNetU.UnityDebugLogger">
             <summary>
-            Simple class to override instead of monobehaviour, has some extra network functions
+            Logs to standard UnityEngine.Debug class
             </summary>
         </member>
-        <member name="M:NetBehaviour.OnFinishedCreating">
+        <member name="M:PNetU.UnityDebugLogger.Info(System.String,System.Object[])">
             <summary>
-            Called once the network view has finished attaching and instantiating
+            informational message
+            </summary>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetU.UnityDebugLogger.Warning(System.String,System.Object[])">
+            <summary>
+            warning message
+            </summary>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetU.UnityDebugLogger.Error(System.String,System.Object[])">
+            <summary>
+            error message
+            </summary>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="T:PNetU.UnityExtensions">
+            <summary>
+            Extensions for unity stuff
             </summary>
         </member>
-        <member name="P:NetBehaviour.netView">
+        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Quaternion,Lidgren.Network.NetOutgoingMessage)">
             <summary>
-            Get the PNetU.NetworkView attached to the gameObject
+            Serialize the quaternion to the message
+            </summary>
+            <param name="quaternion"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Vector3,Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize the vector3 to the message
+            </summary>
+            <param name="vector3"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color)">
+            <summary>
+            Get the 3 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color)">
+            <summary>
+            Get the 4 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color32)">
+            <summary>
+            Get the 3 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color32)">
+            <summary>
+            Get the 4 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="T:PNetU.UnityEngineHook">
+            <summary>
+            network hooking into the Update method of unity
             </summary>
         </member>
-        <member name="T:PNetU.ClientConfiguration">
+        <member name="M:PNetU.UnityEngineHook.Update">
             <summary>
-            Configuration for the client
-            </summary>
-        </member>
-        <member name="F:PNetU.ClientConfiguration.Ip">
-            <summary>
-            the ip or domain name of the server
-            </summary>
-        </member>
-        <member name="F:PNetU.ClientConfiguration.Port">
-            <summary>
-            the port to connect to on the server
-            </summary>
-        </member>
-        <member name="F:PNetU.ClientConfiguration.AppIdentifier">
-            <summary>
-            this should be unique per game, and should be the same on the client and server
-            </summary>
-        </member>
-        <member name="F:PNetU.ClientConfiguration.BindPort">
-            <summary>
-            the port to bind the game to. 0 will cause it to bind to the first available port
-            </summary>
-        </member>
-        <member name="F:PNetU.ClientConfiguration.DeleteNetworkInstantiatesOnRoomChange">
-            <summary>
-            if true, delete network instantiates on changing rooms (after OnRoomChange is run)
-            </summary>
-        </member>
-        <member name="F:PNetU.ClientConfiguration.DeleteNetworkInstantiatesOnDisconnect">
-            <summary>
-            if true, delete network instantiates on disconnecting from a server
-            </summary>
-        </member>
-        <member name="M:PNetU.ClientConfiguration.#ctor(System.String,System.Int32,System.Int32,System.String)">
-            <summary>
-            
-            </summary>
-            <param name="port"> </param>
-            <param name="bindPort"></param>
-            <param name="appIdentifier"></param>
-            <param name="ip"> </param>
-        </member>
-        <member name="T:PNetU.SynchronizedField`1">
-            <summary>
-            Creates a field which updates it's value on the network when changed
-            </summary>
-            <typeparam name="T">Must be serializable</typeparam>
-        </member>
-        <member name="F:PNetU.SynchronizedField`1.OnValueUpdated">
-            <summary>
-            Gets called when a new value is received over the network
-            </summary>
-        </member>
-        <member name="M:PNetU.SynchronizedField`1.Update">
-            <summary>
-            Use to trigger update on reference types
-            </summary>
-        </member>
-        <member name="M:PNetU.SynchronizedField`1.#ctor(PNetU.NetworkView)">
-            <summary>
-            Initializes the synchronized field
-            </summary>
-            <param name="netView">The NetworkView this value belongs to</param>
-        </member>
-        <member name="M:PNetU.SynchronizedField`1.Finalize">
-            <summary>
-            Destructor
-            </summary>
-        </member>
-        <member name="P:PNetU.SynchronizedField`1.Value">
-            <summary>
-            Use this to access or set the actual value
-            </summary>
-        </member>
-        <member name="T:NetworkViewId">
-            <summary>
-            Identifier for a NetworkView
-            </summary>
-        </member>
-        <member name="M:NetworkViewId.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            write to the message
-            </summary>
-            <param name="message">message to write to</param>
-        </member>
-        <member name="M:NetworkViewId.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
-            <summary>
-            doesn't do anything for integrity
-            </summary>
-            <param name="message">message to read from</param>
-        </member>
-        <member name="P:NetworkViewId.IsMine">
-            <summary>
-            Whether or not I own the object
-            </summary>
-        </member>
-        <member name="P:NetworkViewId.guid">
-            <summary>
-            network id
-            </summary>
-        </member>
-        <member name="P:NetworkViewId.Zero">
-            <summary>
-            Network ID of nothing
-            </summary>
-        </member>
-        <member name="P:NetworkViewId.AllocSize">
-            <summary>
-            size when serializing to stream
+            Run every frame, as long as the script is enabled
             </summary>
         </member>
     </members>
