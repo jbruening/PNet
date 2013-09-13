@@ -94,6 +94,53 @@
             16 bytes
             </summary>
         </member>
+        <member name="T:PNetU.UnityExtensions">
+            <summary>
+            Extensions for unity stuff
+            </summary>
+        </member>
+        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Quaternion,Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            Serialize the quaternion to the message
+            </summary>
+            <param name="quaternion"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Vector3,Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize the vector3 to the message
+            </summary>
+            <param name="vector3"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color)">
+            <summary>
+            Get the 3 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color)">
+            <summary>
+            Get the 4 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color32)">
+            <summary>
+            Get the 3 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color32)">
+            <summary>
+            Get the 4 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
         <member name="T:PNetU.NetworkView">
             <summary>
             network synchronization
@@ -167,7 +214,7 @@
             identifier for the network view
             </summary>
         </member>
-        <member name="M:PNetU.NetworkView.Find(NetworkViewId)">
+        <member name="M:PNetU.NetworkView.Find(PNetC.NetworkViewId)">
             <summary>
             find a network view based on the given NetworkViewId
             </summary>
@@ -207,6 +254,16 @@
             ID of the owner. 0 is the server.
             </summary>
         </member>
+        <member name="T:PNetU.UnityEngineHook">
+            <summary>
+            network hooking into the Update method of unity
+            </summary>
+        </member>
+        <member name="M:PNetU.UnityEngineHook.Update">
+            <summary>
+            Run every frame, as long as the script is enabled
+            </summary>
+        </member>
         <member name="T:NetBehaviour">
             <summary>
             Simple class to override instead of monobehaviour, has some extra network functions
@@ -222,19 +279,123 @@
             Get the PNetU.NetworkView attached to the gameObject
             </summary>
         </member>
+        <member name="T:PNetU.UnityDebugLogger">
+            <summary>
+            Logs to standard UnityEngine.Debug class
+            </summary>
+        </member>
+        <member name="M:PNetU.UnityDebugLogger.Info(System.String,System.Object[])">
+            <summary>
+            informational message
+            </summary>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetU.UnityDebugLogger.Warning(System.String,System.Object[])">
+            <summary>
+            warning message
+            </summary>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetU.UnityDebugLogger.Error(System.String,System.Object[])">
+            <summary>
+            error message
+            </summary>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
         <member name="T:PNetU.Net">
             <summary>
             Networking class
             </summary>
         </member>
-        <member name="M:PNetU.Net.SetupUnity">
-            <summary>
-            Bind unity things to PNetC.Net
-            </summary>
-        </member>
         <member name="F:PNetU.Net.resourceCaching">
             <summary>
             resource caching for instantiation
+            </summary>
+        </member>
+        <member name="M:PNetU.Net.Connect(PNetC.ClientConfiguration)">
+            <summary>
+            Connect with the specified configuration
+            </summary>
+            <param name="configuration"></param>
+        </member>
+        <member name="M:PNetU.Net.Disconnect">
+            <summary>
+            Disconnect if connected
+            </summary>
+        </member>
+        <member name="M:PNetU.Net.RPC(System.Byte,PNet.INetSerializable[])">
+            <summary>
+            Send an rpc to the server
+            </summary>
+            <param name="rpcId"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetU.Net.FinishedRoomChange">
+            <summary>
+            Run this when the room changing has completed (tells the server you're actually ready to be in a room)
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.Peer">
+            <summary>
+            the PNetC.Net instance used by this static class
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnRoomChange">
+            <summary>
+            When the room is changing
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnDisconnectedFromServer">
+            <summary>
+            When disconnected from the server
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnConnectedToServer">
+            <summary>
+            When finished connecting to the server
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.WriteHailMessage">
+            <summary>
+            The function to use for writing the connect data (username/password/etc)
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.ProcessRPC">
+            <summary>
+            subscribe to this in order to receive static RPC's from the server. you need to manually process them.
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnDiscoveryResponse">
+            <summary>
+            When a discovery response is received
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.IsMessageQueueRunning">
+            <summary>
+            pause the processing of the network queue
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.Status">
+            <summary>
+            latest status
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.StatusReason">
+            <summary>
+            reason for the most latest status
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.PlayerId">
+            <summary>
+            The Network ID of this client
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.Latency">
+            <summary>
+            last received latency value from the lidgren's calculations
             </summary>
         </member>
         <member name="T:NetworkedSceneObject">
@@ -280,89 +441,6 @@
             Get the data to serialize for this scene object
             </summary>
             <returns></returns>
-        </member>
-        <member name="T:PNetU.UnityDebugLogger">
-            <summary>
-            Logs to standard UnityEngine.Debug class
-            </summary>
-        </member>
-        <member name="M:PNetU.UnityDebugLogger.Info(System.String,System.Object[])">
-            <summary>
-            informational message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetU.UnityDebugLogger.Warning(System.String,System.Object[])">
-            <summary>
-            warning message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetU.UnityDebugLogger.Error(System.String,System.Object[])">
-            <summary>
-            error message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="T:PNetU.UnityExtensions">
-            <summary>
-            Extensions for unity stuff
-            </summary>
-        </member>
-        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Quaternion,Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            Serialize the quaternion to the message
-            </summary>
-            <param name="quaternion"></param>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Vector3,Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            serialize the vector3 to the message
-            </summary>
-            <param name="vector3"></param>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color)">
-            <summary>
-            Get the 3 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color)">
-            <summary>
-            Get the 4 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color32)">
-            <summary>
-            Get the 3 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color32)">
-            <summary>
-            Get the 4 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="T:PNetU.UnityEngineHook">
-            <summary>
-            network hooking into the Update method of unity
-            </summary>
-        </member>
-        <member name="M:PNetU.UnityEngineHook.Update">
-            <summary>
-            Run every frame, as long as the script is enabled
-            </summary>
         </member>
     </members>
 </doc>

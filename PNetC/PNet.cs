@@ -11,45 +11,45 @@ namespace PNetC
     /// <summary>
     /// Networking class
     /// </summary>
-    public static class Net
+    public class Net
     {
         /// <summary>
         /// When finished connecting to the server
         /// </summary>
-        public static event Action OnConnectedToServer;
+        public event Action OnConnectedToServer;
 
         /// <summary>
         /// When disconnected from the server
         /// </summary>
-        public static event Action OnDisconnectedFromServer;
+        public event Action OnDisconnectedFromServer;
 
         /// <summary>
         /// When we've failed to connect
         /// </summary>
-        public static event Action<string> OnFailedToConnect;
+        public event Action<string> OnFailedToConnect;
 
         /// <summary>
         /// When the room is changing
         /// </summary>
-        public static event Action<string> OnRoomChange;
+        public event Action<string> OnRoomChange;
 
         /// <summary>
         /// subscribe to this in order to receive static RPC's from the server. you need to manually process them.
         /// </summary>
-        public static event Action<byte, NetIncomingMessage> ProcessRPC;
+        public event Action<byte, NetIncomingMessage> ProcessRPC;
 
         /// <summary>
         /// When a discovery response is received
         /// </summary>
-        public static event Action<NetIncomingMessage> OnDiscoveryResponse;
+        public event Action<NetIncomingMessage> OnDiscoveryResponse;
         /// <summary>
         /// logging level. UNUSED
         /// </summary>
-        public static NetworkLogLevel LogLevel;
+        public NetworkLogLevel LogLevel;
         /// <summary>
         /// latest status
         /// </summary>
-        public static NetConnectionStatus Status { 
+        public NetConnectionStatus Status { 
             get
             {
                 return _status;
@@ -60,39 +60,48 @@ namespace PNetC
                 Debug.Log("[Net Status] " + _status);
             }
         }
-        private static NetConnectionStatus _status = NetConnectionStatus.Disconnected;
+        private NetConnectionStatus _status = NetConnectionStatus.Disconnected;
         /// <summary>
         /// reason for the most latest status
         /// </summary>
         [DefaultValue("")]
-        public static string StatusReason { get; internal set; }
+        public string StatusReason { get; private set; }
         /// <summary>
         /// pause the processing of the network queue
         /// </summary>
-        public static bool IsMessageQueueRunning = true;
+        public bool IsMessageQueueRunning = true;
         /// <summary>
         /// Not currently set
         /// </summary>
-        public static double Time { get; internal set; }
+        public double Time { get; internal set; }
         /// <summary>
         /// The function to use for writing the connect data (username/password/etc)
         /// </summary>
-        public static Action<NetOutgoingMessage> WriteHailMessage = delegate { };
+        public Action<NetOutgoingMessage> WriteHailMessage = delegate { };
 
-        internal static NetClient Peer;
-        static NetClient NetClient{get { return Peer; }}
+        internal NetClient Peer;
         /// <summary>
         /// The Network ID of this client
         /// </summary>
-        public static ushort PlayerId { get; private set; }
-        static NetPeerConfiguration _config;
+        public ushort PlayerId { get; private set; }
+        NetPeerConfiguration _config;
+        /// <summary>
+        /// The hook used to hook into various game engines that you might use
+        /// </summary>
+        public IEngineHook EngineHook { get; private set; }
+
+        /// <summary>
+        /// The container of all the network views
+        /// </summary>
+        public NetworkViewManager NetworkViewManager { get; private set; }
+
         /// <summary>
         /// 
         /// </summary>
-        public static IEngineHook SingletonEngineHook { get; private set; }
-
-        static Net()
+        public Net(IEngineHook engineHook)
         {
+            EngineHook = engineHook;
+            NetworkViewManager = new NetworkViewManager(this);
             Status = NetConnectionStatus.Disconnected;
         }
 
@@ -103,7 +112,7 @@ namespace PNetC
         /// <param name="port"></param>
         /// <param name="bindport">port to actually listen on. Default is just the first available port</param>
         [Obsolete("Use the overload that takes a ClientConfiguration")]
-        public static void Connect(string ip, int port, int bindport = 0)
+        public void Connect(string ip, int port, int bindport = 0)
         {
             Configuration = new ClientConfiguration(ip, port, bindport);
             Connect(Configuration);
@@ -111,18 +120,18 @@ namespace PNetC
         /// <summary>
         /// the current configuration
         /// </summary>
-        public static ClientConfiguration Configuration { get; private set; }
+        public ClientConfiguration Configuration { get; private set; }
 
         /// <summary>
         /// last received latency value from the lidgren's calculations
         /// </summary>
-        public static float Latency { get; private set; }
+        public float Latency { get; private set; }
 
         /// <summary>
         /// Connect with the specified configuration
         /// </summary>
         /// <param name="configuration"></param>
-        public static void Connect(ClientConfiguration configuration)
+        public void Connect(ClientConfiguration configuration)
         {
             Configuration = configuration;
             if (Peer != null && Peer.Status != NetPeerStatus.NotRunning)
@@ -131,9 +140,10 @@ namespace PNetC
                 return;
             }
 
-            SingletonEngineHook = EngineHookFactory.DoCreateEngineHook();
-            if (SingletonEngineHook == null) throw new Exception("The EngineHookFactory returned null. It should return an instance of IEngineHook. Make sure you've subscribed a function to EngineHookFactory.CreateEngineHook");
-            SingletonEngineHook.EngineUpdate += Update;
+            if (EngineHook == null) 
+                throw new Exception("Cannot have a null EngineHook");
+            
+            EngineHook.EngineUpdate += Update;
 
             _config = new NetPeerConfiguration(Configuration.AppIdentifier);
             _config.Port =  Configuration.BindPort; //so we can run client and server on the same machine..
@@ -151,7 +161,7 @@ namespace PNetC
         /// <summary>
         /// Disconnect if connected
         /// </summary>
-        public static void Disconnect()
+        public void Disconnect()
         {
             if (Peer == null)
                 return;
@@ -169,7 +179,7 @@ namespace PNetC
         /// </summary>
         /// <param name="rpcId"></param>
         /// <param name="args"></param>
-        public static void RPC(byte rpcId, params INetSerializable[] args)
+        public void RPC(byte rpcId, params INetSerializable[] args)
         {
             var size = 1;
             RPCUtils.AllocSize(ref size, args);
@@ -184,7 +194,7 @@ namespace PNetC
         /// <summary>
         /// Run once the room changing has completed (tells the server you're actually ready to be in a room)
         /// </summary>
-        public static void FinishedRoomChange()
+        public void FinishedRoomChange()
         {
             var message = Peer.CreateMessage(1);
 
@@ -192,7 +202,7 @@ namespace PNetC
             Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
-        private static void FinishedInstantiate(ushort netID)
+        private void FinishedInstantiate(ushort netID)
         {
             NetOutgoingMessage msg = Peer.CreateMessage(3);
             msg.Write(RPCUtils.FinishedInstantiate);
@@ -202,7 +212,7 @@ namespace PNetC
             Debug.Log("Finished instantiation, sending ack");
         }
 
-        private static void ProcessUtils(NetIncomingMessage msg)
+        private void ProcessUtils(NetIncomingMessage msg)
         {
             var utilId = msg.ReadByte();
 
@@ -222,20 +232,17 @@ namespace PNetC
                 var rotation = new Quaternion();
                 rotation.OnDeserialize(msg);
 
-                var view = new NetworkView();
-                NetworkView.RegisterView(view, viewId);
-                view.ViewID = new NetworkViewId(){guid = viewId, IsMine = PlayerId == ownerId};
-                view.OwnerId = ownerId;
+                var view = NetworkViewManager.Create(viewId, ownerId);
 
                 object netviewContainer = null;
 
                 try
                 {
-                     netviewContainer = SingletonEngineHook.Instantiate(resourcePath, view, position, rotation);
+                     netviewContainer = EngineHook.Instantiate(resourcePath, view, position, rotation);
                 }
                 catch(Exception e)
                 {
-                    Debug.LogError("[SingletonEngineHook.Instantiate] {0}", e);
+                    Debug.LogError("[EngineHook.Instantiate] {0}", e);
                 }
                 view.Container = netviewContainer;
 
@@ -248,7 +255,7 @@ namespace PNetC
                 var viewId = msg.ReadUInt16();
 
                 NetworkView find;
-                if (NetworkView.Find(viewId, out find))
+                if (NetworkViewManager.Find(viewId, out find))
                 {
                     find.DoOnRemove();
                 }
@@ -271,7 +278,7 @@ namespace PNetC
 
                 if (Configuration.DeleteNetworkInstantiatesOnRoomChange)
                 {
-                    NetworkView.DestroyAllViews();
+                    NetworkViewManager.DestroyAllViews();
                 }
             }
             else if (utilId == RPCUtils.AddView)
@@ -283,22 +290,18 @@ namespace PNetC
 
 
                 NetworkView view;
-                if (NetworkView.Find(addToId, out view))
+                if (NetworkViewManager.Find(addToId, out view))
                 {
-                    var newView = new NetworkView();
-                    NetworkView.RegisterView(newView, idToAdd);
-                    newView.ViewID = new NetworkViewId() { guid = idToAdd, IsMine = view.IsMine };
-                    newView.IsMine = view.IsMine;
-                    newView.OwnerId = view.OwnerId;
+                    var newView = NetworkViewManager.Create(idToAdd, view.OwnerId);
 
                     object container = null;
                     try
                     {
-                        container = SingletonEngineHook.AddNetworkView(view, newView, customFunction);
+                        container = EngineHook.AddNetworkView(view, newView, customFunction);
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError("[SingletonEngineHook.AddNetworkView] {0}", e);
+                        Debug.LogError("[EngineHook.AddNetworkView] {0}", e);
                     }
                     if (container != null)
                     {
@@ -318,7 +321,7 @@ namespace PNetC
             }
         }
 
-        static void Update()
+        void Update()
         {
             if (!IsMessageQueueRunning) return;
             var messages = new List<NetIncomingMessage>();
@@ -372,7 +375,7 @@ namespace PNetC
 
                                 if (Configuration.DeleteNetworkInstantiatesOnDisconnect)
                                 {
-                                    NetworkView.DestroyAllViews();
+                                    NetworkViewManager.DestroyAllViews();
                                 }
                             }
                             else
@@ -402,13 +405,13 @@ namespace PNetC
             }
         }
 
-        internal static NetOutgoingMessage CreateMessage(int initialCapacity)
+        internal NetOutgoingMessage CreateMessage(int initialCapacity)
         {
             return Peer.CreateMessage(initialCapacity);
         }
 
 
-        private static void Consume(NetIncomingMessage msg)
+        private void Consume(NetIncomingMessage msg)
         {
             try
             {
@@ -417,15 +420,15 @@ namespace PNetC
                 {
                     var actorId = msg.ReadUInt16();
                     NetworkView find;
-                    if (NetworkView.Find(actorId, out find))
-                        find.OnDeserializeStream(msg);
+                    if (NetworkViewManager.Find(actorId, out find))
+                        find.DoOnDeserializeStream(msg);
                 }
                 else if (msg.SequenceChannel == Channels.RELIABLE_STREAM)
                 {
                     var actorId = msg.ReadUInt16();
                     NetworkView find;
-                    if (NetworkView.Find(actorId, out find))
-                        find.OnDeserializeStream(msg);
+                    if (NetworkViewManager.Find(actorId, out find))
+                        find.DoOnDeserializeStream(msg);
                 }
                 else if (msg.SequenceChannel >= Channels.BEGIN_RPCMODES && msg.SequenceChannel <= Channels.OWNER_RPC)
                 {
@@ -433,7 +436,7 @@ namespace PNetC
                     var viewID = msg.ReadUInt16();
                     var rpcId = msg.ReadByte();
                     NetworkView find;
-                    if (NetworkView.Find(viewID, out find))
+                    if (NetworkViewManager.Find(viewID, out find))
                         find.CallRPC(rpcId, msg);
                     else
                         Debug.LogWarning("couldn't find view " + viewID + " to send rpc " + rpcId);
@@ -443,7 +446,7 @@ namespace PNetC
                     var viewId = msg.ReadUInt16();
                     var fieldId = msg.ReadByte();
                     NetworkView find;
-                    if (NetworkView.Find(viewId, out find))
+                    if (NetworkViewManager.Find(viewId, out find))
                         find.SetSynchronizedField(fieldId, msg);
                     else
                         Debug.LogWarning("couldn't find view " + viewId + " to set field " + fieldId);

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using PNet;
-using Lidgren.Network;
+﻿using Lidgren.Network;
+using PNetC;
 
 namespace PNetU
 {
@@ -16,7 +12,7 @@ namespace PNetU
         /// <returns></returns>
         public static NetworkView Find(NetworkViewId viewID)
         {
-            return PNetC.NetworkView.Find(viewID).Container as NetworkView;
+            return Net.Peer.NetworkViewManager.Find(viewID).Container as NetworkView;
         }
 
         /// <summary>
@@ -28,7 +24,7 @@ namespace PNetU
         public static bool Find(ref NetIncomingMessage message, out NetworkView view)
         {
             PNetC.NetworkView netview;
-            var result = PNetC.NetworkView.Find(ref message, out netview);
+            var result = Net.Peer.NetworkViewManager.Find(ref message, out netview);
             view = netview.Container as NetworkView;
             return result;
         }

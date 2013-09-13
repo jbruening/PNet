@@ -8,12 +8,14 @@ namespace PNetC
     /// <summary>
     /// network synchronization
     /// </summary>
-    public sealed partial class NetworkView
+    public sealed class NetworkView
     {
         /// <summary>
         /// The object that this networkview is attached to.
         /// </summary>
         public object Container { get; internal set; }
+
+        internal readonly NetworkViewManager Manager;
 
         /// <summary>
         /// Send an rpc
@@ -26,12 +28,12 @@ namespace PNetC
             var size = 2;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = Net.Peer.CreateMessage(size);
+            var message = Manager.Net.Peer.CreateMessage(size);
             message.Write(ViewID.guid);
             message.Write(rpcID);
             RPCUtils.WriteParams(ref message, args);
 
-            Net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, (int)mode + Channels.BEGIN_RPCMODES);
+            Manager.Net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, (int)mode + Channels.BEGIN_RPCMODES);
         }
 
         /// <summary>
@@ -44,12 +46,12 @@ namespace PNetC
             var size = 3;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = Net.Peer.CreateMessage(size);
+            var message = Manager.Net.Peer.CreateMessage(size);
             message.Write(ViewID.guid);
             message.Write(rpcID);
             RPCUtils.WriteParams(ref message, args);
 
-            Net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+            Manager.Net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
         }
 
         #region serialization
@@ -76,27 +78,33 @@ namespace PNetC
         /// method of serialization
         /// </summary>
         public NetworkStateSynchronization StateSynchronization = NetworkStateSynchronization.Off;
-        
+
         /// <summary>
         /// subscribe to this in order to deserialize streaming data
         /// </summary>
-        public Action<NetIncomingMessage> OnDeserializeStream = delegate { };
+        public event Action<NetIncomingMessage> OnDeserializeStream;
+
+        internal void DoOnDeserializeStream(NetIncomingMessage msg)
+        {
+            if (OnDeserializeStream != null)
+                OnDeserializeStream(msg);
+        }
 
         /// <summary>
         /// Needs to be called by the implementing engine
         /// </summary>
         public void DoStreamSerialize()
         {
-            if (Net.Status == NetConnectionStatus.Connected)
+            if (Manager.Net.Status == NetConnectionStatus.Connected)
             {
-                var nMessage = Net.Peer.CreateMessage(DefaultStreamSize);
+                var nMessage = Manager.Net.Peer.CreateMessage(DefaultStreamSize);
                 nMessage.Write(ViewID.guid);
                 _onSerializeStream(nMessage);
 
                 if (StateSynchronization == NetworkStateSynchronization.Unreliable)
-                    Net.Peer.SendMessage(nMessage, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
+                    Manager.Net.Peer.SendMessage(nMessage, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
                 else if (StateSynchronization == NetworkStateSynchronization.ReliableDeltaCompressed)
-                    Net.Peer.SendMessage(nMessage, NetDeliveryMethod.ReliableOrdered, Channels.RELIABLE_STREAM);
+                    Manager.Net.Peer.SendMessage(nMessage, NetDeliveryMethod.ReliableOrdered, Channels.RELIABLE_STREAM);
             }
         }
 
@@ -204,6 +212,11 @@ namespace PNetC
         /// </summary>
         public NetworkViewId ViewID = NetworkViewId.Zero;
 
+        internal NetworkView(NetworkViewManager manager)
+        {
+            Manager = manager;
+        }
+
         /// <summary>
         /// ID of the owner. 0 is the server.
         /// </summary>
@@ -227,7 +240,7 @@ namespace PNetC
         {
             _rpcProcessors = null;
             _fieldProcessors = null;
-            RemoveView(ViewID.guid);
+            Manager.RemoveView(ViewID.guid);
             try
             {
                 if (OnRemove != null) OnRemove();

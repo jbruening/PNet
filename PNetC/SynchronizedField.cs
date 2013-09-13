@@ -16,8 +16,8 @@ namespace PNetC
     public class SynchronizedField<T>
     {
         internal byte FieldId;
-        private T m_value;
-        private NetworkView m_netView;
+        private T _value;
+        private readonly NetworkView _netView;
 
         /// <summary>
         /// Gets called when a new value is received over the network
@@ -31,13 +31,13 @@ namespace PNetC
         {
             get
             {
-                return m_value;
+                return _value;
             }
             set
             {
-                if (m_netView.IsMine  && !EqualityComparer<T>.Default.Equals(m_value, value))
+                if (_netView.IsMine  && !EqualityComparer<T>.Default.Equals(_value, value))
                 {
-                    m_value = value;
+                    _value = value;
                     SendUpdatedValue();
                 } 
             }
@@ -69,9 +69,9 @@ namespace PNetC
                 return;
             }
 
-            m_netView = netView;
-            m_value = (T)Activator.CreateInstance(typeof(T));
-            m_netView.SubscribeToSynchronizedField<T>(this);
+            _netView = netView;
+            _value = (T)Activator.CreateInstance(typeof(T));
+            _netView.SubscribeToSynchronizedField<T>(this);
             SendUpdatedValue();
         }
 
@@ -85,7 +85,7 @@ namespace PNetC
         /// </summary>
         ~SynchronizedField()
         {
-            m_netView.UnsubscribeSynchronizedField(FieldId);
+            _netView.UnsubscribeSynchronizedField(FieldId);
         }
         #endregion
 
@@ -117,19 +117,19 @@ namespace PNetC
         
         private void SendUpdatedValue()
         {
-            if (!m_netView.IsMine)
+            if (!_netView.IsMine)
                 return;
             try
             {
-                byte[] serializedData = SerializeValue(m_value);
+                byte[] serializedData = SerializeValue(_value);
                 int msgSize = serializedData.Length + 3;
-                NetOutgoingMessage msg = Net.Peer.CreateMessage(msgSize);
+                NetOutgoingMessage msg = _netView.Manager.Net.Peer.CreateMessage(msgSize);
 
-                msg.Write(m_netView.ViewID.guid);
+                msg.Write(_netView.ViewID.guid);
                 msg.Write(FieldId);
                 msg.Write(serializedData);
 
-                Net.Peer.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
+                _netView.Manager.Net.Peer.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
             }
             catch
             {
@@ -144,8 +144,8 @@ namespace PNetC
 
             try
             {
-                m_value = DeserializeValue(buffer);
-                OnValueUpdated(m_value);
+                _value = DeserializeValue(buffer);
+                OnValueUpdated(_value);
             }
             catch
             {

@@ -11,6 +11,8 @@ namespace PNetU
     /// </summary>
     internal class UnityEngineHook : MonoBehaviour, PNetC.IEngineHook
     {
+        public event Action EngineUpdate;
+
         static UnityEngineHook _instance;
         public static UnityEngineHook Instance 
         { 
@@ -21,7 +23,7 @@ namespace PNetU
                     var gobj = new GameObject("PNetU Singleton Engine Hook");
                     _instance = gobj.AddComponent<UnityEngineHook>();
                     //gobj.hideFlags = HideFlags.DontSave;
-                    Object.DontDestroyOnLoad(gobj);
+                    DontDestroyOnLoad(gobj);
                 }
                 return _instance; 
             } 
@@ -31,7 +33,7 @@ namespace PNetU
             if (_instance == null)
             {
                 _instance = this;
-                Object.DontDestroyOnLoad(gameObject);
+                DontDestroyOnLoad(this);
             }
 
             if (_instance != this)
@@ -50,10 +52,12 @@ namespace PNetU
         void OnDestroy()
         {
             if (_instance == this)
-                PNetC.Net.Disconnect();
+            {
+                Net.Peer.Disconnect();
+                //run some cleanup too, just in case
+                EngineUpdate = null;
+            }
         }
-
-        public event Action EngineUpdate;
 
         internal static Dictionary<string, GameObject> ResourceCache = new Dictionary<string, GameObject>();
         public object Instantiate(string path, PNetC.NetworkView newView, PNetC.Vector3 location, PNetC.Quaternion rotation)
@@ -68,7 +72,7 @@ namespace PNetU
             if (Net.resourceCaching && !isCached)
                 ResourceCache.Add(path, gobj);
 
-            var instance = (GameObject)GameObject.Instantiate(gobj, new Vector3(location.X, location.Y, location.Z), new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W));
+            var instance = (GameObject)Instantiate(gobj, new Vector3(location.X, location.Y, location.Z), new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W));
 
             if (instance == null)
             {

@@ -12,6 +12,8 @@ namespace PNetC
     public class NetworkedSceneObject
     {
         int _networkID;
+        private readonly Net _net;
+
         /// <summary>
         /// The scene/room Network ID of this item. Should be unique per object
         /// </summary>
@@ -21,12 +23,19 @@ namespace PNetC
             {
                 return _networkID;
             }
+            set { _networkID = value; }
         }
 
-        public NetworkedSceneObject(int networkID)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="networkID"></param>
+        /// <param name="net"></param>
+        public NetworkedSceneObject(int networkID, Net net)
         {
             _networkID = networkID;
-            sceneObjects[_networkID] = this;
+            _net = net;
+            SceneObjects[_networkID] = this;
         }
         
         /// <summary>
@@ -34,11 +43,12 @@ namespace PNetC
         /// </summary>
         public static void ClearSceneIDs()
         {
-            sceneObjects.Clear();
+            SceneObjects.Clear();
         }
 
         #region RPC Processing
-        Dictionary<byte, Action<NetIncomingMessage>> RPCProcessors = new Dictionary<byte, Action<NetIncomingMessage>>();
+
+        readonly Dictionary<byte, Action<NetIncomingMessage>> _rpcProcessors = new Dictionary<byte, Action<NetIncomingMessage>>();
 
         /// <summary>
         /// Subscribe to an rpc
@@ -53,19 +63,19 @@ namespace PNetC
                 throw new ArgumentNullException("rpcProcessor", "the processor delegate cannot be null");
             if (overwriteExisting)
             {
-                RPCProcessors[rpcID] = rpcProcessor;
+                _rpcProcessors[rpcID] = rpcProcessor;
                 return true;
             }
             else
             {
                 Action<NetIncomingMessage> checkExist;
-                if (RPCProcessors.TryGetValue(rpcID, out checkExist))
+                if (_rpcProcessors.TryGetValue(rpcID, out checkExist))
                 {
                     return false;
                 }
                 else
                 {
-                    RPCProcessors.Add(rpcID, checkExist);
+                    _rpcProcessors.Add(rpcID, rpcProcessor);
                     return true;
                 }
             }
@@ -77,23 +87,23 @@ namespace PNetC
         /// <param name="rpcID"></param>
         public void UnsubscribeFromRPC(byte rpcID)
         {
-            RPCProcessors.Remove(rpcID);
+            _rpcProcessors.Remove(rpcID);
         }
 
         internal static void CallRPC(int id, byte rpcID, NetIncomingMessage message)
         {
             NetworkedSceneObject sceneObject;
-            if (sceneObjects.TryGetValue(id, out sceneObject))
+            if (SceneObjects.TryGetValue(id, out sceneObject))
             {
                 Action<NetIncomingMessage> processor;
-                if (sceneObject.RPCProcessors.TryGetValue(rpcID, out processor))
+                if (sceneObject._rpcProcessors.TryGetValue(rpcID, out processor))
                 {
                     if (processor != null)
                         processor(message);
                     else
                     {
                         Debug.LogWarning("RPC processor for {0} was null. Automatically cleaning up. Please be sure to clean up after yourself in the future.", rpcID);
-                        sceneObject.RPCProcessors.Remove(rpcID);
+                        sceneObject._rpcProcessors.Remove(rpcID);
                     }
                 }
                 else
@@ -116,12 +126,12 @@ namespace PNetC
             var size = 3;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = Net.Peer.CreateMessage(size);
+            var message = _net.Peer.CreateMessage(size);
             message.Write((ushort)NetworkID);
             message.Write(rpcID);
             RPCUtils.WriteParams(ref message, args);
 
-            Net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OBJECT_RPC);
+            _net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OBJECT_RPC);
         }
 
         /// <summary>
@@ -137,6 +147,6 @@ namespace PNetC
             return sb.ToString();
         }
 
-        private static Dictionary<int, NetworkedSceneObject> sceneObjects = new Dictionary<int, NetworkedSceneObject>();
+        private static readonly Dictionary<int, NetworkedSceneObject> SceneObjects = new Dictionary<int, NetworkedSceneObject>();
     }
 }

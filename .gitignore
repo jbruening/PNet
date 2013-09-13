@@ -118,3 +118,4 @@ UpgradeLog*.XML
 /Example/Example Client/Assembly-UnityScript-firstpass-vs.unityproj
 /Example/Example Client/Example Client.sln
 /Example/Example Client/Example Client-csharp.sln
+*.DotSettings

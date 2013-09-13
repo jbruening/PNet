@@ -1,7 +1,7 @@
 using Lidgren.Network;
-using PNetC;
 using Debug = UnityEngine.Debug;
 using UnityEngine;
+using Net = PNetU.Net;
 
 public class ExamplePNet : MonoBehaviour
 {
@@ -20,8 +20,6 @@ public class ExamplePNet : MonoBehaviour
         }
 
         DontDestroyOnLoad(this);
-
-        PNetU.Net.SetupUnity();
 
         Net.OnRoomChange += OnRoomChange;
         Net.OnDisconnectedFromServer += OnDisconnectedFromServer;
@@ -71,7 +69,7 @@ public class ExamplePNet : MonoBehaviour
     // Use this for initialization
 	void Start ()
 	{
-	    var config = new ClientConfiguration(ip, port);
+	    var config = new PNetC.ClientConfiguration(ip, port);
 	    Net.Connect(config);
 	}
 }

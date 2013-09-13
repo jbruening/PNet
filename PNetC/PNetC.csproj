@@ -46,7 +46,7 @@
     <Compile Include="NetworkedSceneObject.cs" />
     <Compile Include="NetworkStateSynchronization.cs" />
     <Compile Include="NetworkView.cs" />
-    <Compile Include="NetworkView.Static.cs" />
+    <Compile Include="NetworkViewManager.cs" />
     <Compile Include="NetworkViewId.cs" />
     <Compile Include="PNet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

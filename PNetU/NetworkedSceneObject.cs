@@ -17,11 +17,11 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// </summary>
     public int NetworkID = 0;
 
-    PNetC.NetworkedSceneObject sceneObject;
+    PNetC.NetworkedSceneObject _sceneObject;
 
     void Awake()
     {
-        sceneObject = new PNetC.NetworkedSceneObject(NetworkID);
+        _sceneObject = new PNetC.NetworkedSceneObject(NetworkID, Net.Peer);
     }
 
     #region RPC Processing
@@ -34,7 +34,7 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
     public bool SubscribeToRPC(byte rpcID, Action<NetIncomingMessage> rpcProcessor, bool overwriteExisting = true)
     {
-        return sceneObject.SubscribeToRPC(rpcID, rpcProcessor, overwriteExisting);
+        return _sceneObject.SubscribeToRPC(rpcID, rpcProcessor, overwriteExisting);
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// <param name="rpcID"></param>
     public void UnsubscribeFromRPC(byte rpcID)
     {
-        sceneObject.UnsubscribeFromRPC(rpcID);
+        _sceneObject.UnsubscribeFromRPC(rpcID);
     }
     #endregion
 
@@ -54,7 +54,7 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// <param name="args"></param>
     public void RPC(byte rpcID, params INetSerializable[] args)
     {
-        sceneObject.RPC(rpcID, args);
+        _sceneObject.RPC(rpcID, args);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     public string Serialize()
     {
         var sb = new StringBuilder();
-        sb.AppendLine(sceneObject.Serialize());
+        sb.AppendLine(_sceneObject.Serialize());
         sb.Append("type:").Append(this.GetType().Name).AppendLine(";");
         sb.Append("data:").Append(SerializeObjectData()).AppendLine(";");
         sb.Append("pos:").Append(transform.position.ToString()).AppendLine(";");
