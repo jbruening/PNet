@@ -13,7 +13,7 @@ using NetworkLogLevel = UnityEngine.NetworkLogLevel;
 namespace PNetU
 {
     /// <summary>
-    /// Networking class
+    /// Networking class. Is basically a static class -> PNetC instance binding
     /// </summary>
     public static class Net
     {
