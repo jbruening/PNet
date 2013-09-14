@@ -1,38 +1,33 @@
 ﻿using PNetC;
+using UnityEngine;
+using NetworkLogLevel = UnityEngine.NetworkLogLevel;
 
 namespace PNetU
 {
     /// <summary>
     /// Logs to standard UnityEngine.Debug class
     /// </summary>
-    public sealed class UnityDebugLogger : ILogger
+    internal sealed class UnityDebugLogger : ILogger
     {
-        /// <summary>
-        /// informational message
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="args"></param>
-        public void Info(string info, params object[] args)
+        void ILogger.Full(string info, params object[] args)
         {
-            UnityEngine.Debug.Log(string.Format(info, args));
+            if (Network.logLevel == NetworkLogLevel.Full || UnityEngine.Debug.isDebugBuild)
+                UnityEngine.Debug.Log(string.Format(info, args));
+
         }
 
-        /// <summary>
-        /// warning message
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="args"></param>
-        public void Warning(string info, params object[] args)
+        void ILogger.Info(string info, params object[] args)
+        {
+            if (Network.logLevel > NetworkLogLevel.Off || UnityEngine.Debug.isDebugBuild)
+                UnityEngine.Debug.Log(string.Format(info, args));
+        }
+
+        void ILogger.Warning(string info, params object[] args)
         {
             UnityEngine.Debug.LogWarning(string.Format(info, args));
         }
 
-        /// <summary>
-        /// error message
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="args"></param>
-        public void Error(string info, params object[] args)
+        void ILogger.Error(string info, params object[] args)
         {
             UnityEngine.Debug.LogError(string.Format(info, args));
         }

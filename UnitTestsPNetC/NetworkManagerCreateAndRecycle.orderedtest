@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<OrderedTest name="NetworkManagerCreateAndRecycle" storage="l:\pnet\unittestspnetc\networkmanagercreateandrecycle.orderedtest" id="f5f4693d-5d47-47aa-83b5-0df311523ac8" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestLinks>
+    <TestLink id="6a8c6f74-c204-7bfa-0de5-ecf89c18a862" name="CreateTest" storage="bin\release\unittestspnetc.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <TestLink id="8bb7f256-1d18-c7aa-d3b8-1a6eda3312a1" name="RecycleTest" storage="bin\release\unittestspnetc.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  </TestLinks>
+</OrderedTest>

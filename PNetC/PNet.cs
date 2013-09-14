@@ -42,10 +42,12 @@ namespace PNetC
         /// When a discovery response is received
         /// </summary>
         public event Action<NetIncomingMessage> OnDiscoveryResponse;
+
         /// <summary>
-        /// logging level. UNUSED
+        /// The function to use for writing the connect data (username/password/etc)
         /// </summary>
-        public NetworkLogLevel LogLevel;
+        public Action<NetOutgoingMessage> WriteHailMessage = delegate { };
+
         /// <summary>
         /// latest status
         /// </summary>
@@ -57,9 +59,24 @@ namespace PNetC
             internal set
             {
                 _status = value;
-                Debug.Log("[Net Status] " + _status);
+                Debug.LogInfo("[Net Status] " + _status);
             }
         }
+
+        /// <summary>
+        /// This will cause all the events to clear out. This is mainly for Unity to use. You probably shouldn't use it.
+        /// </summary>
+        public void CleanupEvents()
+        {
+            OnConnectedToServer = null;
+            OnDisconnectedFromServer = null;
+            OnFailedToConnect = null;
+            OnRoomChange = null;
+            ProcessRPC = null;
+            OnDiscoveryResponse = null;
+            WriteHailMessage = delegate { };
+        }
+
         private NetConnectionStatus _status = NetConnectionStatus.Disconnected;
         /// <summary>
         /// reason for the most latest status
@@ -74,10 +91,6 @@ namespace PNetC
         /// Not currently set
         /// </summary>
         public double Time { get; internal set; }
-        /// <summary>
-        /// The function to use for writing the connect data (username/password/etc)
-        /// </summary>
-        public Action<NetOutgoingMessage> WriteHailMessage = delegate { };
 
         internal NetClient Peer;
         /// <summary>
@@ -234,6 +247,8 @@ namespace PNetC
 
                 var view = NetworkViewManager.Create(viewId, ownerId);
 
+                
+
                 object netviewContainer = null;
 
                 try
@@ -245,6 +260,8 @@ namespace PNetC
                     Debug.LogError("[EngineHook.Instantiate] {0}", e);
                 }
                 view.Container = netviewContainer;
+
+                Debug.Log("Created {0}", view);
 
                 view.DoOnFinishedCreation();
                 
@@ -263,6 +280,8 @@ namespace PNetC
             else if (utilId == RPCUtils.ChangeRoom)
             {
                 var newRoom = msg.ReadString();
+
+                Debug.Log("Changing to room {0}", newRoom);
 
                 if (OnRoomChange != null)
                 {
@@ -286,7 +305,7 @@ namespace PNetC
                 var addToId = msg.ReadUInt16();
                 var idToAdd = msg.ReadUInt16();
                 string customFunction;
-                var runCustomFunction = msg.ReadString(out customFunction);
+                msg.ReadString(out customFunction);
 
 
                 NetworkView view;
@@ -317,7 +336,7 @@ namespace PNetC
             {
                 var playerId = msg.ReadUInt16();
                 PlayerId = playerId;
-                Debug.Log("Setting player id to " + playerId);
+                Debug.LogInfo("Setting player id to " + playerId);
             }
         }
 

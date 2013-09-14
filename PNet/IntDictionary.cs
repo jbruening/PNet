@@ -117,6 +117,15 @@ namespace PNet
         }
 
         /// <summary>
+        /// clear out all keys/values
+        /// </summary>
+        public void Clear()
+        {
+            m_Collection.Clear();
+            hasValueCollection.Clear();
+        }
+
+        /// <summary>
         /// does a value exist for the specified key
         /// </summary>
         /// <param name="key"></param>

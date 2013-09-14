@@ -6,6 +6,9 @@ namespace PNetC
     /// </summary>
     public interface IEngineHook
     {
+        /// <summary>
+        /// This should be run every frame by whatever engine you're using PNetC in.
+        /// </summary>
         event Action EngineUpdate;
         /// <summary>
         /// Create an object, and return it. Said object should be a container to hold the NetworkView
@@ -17,16 +20,13 @@ namespace PNetC
         /// <returns></returns>
         object Instantiate(string path, NetworkView newView, Vector3 location, Quaternion rotation);
 
+        /// <summary>
+        /// Add a NetworkView to the same container as an already existing NetworkView
+        /// </summary>
+        /// <param name="view"></param>
+        /// <param name="newView"></param>
+        /// <param name="customFunction"></param>
+        /// <returns></returns>
         object AddNetworkView(NetworkView view, NetworkView newView, string customFunction);
-    }
-
-    public static class EngineHookFactory
-    {
-        public static Func<IEngineHook> CreateEngineHook;
-
-        internal static IEngineHook DoCreateEngineHook()
-        {
-            return CreateEngineHook != null ? CreateEngineHook() : null;
-        }
     }
 }

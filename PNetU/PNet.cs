@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using PNetC;
-using UnityEngine;
 using Lidgren.Network;
 using PNet;
-using System.ComponentModel;
-using Debug = UnityEngine.Debug;
-using NetworkLogLevel = UnityEngine.NetworkLogLevel;
+using UnityEngine;
 
 namespace PNetU
 {
@@ -31,7 +24,12 @@ namespace PNetU
         {
             //do da setup
             Peer = new PNetC.Net(UnityEngineHook.Instance);
-            PNetC.Debug.logger = new UnityDebugLogger();
+            PNetC.Debug.Logger = new UnityDebugLogger();
+        }
+
+        internal static void CleanupEvents()
+        {
+            //TODO: clean out all the Peer events
         }
 
         #region PNetC.Net instance -> PNetU.Net static bindings
@@ -91,9 +89,27 @@ namespace PNetU
         }
 
         /// <summary>
+        /// When we've failed to connect
+        /// </summary>
+        public static event Action<string> OnFailedToConnect
+        {
+            add { Peer.OnFailedToConnect += value; }
+            remove { Peer.OnFailedToConnect -= value; }
+        }
+
+        /// <summary>
         /// pause the processing of the network queue
         /// </summary>
         public static bool IsMessageQueueRunning { get { return Peer.IsMessageQueueRunning; } set { Peer.IsMessageQueueRunning = value; } }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static NetworkLogLevel LogLevel
+        {
+            get { return Network.logLevel; }
+            set { Network.logLevel = value; }
+        }
         
         /// <summary>
         /// latest status
@@ -119,7 +135,7 @@ namespace PNetU
         /// Connect with the specified configuration
         /// </summary>
         /// <param name="configuration"></param>
-        public static void Connect(ClientConfiguration configuration)
+        public static void Connect(PNetC.ClientConfiguration configuration)
         {
             Peer.Connect(configuration);
         }

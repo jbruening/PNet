@@ -11,6 +11,16 @@ namespace PNetC
     public sealed class NullLogger : ILogger
     {
         /// <summary>
+        /// message only done during full debugging
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="args"></param>
+        public void Full(string info, params object[] args)
+        {
+            
+        }
+
+        /// <summary>
         /// informational message
         /// </summary>
         /// <param name="info"></param>

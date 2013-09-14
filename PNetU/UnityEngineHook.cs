@@ -56,6 +56,7 @@ namespace PNetU
                 Net.Peer.Disconnect();
                 //run some cleanup too, just in case
                 EngineUpdate = null;
+                Net.CleanupEvents();
             }
         }
 

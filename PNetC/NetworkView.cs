@@ -17,6 +17,63 @@ namespace PNetC
 
         internal readonly NetworkViewManager Manager;
 
+        #region NetworkViewID
+        /// <summary>
+        /// If i'm the owner
+        /// </summary>
+        public bool IsMine { get; private set; }
+        /// <summary>
+        /// identifier for the network view
+        /// </summary>
+        public NetworkViewId ViewID = NetworkViewId.Zero;
+
+        private ushort _ownerId;
+        /// <summary>
+        /// ID of the owner. 0 is the server.
+        /// </summary>
+        public ushort OwnerId
+        {
+            get { return _ownerId; }
+            internal set
+            {
+                _ownerId = value;
+                IsMine = _ownerId == Manager.Net.PlayerId;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// stream size. Helps prevent array resizing
+        /// </summary>
+        public int DefaultStreamSize;
+
+        private readonly Dictionary<byte, Action<NetIncomingMessage>> _rpcProcessors = new Dictionary<byte, Action<NetIncomingMessage>>();
+        private readonly IntDictionary<Action<NetIncomingMessage>> _fieldProcessors = new IntDictionary<Action<NetIncomingMessage>>();
+        private Action<NetOutgoingMessage> _onSerializeStream = delegate { };
+
+        /// <summary>
+        /// method of serialization
+        /// </summary>
+        public NetworkStateSynchronization StateSynchronization = NetworkStateSynchronization.Off;
+        /// <summary>
+        /// subscribe to this in order to deserialize streaming data
+        /// </summary>
+        public event Action<NetIncomingMessage> OnDeserializeStream;
+        /// <summary>
+        /// Subscribe to this to know when an object is being destroyed by the server.
+        /// </summary>
+        public event Action OnRemove = delegate { };
+        /// <summary>
+        /// run once we've finished setting up the networkview variables
+        /// </summary>
+        public event Action OnFinishedCreation = delegate { };
+
+        internal NetworkView(NetworkViewManager manager)
+        {
+            Manager = manager;
+        }
+
         /// <summary>
         /// Send an rpc
         /// </summary>
@@ -56,10 +113,6 @@ namespace PNetC
 
         #region serialization
         /// <summary>
-        /// stream size. Helps prevent array resizing
-        /// </summary>
-        public int DefaultStreamSize;
-        /// <summary>
         /// set the method to be used during stream serialization
         /// </summary>
         /// <param name="newMethod"></param>
@@ -72,17 +125,6 @@ namespace PNetC
                 DefaultStreamSize = defaultStreamSize;
             }
         }
-        Action<NetOutgoingMessage> _onSerializeStream = delegate { };
-
-        /// <summary>
-        /// method of serialization
-        /// </summary>
-        public NetworkStateSynchronization StateSynchronization = NetworkStateSynchronization.Off;
-
-        /// <summary>
-        /// subscribe to this in order to deserialize streaming data
-        /// </summary>
-        public event Action<NetIncomingMessage> OnDeserializeStream;
 
         internal void DoOnDeserializeStream(NetIncomingMessage msg)
         {
@@ -109,9 +151,6 @@ namespace PNetC
         }
 
         #endregion
-
-        Dictionary<byte, Action<NetIncomingMessage>> _rpcProcessors = new Dictionary<byte,Action<NetIncomingMessage>>();
-        IntDictionary<Action<NetIncomingMessage>> _fieldProcessors = new IntDictionary<Action<NetIncomingMessage>>();
 
         /// <summary>
         /// Subscribe to an rpc
@@ -192,37 +231,6 @@ namespace PNetC
             else
                 Debug.LogWarning("Unhandled synchronized field " + fieldID);
         }
-
-        /// <summary>
-        /// Subscribe to this to know when an object is being destroyed by the server.
-        /// </summary>
-        public event Action OnRemove = delegate { };
-        /// <summary>
-        /// run once we've finished setting up the networkview variables
-        /// </summary>
-        public event Action OnFinishedCreation = delegate { };
-
-        #region NetworkViewID
-        /// <summary>
-        /// If i'm the owner
-        /// </summary>
-        public bool IsMine { get; internal set; }
-        /// <summary>
-        /// identifier for the network view
-        /// </summary>
-        public NetworkViewId ViewID = NetworkViewId.Zero;
-
-        internal NetworkView(NetworkViewManager manager)
-        {
-            Manager = manager;
-        }
-
-        /// <summary>
-        /// ID of the owner. 0 is the server.
-        /// </summary>
-        public ushort OwnerId { get; internal set; }
-
-        #endregion
         
         internal void DoOnFinishedCreation()
         {
@@ -238,9 +246,11 @@ namespace PNetC
 
         internal void DoOnRemove()
         {
-            _rpcProcessors = null;
-            _fieldProcessors = null;
-            Manager.RemoveView(ViewID.guid);
+            //do some cleanup
+            _rpcProcessors.Clear();
+            _fieldProcessors.Clear();
+            _onSerializeStream = delegate { };
+
             try
             {
                 if (OnRemove != null) OnRemove();
@@ -249,7 +259,18 @@ namespace PNetC
             {
                 Debug.LogError("[NetworkView.OnRemove] {0}", e);
             }
+
+            Manager.RemoveView(this);
             Container = null;
+        }
+
+        /// <summary>
+        /// viewid, ownerid, container
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return string.Format("NV {0}:{1}:{2}", ViewID.guid, OwnerId, Container);
         }
     }
 }

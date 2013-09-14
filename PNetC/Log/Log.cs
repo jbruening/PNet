@@ -13,16 +13,26 @@ namespace PNetC
         /// <summary>
         /// Reference to the actual log receiver
         /// </summary>
-        public static ILogger logger = new NullLogger();
+        public static ILogger Logger = new NullLogger();
 
         /// <summary>
-        /// Info message
+        /// Only done when you want full logging
         /// </summary>
         /// <param name="value"></param>
         /// <param name="args"></param>
         public static void Log(string value, params object[] args)
         {
-            logger.Info(value, args);
+            Logger.Full(value, args);
+        }
+
+        /// <summary>
+        /// Info message. Semi important.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="args"></param>
+        public static void LogInfo(string value, params  object[] args)
+        {
+            Logger.Info(value, args);
         }
         /// <summary>
         /// Error message
@@ -31,7 +41,7 @@ namespace PNetC
         /// <param name="args"></param>
         public static void LogError(string value, params object[] args)
         {
-            logger.Error(value, args);
+            Logger.Error(value, args);
         }
         /// <summary>
         /// Warning message
@@ -40,7 +50,7 @@ namespace PNetC
         /// <param name="args"></param>
         public static void LogWarning(string value, params object[] args)
         {
-            logger.Warning(value, args);
+            Logger.Warning(value, args);
         }
     }
 }

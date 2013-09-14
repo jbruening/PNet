@@ -30,6 +30,19 @@ namespace PNetU
 
             _networkView.OnDeserializeStream += StreamDeserializeCaller;
             _networkView.OnRemove += DoOnRemove;
+
+            if (_queuedSer != null)
+            {
+                _networkView.SetSerializationMethod(_queuedSer, _queuedStreamSize);
+            }
+
+            var components = gameObject.GetComponents<MonoBehaviour>().OrderBy(c => c.name);
+
+            foreach (var component in components)
+            {
+                SubscribeMarkedRPCsOnComponent(component);
+                SubscribeSynchronizedFields(component);
+            }
         }
 
         /// <summary>
@@ -65,7 +78,7 @@ namespace PNetU
         /// <summary>
         /// stream size. Helps prevent array resizing
         /// </summary>
-        public int defaultStreamSize;
+        public int defaultStreamSize { get { return _networkView.DefaultStreamSize; } set { _networkView.DefaultStreamSize = value; } }
         /// <summary>
         /// set the method to be used during stream serialization
         /// </summary>
@@ -73,13 +86,21 @@ namespace PNetU
         /// <param name="defaultStreamSize"></param>
         public void SetSerializationMethod(Action<NetOutgoingMessage> newMethod, int defaultStreamSize = 16)
         {
-            if (newMethod != null)
+            if (newMethod == null) return;
+            if (_networkView == null)
             {
-                OnSerializeStream = newMethod;
-                this.defaultStreamSize = defaultStreamSize;
+                _queuedSer = newMethod;
+                _queuedStreamSize = defaultStreamSize;
+                return;
             }
+
+            _networkView.SetSerializationMethod(newMethod, defaultStreamSize);
+            this.defaultStreamSize = defaultStreamSize;
         }
-        Action<NetOutgoingMessage> OnSerializeStream = delegate { };
+
+        private Action<NetOutgoingMessage> _queuedSer;
+        private int _queuedStreamSize;
+
 
         private NetworkStateSynchronization _stateSynchronization = NetworkStateSynchronization.Off;
         private bool _isSerializing = false;
@@ -155,19 +176,6 @@ namespace PNetU
         public float SerializationTime = 0.05f;
 
         #endregion
-
-        void Awake()
-        {
-            var components = gameObject.GetComponents<MonoBehaviour>().OrderBy(c => c.name);
-
-            foreach (var component in components)
-            {
-                SubscribeMarkedRPCsOnComponent(component);
-                SubscribeSynchronizedFields(component);
-            }
-
-
-        }
 
         /// <summary>
         /// Subscribe all the marked rpcs on the supplied component
@@ -284,7 +292,7 @@ namespace PNetU
         {
             _networkView.OnDeserializeStream -= StreamDeserializeCaller;
             _networkView.OnRemove -= DoOnRemove;
-            Destroy(gameObject);
+            _networkView = null;
         }
 
         #region NetworkViewID

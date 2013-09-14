@@ -86,7 +86,7 @@ namespace PNetC
             newView.ViewID = new NetworkViewId {guid = viewId, IsMine = Net.PlayerId == ownerId};
             newView.OwnerId = ownerId;
             RegisterView(newView, viewId);
-            return new NetworkView(this);
+            return newView;
         }
 
         //pool get for networkviews

@@ -19,10 +19,22 @@ public abstract class NetworkedSceneObject : MonoBehaviour
 
     PNetC.NetworkedSceneObject _sceneObject;
 
-    void Awake()
+    /// <summary>
+    /// If you override, you need to run SetupPNetC, probably first.
+    /// </summary>
+    protected void Awake()
+    {
+        SetupPNetC();
+    }
+
+    /// <summary>
+    /// Only do this if you override awake
+    /// </summary>
+    protected void SetupPNetC()
     {
         _sceneObject = new PNetC.NetworkedSceneObject(NetworkID, Net.Peer);
     }
+
 
     #region RPC Processing
     /// <summary>
