@@ -1,4 +1,5 @@
-﻿using Lidgren.Network;
+﻿using System.Collections.Generic;
+using Lidgren.Network;
 using PNet;
 
 namespace PNetC
@@ -9,6 +10,7 @@ namespace PNetC
     public sealed class NetworkViewManager
     {
         readonly IntDictionary<NetworkView> _allViews = new IntDictionary<NetworkView>();
+        private readonly Stack<NetworkView> _netViewPool = new Stack<NetworkView>(150);
         internal readonly Net Net;
 
         /// <summary>
@@ -50,9 +52,13 @@ namespace PNetC
             return false;
         }
 
-        internal void RemoveView(ushort viewId)
+        internal void RemoveView(NetworkView view)
         {
-            _allViews.Remove(viewId);
+            if (view.Manager == this)
+            {
+                _allViews.Remove(view.ViewID.guid);
+                RecycleNetworkView(view);
+            }
         }
 
         internal void DestroyAllViews()
@@ -66,8 +72,6 @@ namespace PNetC
                     if (view != null)
                         view.DoOnRemove();
                 }
-
-                _allViews.Remove(i);
             }
         }
 
@@ -78,11 +82,25 @@ namespace PNetC
 
         internal NetworkView Create(ushort viewId, ushort ownerId)
         {
-            var newView = new NetworkView(this);
-            newView.ViewID = new NetworkViewId(){guid = viewId, IsMine = Net.PlayerId == ownerId};
+            var newView = GetNetworkView();
+            newView.ViewID = new NetworkViewId {guid = viewId, IsMine = Net.PlayerId == ownerId};
             newView.OwnerId = ownerId;
             RegisterView(newView, viewId);
             return new NetworkView(this);
+        }
+
+        //pool get for networkviews
+        NetworkView GetNetworkView()
+        {
+            if (_netViewPool.Count == 0)
+                return new NetworkView(this);
+            return _netViewPool.Pop();
+        }
+        //pool recycle for networkviews
+        void RecycleNetworkView(NetworkView view)
+        {
+            if (_netViewPool.Count < 150)
+                _netViewPool.Push(view);
         }
     }
 }

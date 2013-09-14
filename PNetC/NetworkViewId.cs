@@ -7,7 +7,7 @@ namespace PNetC
     /// <summary>
     /// Identifier for a NetworkView
     /// </summary>
-    public class NetworkViewId : INetSerializable
+    public struct NetworkViewId : INetSerializable
     {
         /// <summary>
         /// Whether or not I own the object

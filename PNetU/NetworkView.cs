@@ -21,12 +21,12 @@ namespace PNetU
     public partial class NetworkView : MonoBehaviour
     {
         private PNetC.NetworkView _networkView;
-        internal void SetNetworkView(PNetC.NetworkView networkView)
+        internal void SetNetworkView(PNetC.NetworkView netView)
         {
-            _networkView = networkView;
-            IsMine = networkView.IsMine;
-            OwnerId = networkView.OwnerId;
-            viewID = networkView.ViewID;
+            _networkView = netView;
+            IsMine = netView.IsMine;
+            OwnerId = netView.OwnerId;
+            viewID = netView.ViewID;
 
             _networkView.OnDeserializeStream += StreamDeserializeCaller;
             _networkView.OnRemove += DoOnRemove;
