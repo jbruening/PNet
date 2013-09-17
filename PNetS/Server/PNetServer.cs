@@ -44,6 +44,8 @@ namespace PNetS
         /// </summary>
         [DefaultValue("")]
         public static string statusReason { get; internal set; }
+
+        public static NetPeerStatus PeerStatus { get { return peer.Status; } }
         /// <summary>
         /// NOT USED CURRENTLY
         /// </summary>

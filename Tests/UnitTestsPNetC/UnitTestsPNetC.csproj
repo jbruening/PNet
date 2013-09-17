@@ -45,23 +45,25 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestablePNet.cs" />
     <Compile Include="NetworkViewManagerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestEngineHook.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lidgren.Network\Lidgren.Network.csproj">
+    <ProjectReference Include="..\..\Lidgren.Network\Lidgren.Network.csproj">
       <Project>{49BA1C69-6104-41AC-A5D8-B54FA9F696E8}</Project>
       <Name>Lidgren.Network</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PNetC\PNetC.csproj">
+    <ProjectReference Include="..\..\PNetC\PNetC.csproj">
       <Project>{314D16A0-FF83-4D3D-919E-8255D8BC9728}</Project>
       <Name>PNetC</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PNet\PNet.csproj">
+    <ProjectReference Include="..\..\PNet\PNet.csproj">
       <Project>{2DA9878B-D8F8-4F19-B3FC-DF5B83DBF8F4}</Project>
       <Name>PNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PNet.Testing.Common\PNet.Testing.Common.csproj">
+      <Project>{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}</Project>
+      <Name>PNet.Testing.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

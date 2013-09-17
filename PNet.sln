@@ -13,14 +13,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PNetS", "PNetS\PNetS.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PNetC", "PNetC\PNetC.csproj", "{314D16A0-FF83-4D3D-919E-8255D8BC9728}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestsPNetC", "UnitTestsPNetC\UnitTestsPNetC.csproj", "{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF4B1E16-23AD-4E47-A302-C372D191A0BD}"
 	ProjectSection(SolutionItems) = preProject
 		Local.testsettings = Local.testsettings
 		PNet.vsmdi = PNet.vsmdi
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A4907520-2865-418F-BF90-1087DD6502AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PNet.Testing.Common", "Tests\PNet.Testing.Common\PNet.Testing.Common.csproj", "{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestsPNetC", "Tests\UnitTestsPNetC\UnitTestsPNetC.csproj", "{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientServerIntegrationTests", "Tests\ClientServerIntegrationTests\ClientServerIntegrationTests.csproj", "{89FEA82B-53FA-450B-A3D7-7E8102483FC2}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -95,6 +101,16 @@ Global
 		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{314D16A0-FF83-4D3D-919E-8255D8BC9728}.Release|x86.ActiveCfg = Release|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D}.Release|x86.ActiveCfg = Release|Any CPU
 		{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -105,8 +121,23 @@ Global
 		{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF}.Release|x86.ActiveCfg = Release|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D} = {A4907520-2865-418F-BF90-1087DD6502AB}
+		{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF} = {A4907520-2865-418F-BF90-1087DD6502AB}
+		{89FEA82B-53FA-450B-A3D7-7E8102483FC2} = {A4907520-2865-418F-BF90-1087DD6502AB}
 	EndGlobalSection
 EndGlobal
