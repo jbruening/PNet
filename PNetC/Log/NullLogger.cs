@@ -13,9 +13,10 @@ namespace PNetC
         /// <summary>
         /// message only done during full debugging
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="info"></param>
         /// <param name="args"></param>
-        public void Full(string info, params object[] args)
+        public void Full(Net sender, string info, params object[] args)
         {
             
         }
@@ -23,9 +24,10 @@ namespace PNetC
         /// <summary>
         /// informational message
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="info"></param>
         /// <param name="args"></param>
-        public void Info(string info, params object[] args)
+        public void Info(Net sender, string info, params object[] args)
         {
             
         }
@@ -33,9 +35,10 @@ namespace PNetC
         /// <summary>
         /// warning message
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="info"></param>
         /// <param name="args"></param>
-        public void Warning(string info, params object[] args)
+        public void Warning(Net sender, string info, params object[] args)
         {
             
         }
@@ -43,9 +46,10 @@ namespace PNetC
         /// <summary>
         /// error message
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="info"></param>
         /// <param name="args"></param>
-        public void Error(string info, params object[] args)
+        public void Error(Net sender, string info, params object[] args)
         {
             
         }

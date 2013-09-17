@@ -18,39 +18,45 @@ namespace PNetC
         /// <summary>
         /// Only done when you want full logging
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="value"></param>
         /// <param name="args"></param>
-        public static void Log(string value, params object[] args)
+        public static void Log(Net sender, string value, params object[] args)
         {
-            Logger.Full(value, args);
+            Logger.Full(sender, value, args);
         }
 
         /// <summary>
         /// Info message. Semi important.
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="value"></param>
         /// <param name="args"></param>
-        public static void LogInfo(string value, params  object[] args)
+        public static void LogInfo(Net sender, string value, params  object[] args)
         {
-            Logger.Info(value, args);
+            Logger.Info(sender, value, args);
         }
+
         /// <summary>
         /// Error message
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="value"></param>
         /// <param name="args"></param>
-        public static void LogError(string value, params object[] args)
+        public static void LogError(Net sender, string value, params object[] args)
         {
-            Logger.Error(value, args);
+            Logger.Error(sender, value, args);
         }
+
         /// <summary>
         /// Warning message
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="value"></param>
         /// <param name="args"></param>
-        public static void LogWarning(string value, params object[] args)
+        public static void LogWarning(Net sender, string value, params object[] args)
         {
-            Logger.Warning(value, args);
+            Logger.Warning(sender, value, args);
         }
     }
 }

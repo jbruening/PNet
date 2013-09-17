@@ -60,12 +60,12 @@ namespace PNetC
         {
             if (netView == null)
             {
-                Debug.LogError("Synchronized fields must be initialized with a valid network view!");
+                Debug.LogError(null, "Synchronized fields must be initialized with a valid network view!");
                 return;
             }
             if (!typeof(T).IsSerializable)
             {
-                Debug.LogError("Synchronized field with non serializable Type " + typeof(T));
+                Debug.LogError(netView.Manager.Net, "Synchronized field with non serializable Type " + typeof(T));
                 return;
             }
 
@@ -133,7 +133,7 @@ namespace PNetC
             }
             catch
             {
-                Debug.LogError("Failed to serialize synchronized field value!");
+                Debug.LogError(_netView.Manager.Net, "Failed to serialize synchronized field value!");
             }
             
         }
@@ -149,7 +149,7 @@ namespace PNetC
             }
             catch
             {
-                Debug.LogError("Failed to deserialize synchronized field value!");
+                Debug.LogError(_netView.Manager.Net, "Failed to deserialize synchronized field value!");
             }
         }
         #endregion

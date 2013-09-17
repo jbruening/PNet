@@ -59,7 +59,7 @@ namespace PNetC
             internal set
             {
                 _status = value;
-                Debug.LogInfo("[Net Status] " + _status);
+                Debug.LogInfo(this, "[Net Status] " + _status);
             }
         }
 
@@ -149,7 +149,7 @@ namespace PNetC
             Configuration = configuration;
             if (Peer != null && Peer.Status != NetPeerStatus.NotRunning)
             {
-                Debug.LogError("cannot connect while connected");
+                Debug.LogError(this, "cannot connect while connected");
                 return;
             }
 
@@ -222,7 +222,7 @@ namespace PNetC
             msg.Write(netID);
 
             Peer.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
-            Debug.Log("Finished instantiation, sending ack");
+            Debug.Log(this, "Finished instantiation, sending ack");
         }
 
         private void ProcessUtils(NetIncomingMessage msg)
@@ -257,11 +257,11 @@ namespace PNetC
                 }
                 catch(Exception e)
                 {
-                    Debug.LogError("[EngineHook.Instantiate] {0}", e);
+                    Debug.LogError(this, "[EngineHook.Instantiate] {0}", e);
                 }
                 view.Container = netviewContainer;
 
-                Debug.Log("Created {0}", view);
+                Debug.Log(this, "Created {0}", view);
 
                 view.DoOnFinishedCreation();
                 
@@ -281,7 +281,7 @@ namespace PNetC
             {
                 var newRoom = msg.ReadString();
 
-                Debug.Log("Changing to room {0}", newRoom);
+                Debug.Log(this, "Changing to room {0}", newRoom);
 
                 if (OnRoomChange != null)
                 {
@@ -291,7 +291,7 @@ namespace PNetC
                     }
                     catch(Exception e)
                     {
-                        Debug.LogError("[OnChangeRoom] {0}", e);
+                        Debug.LogError(this, "[OnChangeRoom] {0}", e);
                     }
                 }
 
@@ -320,7 +320,7 @@ namespace PNetC
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError("[EngineHook.AddNetworkView] {0}", e);
+                        Debug.LogError(this, "[EngineHook.AddNetworkView] {0}", e);
                     }
                     if (container != null)
                     {
@@ -329,14 +329,14 @@ namespace PNetC
                 }
                 else
                 {
-                    Debug.LogError("Attempted to add a network view to id {0}, but it could not be found");
+                    Debug.LogError(this, "Attempted to add a network view to id {0}, but it could not be found");
                 }
             }
             else if (utilId == RPCUtils.SetPlayerId)
             {
                 var playerId = msg.ReadUInt16();
                 PlayerId = playerId;
-                Debug.LogInfo("Setting player id to " + playerId);
+                Debug.LogInfo(this, "Setting player id to " + playerId);
             }
         }
 
@@ -363,7 +363,7 @@ namespace PNetC
                 }
                 else if (msg.MessageType == NetIncomingMessageType.WarningMessage)
                 {
-                    Debug.LogWarning(msg.ReadString());
+                    Debug.LogWarning(this, msg.ReadString());
                     Peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ConnectionLatencyUpdated)
@@ -373,7 +373,7 @@ namespace PNetC
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ErrorMessage)
                 {
-                    Debug.LogError(msg.ReadString());
+                    Debug.LogError(this, msg.ReadString());
                     Peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.StatusChanged)
@@ -411,12 +411,12 @@ namespace PNetC
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError("[Net.Update.StatusChanged] {0}", e);
+                        Debug.LogError(this, "[Net.Update.StatusChanged] {0}", e);
                     }
                 }
                 else if (msg.MessageType == NetIncomingMessageType.Error)
                 {
-                    Debug.LogError(msg.ReadString()); //this should really never happen...
+                    Debug.LogError(this, msg.ReadString()); //this should really never happen...
                     Peer.Recycle(msg);
                 }
                 else
@@ -458,7 +458,7 @@ namespace PNetC
                     if (NetworkViewManager.Find(viewID, out find))
                         find.CallRPC(rpcId, msg);
                     else
-                        Debug.LogWarning("couldn't find view " + viewID + " to send rpc " + rpcId);
+                        Debug.LogWarning(this, "couldn't find view " + viewID + " to send rpc " + rpcId);
                 }
                 else if (msg.SequenceChannel == Channels.SYNCHED_FIELD)
                 {
@@ -468,7 +468,7 @@ namespace PNetC
                     if (NetworkViewManager.Find(viewId, out find))
                         find.SetSynchronizedField(fieldId, msg);
                     else
-                        Debug.LogWarning("couldn't find view " + viewId + " to set field " + fieldId);
+                        Debug.LogWarning(this, "couldn't find view " + viewId + " to set field " + fieldId);
                 }
                 else if (msg.SequenceChannel == Channels.OBJECT_RPC)
                 {
@@ -487,12 +487,12 @@ namespace PNetC
                 }
                 else
                 {
-                    Debug.LogWarning("data received over unhandled channel " + msg.SequenceChannel);
+                    Debug.LogWarning(this, "data received over unhandled channel " + msg.SequenceChannel);
                 }
             }
             catch (Exception er)
             {
-                Debug.LogError("[Net.Consume] {0}", er);
+                Debug.LogError(this, "[Net.Consume] {0}", er);
             }
         }
     }

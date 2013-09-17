@@ -9,22 +9,22 @@ namespace PNet.Testing.Common
 {
     class TestClientLogger : PNetC.ILogger
     {
-        public void Full(string info, params object[] args)
+        public void Full(PNetC.Net sender, string info, params object[] args)
         {
             Debug.WriteLine(string.Format(info, args));
         }
 
-        public void Info(string info, params object[] args)
+        public void Info(PNetC.Net sender, string info, params object[] args)
         {
             Debug.WriteLine(string.Format(info, args));
         }
 
-        public void Warning(string info, params object[] args)
+        public void Warning(PNetC.Net sender, string info, params object[] args)
         {
             Debug.WriteLine(string.Format(info, args));
         }
 
-        public void Error(string info, params object[] args)
+        public void Error(PNetC.Net sender, string info, params object[] args)
         {
             Assert.Fail(info, args);
         }

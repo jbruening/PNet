@@ -102,13 +102,13 @@ namespace PNetC
                         processor(message);
                     else
                     {
-                        Debug.LogWarning("RPC processor for {0} was null. Automatically cleaning up. Please be sure to clean up after yourself in the future.", rpcID);
+                        Debug.LogWarning(sceneObject._net, "RPC processor for {0} was null. Automatically cleaning up. Please be sure to clean up after yourself in the future.", rpcID);
                         sceneObject._rpcProcessors.Remove(rpcID);
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("NetworkedSceneObject on {0}: unhandled RPC {1}", id, rpcID);
+                    Debug.LogWarning(sceneObject._net, "NetworkedSceneObject on {0}: unhandled RPC {1}", id, rpcID);
                 }
             }
             

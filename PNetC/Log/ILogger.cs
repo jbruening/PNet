@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+// ReSharper disable CheckNamespace
 namespace PNetC
+// ReSharper restore CheckNamespace
 {
     /// <summary>
     /// Interface for logging information
@@ -13,26 +15,33 @@ namespace PNetC
         /// <summary>
         /// message only done during full debugging
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="info"></param>
         /// <param name="args"></param>
-        void Full(string info, params object[] args);
+        void Full(Net sender, string info, params object[] args);
+
         /// <summary>
         /// informational message
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="info"></param>
         /// <param name="args"></param>
-        void Info(string info, params object[] args);
+        void Info(Net sender, string info, params object[] args);
+
         /// <summary>
         /// warning message
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="info"></param>
         /// <param name="args"></param>
-        void Warning(string info, params object[] args);
+        void Warning(Net sender, string info, params object[] args);
+
         /// <summary>
         /// error message
         /// </summary>
+        /// <param name="sender"></param>
         /// <param name="info"></param>
         /// <param name="args"></param>
-        void Error(string info, params object[] args);
+        void Error(Net sender, string info, params object[] args);
     }
 }

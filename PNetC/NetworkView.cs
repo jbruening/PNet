@@ -212,7 +212,7 @@ namespace PNetC
             }
             else
             {
-                Debug.LogWarning("NetworkView " + ViewID.guid + ": unhandled RPC " + rpcID);
+                Debug.LogWarning(Manager.Net, "NetworkView " + ViewID.guid + ": unhandled RPC " + rpcID);
             }
         }
 
@@ -229,7 +229,7 @@ namespace PNetC
                     _fieldProcessors.Remove(fieldID);
             }
             else
-                Debug.LogWarning("Unhandled synchronized field " + fieldID);
+                Debug.LogWarning(Manager.Net, "Unhandled synchronized field " + fieldID);
         }
         
         internal void DoOnFinishedCreation()
@@ -240,7 +240,7 @@ namespace PNetC
             }
             catch (Exception e)
             {
-                Debug.LogError("[NetworkView.OnFinishedCreation] {0}", e);
+                Debug.LogError(Manager.Net, "[NetworkView.OnFinishedCreation] {0}", e);
             }
         }
 
@@ -257,7 +257,7 @@ namespace PNetC
             }
             catch(Exception e)
             {
-                Debug.LogError("[NetworkView.OnRemove] {0}", e);
+                Debug.LogError(Manager.Net, "[NetworkView.OnRemove] {0}", e);
             }
 
             Manager.RemoveView(this);
