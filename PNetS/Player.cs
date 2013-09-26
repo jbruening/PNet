@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Lidgren.Network;
 using PNet;
 
@@ -45,9 +46,13 @@ namespace PNetS
         /// <summary>
         /// change the player to the specified room
         /// </summary>
+        /// <exception cref="ThreadStateException">if GameState.InvokeRequired</exception>
         /// <param name="room"></param>
         public void ChangeRoom(Room room)
         {
+            if (GameState.InvokeRequired)
+                throw new ThreadStateException("Cannot change rooms on unless on gamestate's update thread");
+
             newRoom = room;
 
             if (CurrentRoom != null)

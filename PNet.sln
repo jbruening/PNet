@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestsPNetC", "Tests\Uni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientServerIntegrationTests", "Tests\ClientServerIntegrationTests\ClientServerIntegrationTests.csproj", "{89FEA82B-53FA-450B-A3D7-7E8102483FC2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PNetSUnitTests", "Tests\PNetSUnitTests\PNetSUnitTests.csproj", "{8186E93F-1456-4893-B3BF-953DDEA5C93E}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = PNet.vsmdi
@@ -131,6 +133,16 @@ Global
 		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{89FEA82B-53FA-450B-A3D7-7E8102483FC2}.Release|x86.ActiveCfg = Release|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,5 +151,6 @@ Global
 		{D2D2F82B-3456-4E91-AD1B-8A52D71F233D} = {A4907520-2865-418F-BF90-1087DD6502AB}
 		{C4A89324-0C65-4B8F-8F71-519DD5FBA9BF} = {A4907520-2865-418F-BF90-1087DD6502AB}
 		{89FEA82B-53FA-450B-A3D7-7E8102483FC2} = {A4907520-2865-418F-BF90-1087DD6502AB}
+		{8186E93F-1456-4893-B3BF-953DDEA5C93E} = {A4907520-2865-418F-BF90-1087DD6502AB}
 	EndGlobalSection
 EndGlobal

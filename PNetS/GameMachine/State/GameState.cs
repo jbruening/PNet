@@ -18,6 +18,10 @@ namespace PNetS
         private const int LOOP_TIGHTNESS = 5;
         static readonly IntDictionary<GameObject> GameObjects = new IntDictionary<GameObject>(256);
         static List<Action> _starteds = new List<Action>(8);
+        private static Thread _createdThread;
+        private static readonly Queue<Action> InvokeQueue = new Queue<Action>();
+        private static readonly object InvokeLocker = new object();
+
         internal static event Action RoomUpdates;
         internal static event Action DestroyDelays;
         internal static void AddStart(Action startMethod)
@@ -32,6 +36,38 @@ namespace PNetS
 
         static GameState()
         {
+        }
+
+        /// <summary>
+        /// whether or not the current thread is the same thread as what the game state is running on
+        /// </summary>
+        public static bool InvokeRequired
+        {
+            get { return Thread.CurrentThread != _createdThread; }
+        }
+
+        /// <summary>
+        /// Run an action on the gamestate's thread, next update
+        /// </summary>
+        /// <param name="action"></param>
+        public static void Invoke(Action action)
+        {
+            lock (InvokeLocker)
+            {
+                InvokeQueue.Enqueue(action);
+            }
+        }
+
+        /// <summary>
+        /// Invoke the specified action if it needs to be invoked. Otherwise, run it now.
+        /// </summary>
+        /// <param name="action"></param>
+        public static void InvokeIfRequired(Action action)
+        {
+            if (InvokeRequired)
+                Invoke(action);
+            else 
+                action();
         }
 
         internal static void RemoveObject(GameObject gobj)
@@ -49,6 +85,7 @@ namespace PNetS
 
             _frameTime = frameTime;
             Watch.Start();
+            _createdThread = Thread.CurrentThread;
 
             _quit = false;
 
@@ -77,6 +114,28 @@ namespace PNetS
         {
             PreviousFrameTime = TimeSinceStartup;
             TimeSinceStartup = Watch.Elapsed.TotalSeconds;
+
+            Action[] invokes;
+            lock (InvokeLocker)
+            {
+                invokes = InvokeQueue.ToArray();
+                InvokeQueue.Clear();
+            }
+
+// ReSharper disable ForCanBeConvertedToForeach - speed
+            for (int i = 0; i < invokes.Length; i++)
+// ReSharper restore ForCanBeConvertedToForeach
+            {
+                var invoke = invokes[i];
+                try
+                {
+                    invoke();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("[Invoke] {0}", e.ToString());
+                }
+            }
 
             if (_starteds.Count > 0)
             {
@@ -162,6 +221,7 @@ namespace PNetS
         }
 
         private static int _removeOffsetting = 0;
+
         internal static void RemoveRoutine(IEnumerator<YieldInstruction> toRemove)
         {
             var ind = Routines.FindIndex(c => object.ReferenceEquals(c, toRemove));
