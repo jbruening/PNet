@@ -343,6 +343,7 @@ namespace PNetC
         void Update()
         {
             if (!IsMessageQueueRunning) return;
+            if (Peer == null) return; //in case something is running update before we've even tried to connect
             var messages = new List<NetIncomingMessage>();
             int counter = Peer.ReadMessages(messages);
 
