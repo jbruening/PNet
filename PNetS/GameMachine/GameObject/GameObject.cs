@@ -17,16 +17,14 @@ namespace PNetS
         /// </summary>
         public GameObject()
         {
-            if (GameState.InvokeRequired)
-                throw new ThreadStateException("Cannot create new gameobjects unless on gamestates' thread");
-
-            Id = GameState.AddGameObject(this);
+            Id = -1;
+            GameState.InvokeIfRequired(() => Id = GameState.AddGameObject(this));
         }
         /// <summary>
         /// Unique identifier
         /// </summary>
         [YamlSerialize(YamlSerializeMethod.Never)]
-        public readonly int Id;
+        public int Id { get; private set; }
 
         [YamlSerialize(YamlSerializeMethod.Assign)]
         private string _resource;

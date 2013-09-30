@@ -72,6 +72,9 @@ namespace PNetS
 
         internal static void RemoveObject(GameObject gobj)
         {
+            //
+            if (gobj.Id == -1)
+                throw new Exception("Attempted to remove a gameobject with an Id of -1. This would be due to a gameobject not fully registering itself with the gamestate before being destroyed. This should never happen");
             GameObjects.Remove(gobj.Id);
         }
 
