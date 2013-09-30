@@ -1,24 +1,20 @@
-﻿using System.Reflection;
-using System.Threading;
-using PNet.Testing.Common;
-using PNetS;
+﻿using PNet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace PNetSUnitTests
+namespace PNet.Testing.Common
 {
     
     
     /// <summary>
-    ///This is a test class for GameStateTest and is intended
-    ///to contain all GameStateTest Unit Tests
+    ///This is a test class for IntDictionaryTest and is intended
+    ///to contain all IntDictionaryTest Unit Tests
     ///</summary>
     [TestClass()]
-    public class GameStateTest
+    public class IntDictionaryTest
     {
-
-
         private TestContext testContextInstance;
+        private IntDictionary<object> _target;
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -53,40 +49,61 @@ namespace PNetSUnitTests
         //}
         //
         //Use TestInitialize to run code before running each test
-        //[TestInitialize()]
-        //public void MyTestInitialize()
-        //{
-        //}
+        [TestInitialize()]
+        public void MyTestInitialize()
+        {
+            _target = new IntDictionary<object>();
+        }
         //
         //Use TestCleanup to run code after each test has run
-        //[TestCleanup()]
-        //public void MyTestCleanup()
-        //{
-        //}
+        [TestCleanup()]
+        public void MyTestCleanup()
+        {
+            _target = null;
+        }
         //
         #endregion
 
         [TestMethod()]
-        public void InvokeIfRequiredCatchTest()
+        public void AddTest()
         {
-            var stateType = typeof (GameState);
-            var threadField = stateType.GetField("_createdThread", BindingFlags.Static | BindingFlags.NonPublic);
-            threadField.SetValue(null, Thread.CurrentThread);
+            var add = new object();
 
-            bool didCatchFail = false;
-            try
+            for (int i = 0; i < 10; i++)
             {
-                GameState.InvokeIfRequired(delegate { throw new Exception("InvokeIfRequiredCatchTest"); });
-            }
-            catch (Exception e)
-            {
-                if (e.Message == "InvokeIfRequiredCatchTest")
-                    didCatchFail = true;
-                else
-                    throw;
+                _target.Add(add);
             }
 
-            Assert.IsTrue(didCatchFail, "Should have caught the failure");
+            int expected = 10;
+            int actual;
+            actual = _target.Add(add);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void RemoveAddTest()
+        {
+            var add = new object();
+
+            for (int i = 0; i < 10; i++)
+            {
+                _target.Add(add);
+            }
+
+            _target.Remove(3);
+
+            int expected = 3;
+            int actual = _target.Add(add);
+            Assert.AreEqual(expected, actual);
+
+            _target.Remove(0);
+            expected = 0;
+            actual = _target.Add(add);
+            Assert.AreEqual(expected, actual);
+
+
+            //make sure out of bounds doesn't throw
+            _target.Remove(int.MaxValue);
         }
     }
 }

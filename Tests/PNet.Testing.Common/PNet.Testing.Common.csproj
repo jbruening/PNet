@@ -45,6 +45,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntDictionaryTest.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="TestServerLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -20,9 +20,8 @@ namespace PNet
     /// <typeparam name="T"></typeparam>
     public class IntDictionary<T> : IEnumerable
     {
-
-        List<T> m_Collection;
-        List<bool> hasValueCollection;
+        readonly List<T> _collection;
+        readonly List<bool> _hasValueCollection;
 
         /// <summary>
         /// 
@@ -31,8 +30,8 @@ namespace PNet
         public IntDictionary(int collectionSize = 32)
         {
             // TODO: Complete member initialization
-            m_Collection = new List<T>(collectionSize);
-            hasValueCollection = new List<bool>(collectionSize);
+            _collection = new List<T>(collectionSize);
+            _hasValueCollection = new List<bool>(collectionSize);
         }
 
         /// <summary>
@@ -43,7 +42,7 @@ namespace PNet
         {
             get
             {
-                return m_Collection.ToArray();
+                return _collection.ToArray();
             }
         }
         /// <summary>
@@ -53,10 +52,12 @@ namespace PNet
         {
             get
             {
-                return hasValueCollection.ToArray();
+                return _hasValueCollection.ToArray();
             }
         }
 
+        //not using stack because of need to remove from somewhere in the middle
+        readonly List<int> _keyReuse = new List<int>();
 
         /// <summary>
         /// adds the object to the collection, and returns the key that was assigned to the object
@@ -65,17 +66,55 @@ namespace PNet
         /// <returns></returns>
         public int Add(T add)
         {
-            //get the first null index
-            var index = hasValueCollection.FindIndex(c => c == false);
+            var index = -1;
+
+            if (_keyReuse.Count > 0)
+            {
+                //pop
+                index = _keyReuse[_keyReuse.Count - 1];
+                _keyReuse.RemoveAt(_keyReuse.Count - 1);
+            }
+
             if (index != -1)
             {
-                m_Collection[index] = add;
-                hasValueCollection[index] = true;
+                _collection[index] = add;
+                _hasValueCollection[index] = true;
                 return index;
             }
-            m_Collection.Add(add);
-            hasValueCollection.Add(true);
-            return m_Collection.Count - 1;
+            _collection.Add(add);
+            _hasValueCollection.Add(true);
+            return _collection.Count - 1;
+        }
+
+        /// <summary>
+        /// remove the item at the specified key
+        /// </summary>
+        /// <param name="key"></param>
+        public void Remove(int key)
+        {
+            if (key < _collection.Count)
+            {
+                _collection[key] = default(T);
+
+                var hadValue = _hasValueCollection[key];
+                if (hadValue)
+                {
+                    //push
+                    _keyReuse.Add(key);
+                }
+
+                _hasValueCollection[key] = false;
+            }
+        }
+
+        /// <summary>
+        /// clear out all keys/values
+        /// </summary>
+        public void Clear()
+        {
+            _collection.Clear();
+            _hasValueCollection.Clear();
+            _keyReuse.Clear();
         }
 
         /// <summary>
@@ -86,43 +125,23 @@ namespace PNet
         /// <param name="add"></param>
         public void Add(int key, T add)
         {
-            if (m_Collection.Count <= key)
+            if (_collection.Count <= key)
             {
                 //collections not big enough. need to resize.
-                var range = key - m_Collection.Count + 1;
-                m_Collection.AddRange(Enumerable.Repeat<T>(default(T), range));
-                hasValueCollection.AddRange(Enumerable.Repeat<bool>(false, range));
+                var range = key - _collection.Count + 1;
+                _collection.AddRange(Enumerable.Repeat<T>(default(T), range));
+                _hasValueCollection.AddRange(Enumerable.Repeat<bool>(false, range));
 
-                m_Collection[key] = add;
-                hasValueCollection[key] = true;
+                _collection[key] = add;
+                _hasValueCollection[key] = true;
             }
             else
             {
-                m_Collection[key] = add;
-                hasValueCollection[key] = true;
+                if (_keyReuse.Contains(key))
+                    _keyReuse.Remove(key);
+                _collection[key] = add;
+                _hasValueCollection[key] = true;
             }
-        }
-
-        /// <summary>
-        /// remove the item at the specified key
-        /// </summary>
-        /// <param name="key"></param>
-        public void Remove(int key)
-        {
-            if (key < m_Collection.Count)
-            {
-                m_Collection[key] = default(T);
-                hasValueCollection[key] = false;
-            }
-        }
-
-        /// <summary>
-        /// clear out all keys/values
-        /// </summary>
-        public void Clear()
-        {
-            m_Collection.Clear();
-            hasValueCollection.Clear();
         }
 
         /// <summary>
@@ -132,9 +151,9 @@ namespace PNet
         /// <returns></returns>
         public bool HasValue(int key)
         {
-            if (key < m_Collection.Count)
+            if (key < _collection.Count)
             {
-                return hasValueCollection[key];
+                return _hasValueCollection[key];
             }
             return false;
         }
@@ -148,8 +167,8 @@ namespace PNet
         {
             get
             {
-                if (index < m_Collection.Count)
-                    return m_Collection[index];
+                if (index < _collection.Count)
+                    return _collection[index];
                 return default(T);
             }
             set
@@ -166,10 +185,10 @@ namespace PNet
         /// <returns></returns>
         public bool TryGetValue(int key, out T value)
         {
-            if (key < m_Collection.Count)
+            if (key < _collection.Count)
             {
-                value = m_Collection[key];
-                return hasValueCollection[key];
+                value = _collection[key];
+                return _hasValueCollection[key];
             }
             value = default(T);
             return false;
@@ -178,7 +197,7 @@ namespace PNet
         /// <summary>
         /// size of the collection array. can be used as upper bound for enumeration
         /// </summary>
-        public int Capacity { get { return m_Collection.Count; } }
+        public int Capacity { get { return _collection.Count; } }
 
         
 
@@ -192,7 +211,7 @@ namespace PNet
         /// <returns></returns>
         public IntDictionaryEnumerator<T> GetEnumerator()
         {
-            return new IntDictionaryEnumerator<T>(m_Collection);
+            return new IntDictionaryEnumerator<T>(_collection);
         }
 
         // Defines the enumerator for the Boxes collection.

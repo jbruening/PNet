@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Threading;
 using System.Yaml;
 using System.Yaml.Serialization;
 using SlimMath;
@@ -16,6 +17,9 @@ namespace PNetS
         /// </summary>
         public GameObject()
         {
+            if (GameState.InvokeRequired)
+                throw new ThreadStateException("Cannot create new gameobjects unless on gamestates' thread");
+
             Id = GameState.AddGameObject(this);
         }
         /// <summary>

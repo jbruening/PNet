@@ -39,7 +39,8 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="YamlSerializer">
-      <HintPath>..\lib\YamlSerializer.dll</HintPath>
+      <HintPath>..\..\lib\YamlSerializer.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
