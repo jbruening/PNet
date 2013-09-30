@@ -74,7 +74,10 @@ namespace PNetS
         {
             //
             if (gobj.Id == -1)
+            {
+                Debug.LogError("Attempted to remove a gameobject with an Id of -1. This happens only if the gameobject has not fully registered with the gamestate before being destroyed. This should never happen. Throwing.");
                 throw new Exception("Attempted to remove a gameobject with an Id of -1. This would be due to a gameobject not fully registering itself with the gamestate before being destroyed. This should never happen");
+            }
             GameObjects.Remove(gobj.Id);
         }
 
