@@ -28,6 +28,8 @@ namespace PNetU
             OwnerId = netView.OwnerId;
             viewID = netView.ViewID;
 
+            netView.StateSynchronization = _stateSynchronization.ToPNetC();
+
             _networkView.OnDeserializeStream += StreamDeserializeCaller;
             _networkView.OnRemove += DoOnRemove;
 
@@ -116,7 +118,10 @@ namespace PNetU
             set
             {
                 _stateSynchronization = value;
-                _networkView.StateSynchronization = _stateSynchronization.ToPNetC();
+
+                if (_networkView != null)
+                    _networkView.StateSynchronization = _stateSynchronization.ToPNetC();
+
                 if (_stateSynchronization != NetworkStateSynchronization.Off && !_isSerializing)
                 {
                     _isSerializing = true;
