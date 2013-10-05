@@ -49,6 +49,8 @@ namespace PNetS
                     try { c.onPlayerDisconnected(player); }
                     catch (Exception e) { Debug.LogError(e.ToString()); }
             }
+            if (player == Owner)
+                Owner = null;
         }
 
         internal void OnPlayerLeftRoom(Player player)

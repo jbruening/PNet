@@ -102,6 +102,7 @@ namespace PNetS
             var gobj = GameState.CreateGameObject(position, rotation);
             gobj.Room = this;
             gobj.Resource = resourcePath;
+            gobj.Owner = owner;
             var netview = gobj.GetComponent<NetworkView>() ?? gobj.AddComponent<NetworkView>();
 
             NetworkView.RegisterNewView(ref netview);
@@ -125,6 +126,8 @@ namespace PNetS
                 loadedView.owner = owner;
             else
                 loadedView.owner = Player.Server;
+            
+            resourceLoadedObject.Owner = loadedView.owner;
 
             m_Actors.Add(loadedView);
 

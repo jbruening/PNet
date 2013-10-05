@@ -66,6 +66,11 @@ namespace PNetS
         /// </summary>
         public Vector3 Right { get { return Rotation.Multiply(Vector3.UnitX); } }
 
+        /// <summary>
+        /// the owner of this gameobject. set during Network Instantiate. Null if no owner.
+        /// </summary>
+        public Player Owner { get; internal set; }
+
 
         private bool _markedForDestruction;
         /// <summary>
@@ -83,6 +88,7 @@ namespace PNetS
         internal static void DestroyNow(GameObject gameObject)
         {
             gameObject._markedForDestruction = true; //just in case
+            gameObject.Owner = null;
             gameObject.OnDestroy();
             gameObject.components.ForEach(g => g.component.Dispose());
             gameObject.components = null;
