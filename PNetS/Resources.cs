@@ -114,15 +114,17 @@ namespace PNetS
             if (dser.Resource == null)
                 dser.Resource = filePath;
 
-            foreach (var awake in awakes)
-                if (awake != null) awake();
-            
-            dser.OnComponentAfterDeserialization();
-
             if (position.HasValue)
                 dser.Position = position.Value;
             if (rotation.HasValue)
                 dser.Rotation = rotation.Value;
+
+            roomToInstantiateIn.OnGameObjectAdded(dser);
+
+            foreach (var awake in awakes)
+                if (awake != null) awake();
+            
+            dser.OnComponentAfterDeserialization();
 
             if (allowNetworkInstantiateIfHasNetworkView && dser.GetComponent<NetworkView>() != null)
                 roomToInstantiateIn.ResourceNetworkInstantiate(dser, visibleToAll, owner);

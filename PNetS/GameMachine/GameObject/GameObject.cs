@@ -47,7 +47,7 @@ namespace PNetS
         /// room this gameobject is in
         /// </summary>
         [YamlSerialize(YamlSerializeMethod.Never)]
-        public Room Room { get; internal set; }
+        public Room Room { get; internal set; } //ALWAYS CALL Room.OnGameobjectAdded WHEN YOU SET THIS VALUE, BUT A BIT AFTER YOU SET THE REST OF THE FIELDS
         /// <summary>
         /// world position
         /// </summary>
@@ -69,6 +69,7 @@ namespace PNetS
         /// <summary>
         /// the owner of this gameobject. set during Network Instantiate. Null if no owner.
         /// </summary>
+        [YamlSerialize(YamlSerializeMethod.Never)]
         public Player Owner { get; internal set; }
 
 

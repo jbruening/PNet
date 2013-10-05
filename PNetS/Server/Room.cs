@@ -113,6 +113,8 @@ namespace PNetS
 
             SendNetworkInstantiate(netview.Connections, gobj);
 
+            OnGameObjectAdded(gobj);
+
             return gobj;
         }
 
@@ -156,7 +158,7 @@ namespace PNetS
             sceneView.NetworkID = sceneObject.NetworkID;
 
             roomObjects[sceneObject.NetworkID] = sceneView;
-
+            OnGameObjectAdded(gobj);
             //sceneObject.OnFinishedCreation();
         }
 
@@ -594,6 +596,21 @@ namespace PNetS
             if (string.IsNullOrWhiteSpace(Name))
                 return "PNetS.Room";
             return "Room " + Name;
+        }
+
+        internal void OnGameObjectAdded(GameObject gameObject)
+        {
+            try
+            {
+                for(int i = 0; i < _roomBehaviours.Count; i++)
+                {
+                    _roomBehaviours[i].OnGameObjectAdded(gameObject);
+                }
+            }
+            catch(Exception e)
+            {
+                Debug.LogError("[Room GameObjectAdded] {0}: {1}", Name, e.ToString());
+            }
         }
     }
 }

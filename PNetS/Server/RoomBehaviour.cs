@@ -50,5 +50,11 @@ namespace PNetS
         /// run when the behaviour is being removed from the room
         /// </summary>
         public void Disposing(){}
+
+        /// <summary>
+        /// run when a gameobject is added to the room
+        /// </summary>
+        /// <param name="gameObject"></param>
+        public virtual void OnGameObjectAdded(GameObject gameObject){}
     }
 }
