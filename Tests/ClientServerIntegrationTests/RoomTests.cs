@@ -81,10 +81,9 @@ namespace ClientServerIntegrationTests
 
             _client.Connect(TestablePNet.GetTestConnectionConfig());
 
-            while (_client.Status != NetConnectionStatus.Connected)
-            {
-                Thread.Sleep(10);
-            }
+            Thread.Sleep(250);
+            
+            Assert.AreEqual(NetConnectionStatus.Connected, _client.Status, "Client did not connect in 250 ms");
 
             Thread.Sleep(100);
 

@@ -26,6 +26,7 @@ namespace ClientServerIntegrationTests
 
             var client = new TestablePNet();
             client.TestableHook.StartUpdateThread();
+            client.OnFailedToConnect += s => Assert.Fail("Failed to connect: {0}", s);
 
             //the client should connect and disconnect quickly
             client.Connect(TestablePNet.GetTestConnectionConfig());

@@ -115,7 +115,6 @@ namespace PNetC
         {
             EngineHook = engineHook;
             NetworkViewManager = new NetworkViewManager(this);
-            Status = NetConnectionStatus.Disconnected;
         }
 
         /// <summary>
@@ -180,11 +179,6 @@ namespace PNetC
                 return;
 
             Peer.Shutdown("disconnecting");
-
-            Status = NetConnectionStatus.Disconnected;
-            StatusReason = "disconnecting";
-
-            //OnDisconnectedFromServer();
         }
 
         /// <summary>
@@ -380,7 +374,7 @@ namespace PNetC
                 else if (msg.MessageType == NetIncomingMessageType.StatusChanged)
                 {
                     var lastStatus = _status;
-                    _status = (NetConnectionStatus) msg.ReadByte();
+                    Status = (NetConnectionStatus) msg.ReadByte();
                     StatusReason = msg.ReadString();
                     Peer.Recycle(msg);
 
