@@ -28,93 +28,106 @@ namespace PNet
     }
 
     /// <summary>
-    /// serializer for strings
+    /// 
     /// </summary>
-    public class StringSerializer : INetSerializable
+    /// <typeparam name="T"></typeparam>
+    public abstract class Serializable<TSerialize, TValue> : INetSerializable where TSerialize : INetSerializable, new()
     {
         /// <summary>
-        /// string to be serialized
+        /// value of the class
         /// </summary>
-        public string str;
+        public TValue Value;
+
+        public abstract void OnSerialize(NetOutgoingMessage message);
+
+        public abstract void OnDeserialize(NetIncomingMessage message);
+
+        public abstract int AllocSize { get; }
+
         /// <summary>
-        /// create a new serializer for the specified string
+        /// a static, single instance of the class. Can be used to reduce garbage collection
         /// </summary>
-        /// <param name="str"></param>
-        public StringSerializer(string str)
+        public static readonly TSerialize Instance = new TSerialize();
+        /// <summary>
+        /// update Value with the newValue
+        /// </summary>
+        /// <param name="newValue"></param>
+        /// <returns>this</returns>
+        public Serializable<TSerialize, TValue> Update(TValue newValue)
         {
-            this.str = str;
+            Value = newValue;
+            return this;
         }
-        /// <summary>
-        /// Create a new serializer, with nothing for the value
-        /// </summary>
-        public StringSerializer() { str = ""; }
+    }
+
+    /// <summary>
+    /// serializer for strings
+    /// </summary>
+    public class StringSerializer : Serializable<StringSerializer, string>
+    {
+        public StringSerializer(string value)
+        {
+            Value = value;
+        }
+        public StringSerializer() { Value = ""; }
         /// <summary>
         /// serialize
         /// </summary>
         /// <param name="message"></param>
-        public void OnSerialize(NetOutgoingMessage message)
+        public override void OnSerialize(NetOutgoingMessage message)
         {
-            message.Write(str);
+            message.Write(Value);
         }
         /// <summary>
         /// deserialize
         /// </summary>
         /// <param name="message"></param>
-        public void OnDeserialize(NetIncomingMessage message)
+        public override void OnDeserialize(NetIncomingMessage message)
         {
-            message.ReadString(out str);
+            message.ReadString(out Value);
         }
         /// <summary>
         /// get the size of the string in bytes
         /// </summary>
-        public int AllocSize
+        public override int AllocSize
         {
-            get { return str.Length * 2; }
+            get { return Value.Length * 2; }
         }
     }
 
     /// <summary>
     /// serializer for integers
     /// </summary>
-    public class IntSerializer : INetSerializable
+    public class IntSerializer : Serializable<IntSerializer, int>
     {
-        /// <summary>
-        /// integer to be serialized
-        /// </summary>
-        public int inte;
-        /// <summary>
-        /// create a new serializer for the specified integer
-        /// </summary>
-        /// <param name="inte"></param>
-        public IntSerializer(int inte) { this.inte = inte; }
-
-        /// <summary>
-        /// Create a new serializer with a value of 0
-        /// </summary>
-        public IntSerializer() { }
+        public IntSerializer(){}
+        public IntSerializer(int value)
+        {
+            Value = value;
+        }
 
         /// <summary>
         /// serialize
         /// </summary>
         /// <param name="message"></param>
-        public void OnSerialize(NetOutgoingMessage message)
+        public override void OnSerialize(NetOutgoingMessage message)
         {
-            message.Write(inte);
+            message.Write(Value);
         }
 
         /// <summary>
         /// deserialize
         /// </summary>
         /// <param name="message"></param>
-        public void OnDeserialize(NetIncomingMessage message)
+        public override void OnDeserialize(NetIncomingMessage message)
         {
-            inte = message.ReadInt32();
+            Value = message.ReadInt32();
         }
 
         /// <summary>
         /// size of the integer in bytes
         /// </summary>
-        public int AllocSize
+        public override int AllocSize
         {
             get { return 4; }
         }
@@ -123,17 +136,13 @@ namespace PNet
     /// <summary>
     /// serializer for floats
     /// </summary>
-    public class FloatSerializer : INetSerializable
+    public class FloatSerializer : Serializable<FloatSerializer, float>
     {
-        /// <summary>
-        /// float used for serialization
-        /// </summary>
-        public float floa;
         /// <summary>
         /// create a new serializer for a float
         /// </summary>
-        /// <param name="inte"></param>
-        public FloatSerializer(float inte) { this.floa = inte; }
+        /// <param name="value"></param>
+        public FloatSerializer(float value) { Value = value; }
 
         /// <summary>
         /// Create a new serializer with a value of 0
@@ -144,24 +153,24 @@ namespace PNet
         /// serialize
         /// </summary>
         /// <param name="message"></param>
-        public void OnSerialize(NetOutgoingMessage message)
+        public override void OnSerialize(NetOutgoingMessage message)
         {
-            message.Write(floa);
+            message.Write(Value);
         }
 
         /// <summary>
         /// deserialize
         /// </summary>
         /// <param name="message"></param>
-        public void OnDeserialize(NetIncomingMessage message)
+        public override void OnDeserialize(NetIncomingMessage message)
         {
-            floa = message.ReadFloat();
+            Value = message.ReadFloat();
         }
 
         /// <summary>
         /// get the size of this serializable
         /// </summary>
-        public int AllocSize
+        public override int AllocSize
         {
             get { return 4; }
         }
@@ -170,34 +179,29 @@ namespace PNet
     /// <summary>
     /// class to serialize byte arrays
     /// </summary>
-    public class ByteArraySerializer : INetSerializable
+    public class ByteArraySerializer : Serializable<ByteArraySerializer, byte[]>
     {
-        /// <summary>
-        /// the data
-        /// </summary>
-        public byte[] Bytes;
-
         /// <summary>
         /// serialize to the stream
         /// </summary>
         /// <param name="message"></param>
-        public void OnSerialize(NetOutgoingMessage message)
+        public override void OnSerialize(NetOutgoingMessage message)
         {
-            message.Write(Bytes.Length);
-            message.Write(Bytes);
+            message.Write(Value.Length);
+            message.Write(Value);
         }
 
         /// <summary>
         /// deserialize from the stream
         /// </summary>
         /// <param name="message"></param>
-        public void OnDeserialize(NetIncomingMessage message)
+        public override void OnDeserialize(NetIncomingMessage message)
         {
             var size = message.ReadInt32();
-            message.ReadBytes(size, out Bytes);
+            message.ReadBytes(size, out Value);
         }
 
         /// <summary />
-        public int AllocSize { get { return Bytes.Length + 4; } }
+        public override int AllocSize { get { return Value.Length + 4; } }
     }
 }
