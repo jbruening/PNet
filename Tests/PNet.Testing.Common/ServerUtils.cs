@@ -35,8 +35,8 @@ namespace PNet.Testing.Common
             PNetServer.Disconnect();
             while(PNetServer.PeerStatus != NetPeerStatus.NotRunning)
             {Thread.Sleep(10);}
-            if (_serverThread.IsAlive)
-                _serverThread.Abort();
+            PNetServer.Shutdown();
+            Thread.Sleep(100);
         }
     }
 }

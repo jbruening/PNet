@@ -39,6 +39,16 @@ namespace PNet
             , { typeof(double), (msg, obj) => { msg.Write((double)obj);}}
             , { typeof(string), (msg, obj) => {msg.Write((string)obj);}}
         };
+
+        public static void AddWriteMethod<T>(Action<NetOutgoingMessage, object> writeMethod) where T : struct
+        {
+            messageWriteMethods.Add(typeof (T), writeMethod);
+        }
+
+        public static void AddReadMethod<T>(Func<NetIncomingMessage, object> readMethod) where T : struct
+        {
+            messageReadMethods.Add(typeof(T), readMethod);
+        }
         /// <summary>
         /// ONLY WORKS FOR VALUE TYPES AND STRING. NO ENUMS.
         /// </summary>

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ComponentModel;
 using Lidgren.Network;
-using System.Threading;
 using PNet;
 
 namespace PNetS
@@ -45,6 +42,9 @@ namespace PNetS
         [DefaultValue("")]
         public static string statusReason { get; internal set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static NetPeerStatus PeerStatus { get { return peer.Status; } }
         /// <summary>
         /// NOT USED CURRENTLY
@@ -368,7 +368,17 @@ namespace PNetS
         /// <returns></returns>
         public static List<Player> AllPlayers()
         {
-            return connections.Values.Select(c => c == null ? null : c.Tag as Player).ToList();
+            var conns = connections.Values;
+            var ret = new List<Player>(conns.Length);
+            
+// ReSharper disable ForCanBeConvertedToForeach we're going for speed
+            for (int i = 0; i < conns.Length; i++)
+// ReSharper restore ForCanBeConvertedToForeach
+            {
+                var c = conns[i];
+                ret.Add(c == null ? null : c.Tag as Player);
+            }
+            return ret;
         }
 
         //rooms

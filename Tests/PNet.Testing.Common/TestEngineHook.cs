@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PNetC;
@@ -11,9 +12,13 @@ namespace PNet.Testing.Common
 
         public int UpdateSleepTime = 30;
         public event Action EngineUpdate;
+
+        public Dictionary<string, NetworkView> Instantiates = new Dictionary<string, NetworkView>();
         public object Instantiate(string path, NetworkView newView, Vector3 location, Quaternion rotation)
         {
-            return null;
+            Console.WriteLine("{0} instantiated", path);
+            Instantiates.Add(path, newView);
+            return path;
         }
 
         public object AddNetworkView(NetworkView view, NetworkView newView, string customFunction)
@@ -34,13 +39,14 @@ namespace PNet.Testing.Common
         }
         public void StopUpdateThread()
         {
-            if (_clientThread != null && _clientThread.IsAlive)
-                _clientThread.Abort();
+            _quit = true;
         }
+
+        private bool _quit = false;
 
         private void DoUpdateThread()
         {
-            while (true)
+            while (!_quit)
             {
                 if (EngineUpdate != null)
                     EngineUpdate();

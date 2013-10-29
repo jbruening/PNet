@@ -31,7 +31,7 @@ namespace PNet
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class Serializable<TSerialize, TValue> : INetSerializable where TSerialize : INetSerializable, new()
+    public abstract class ASerializable<TSerialize, TValue> : INetSerializable where TSerialize : ASerializable<TSerialize, TValue>, new()
     {
         /// <summary>
         /// value of the class
@@ -53,7 +53,7 @@ namespace PNet
         /// </summary>
         /// <param name="newValue"></param>
         /// <returns>this</returns>
-        public Serializable<TSerialize, TValue> Update(TValue newValue)
+        public ASerializable<TSerialize, TValue> Update(TValue newValue)
         {
             Value = newValue;
             return this;
@@ -63,7 +63,7 @@ namespace PNet
     /// <summary>
     /// serializer for strings
     /// </summary>
-    public class StringSerializer : Serializable<StringSerializer, string>
+    public class StringSerializer : ASerializable<StringSerializer, string>
     {
         public StringSerializer(string value)
         {
@@ -98,7 +98,7 @@ namespace PNet
     /// <summary>
     /// serializer for integers
     /// </summary>
-    public class IntSerializer : Serializable<IntSerializer, int>
+    public class IntSerializer : ASerializable<IntSerializer, int>
     {
         public IntSerializer(){}
         public IntSerializer(int value)
@@ -136,7 +136,7 @@ namespace PNet
     /// <summary>
     /// serializer for floats
     /// </summary>
-    public class FloatSerializer : Serializable<FloatSerializer, float>
+    public class FloatSerializer : ASerializable<FloatSerializer, float>
     {
         /// <summary>
         /// create a new serializer for a float
@@ -177,9 +177,30 @@ namespace PNet
     }
 
     /// <summary>
+    /// class to serialize single bytes
+    /// </summary>
+    public class ByteSerializer : ASerializable<ByteSerializer, byte>
+    {
+        public override void OnSerialize(NetOutgoingMessage message)
+        {
+            message.Write(Value);
+        }
+
+        public override void OnDeserialize(NetIncomingMessage message)
+        {
+            Value = message.ReadByte();
+        }
+
+        public override int AllocSize
+        {
+            get { return 1; }
+        }
+    }
+
+    /// <summary>
     /// class to serialize byte arrays
     /// </summary>
-    public class ByteArraySerializer : Serializable<ByteArraySerializer, byte[]>
+    public class ByteArraySerializer : ASerializable<ByteArraySerializer, byte[]>
     {
         /// <summary>
         /// serialize to the stream

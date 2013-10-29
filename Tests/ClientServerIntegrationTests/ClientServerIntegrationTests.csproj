@@ -45,9 +45,12 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientTestComponent.cs" />
+    <Compile Include="RoomTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BasicTests.cs" />
-    <Compile Include="RoomTests.cs" />
+    <Compile Include="RPCTests.cs" />
+    <Compile Include="TestComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Lidgren.Network\Lidgren.Network.csproj">
