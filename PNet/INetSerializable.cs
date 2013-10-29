@@ -198,6 +198,27 @@ namespace PNet
     }
 
     /// <summary>
+    /// class to serialize single booleans
+    /// </summary>
+    public class BoolSerializer : ASerializable<BoolSerializer, bool>
+    {
+        public override void OnSerialize(NetOutgoingMessage message)
+        {
+            message.Write(Value);
+        }
+
+        public override void OnDeserialize(NetIncomingMessage message)
+        {
+            Value = message.ReadBoolean();
+        }
+
+        public override int AllocSize
+        {
+            get { return 1; }
+        }
+    }
+
+    /// <summary>
     /// class to serialize byte arrays
     /// </summary>
     public class ByteArraySerializer : ASerializable<ByteArraySerializer, byte[]>
