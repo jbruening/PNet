@@ -177,10 +177,88 @@ namespace PNet
     }
 
     /// <summary>
+    /// serializer for a short
+    /// </summary>
+    public class ShortSerializer : ASerializable<ShortSerializer, short>
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public ShortSerializer(){}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        public ShortSerializer(short value)
+        {
+            Value = value;
+        }
+        public override void OnSerialize(NetOutgoingMessage message)
+        {
+            message.Write(Value);
+        }
+
+        public override void OnDeserialize(NetIncomingMessage message)
+        {
+            Value = message.ReadInt16();
+        }
+
+        public override int AllocSize
+        {
+            get { return 2; }
+        }
+    }
+
+    /// <summary>
+    /// serializer for a ushort
+    /// </summary>
+    public class UShortSerializer : ASerializable<UShortSerializer, ushort>
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public UShortSerializer(){}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        public UShortSerializer(ushort value)
+        {
+            Value = value;
+        }
+        public override void OnSerialize(NetOutgoingMessage message)
+        {
+            message.Write(Value);
+        }
+
+        public override void OnDeserialize(NetIncomingMessage message)
+        {
+            Value = message.ReadUInt16();
+        }
+
+        public override int AllocSize
+        {
+            get { return 2; }
+        }
+    }
+
+    /// <summary>
     /// class to serialize single bytes
     /// </summary>
     public class ByteSerializer : ASerializable<ByteSerializer, byte>
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public ByteSerializer(){}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        public ByteSerializer(byte value)
+        {
+            Value = value;
+        }
         public override void OnSerialize(NetOutgoingMessage message)
         {
             message.Write(Value);
@@ -202,6 +280,18 @@ namespace PNet
     /// </summary>
     public class BoolSerializer : ASerializable<BoolSerializer, bool>
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public BoolSerializer(){}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        public BoolSerializer(bool value)
+        {
+            Value = value;
+        }
         public override void OnSerialize(NetOutgoingMessage message)
         {
             message.Write(Value);
