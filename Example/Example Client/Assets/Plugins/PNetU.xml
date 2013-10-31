@@ -4,6 +4,353 @@
         <name>PNetU</name>
     </assembly>
     <members>
+        <member name="T:PNetU.NetworkView">
+            <summary>
+            network synchronization
+            </summary>
+        </member>
+        <member name="M:PNetU.NetworkView.RPC(System.Byte,UnityEngine.RPCMode,PNet.INetSerializable[])">
+            <summary>
+            Send an rpc
+            </summary>
+            <param name="rpcID"></param>
+            <param name="mode"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetU.NetworkView.RPCToOwner(System.Byte,PNet.INetSerializable[])">
+            <summary>
+            Send an rpc to the owner of this object
+            </summary>
+            <param name="rpcID"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetU.NetworkView.SetSerializationMethod(System.Action{Lidgren.Network.NetOutgoingMessage},System.Int32)">
+            <summary>
+            set the method to be used during stream serialization
+            </summary>
+            <param name="newMethod"></param>
+            <param name="defaultStreamSize"></param>
+        </member>
+        <member name="F:PNetU.NetworkView.OnDeserializeStream">
+            <summary>
+            subscribe to this in order to deserialize streaming data
+            </summary>
+        </member>
+        <member name="F:PNetU.NetworkView.SerializationTime">
+            <summary>
+            Time between each stream send serialization
+            </summary>
+        </member>
+        <member name="M:PNetU.NetworkView.SubscribeMarkedRPCsOnComponent(UnityEngine.MonoBehaviour)">
+            <summary>
+            Subscribe all the marked rpcs on the supplied component
+            </summary>
+            <param name="behaviour"></param>
+        </member>
+        <member name="M:PNetU.NetworkView.SubscribeToRPC(System.Byte,System.Action{Lidgren.Network.NetIncomingMessage},System.Boolean)">
+            <summary>
+            Subscribe to an rpc
+            </summary>
+            <param name="rpcID">id of the rpc</param>
+            <param name="rpcProcessor">action to process the rpc with</param>
+            <param name="overwriteExisting">overwrite the existing processor if one exists.</param>
+            <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
+        </member>
+        <member name="M:PNetU.NetworkView.UnsubscribeFromRPC(System.Byte)">
+            <summary>
+            Unsubscribe from an rpc
+            </summary>
+            <param name="rpcID"></param>
+        </member>
+        <member name="F:PNetU.NetworkView.DestroyGameObjectOnNetworkDestroy">
+            <summary>
+            Whether or not to destroy the gameobject this is attached to when destroying the networkview
+            </summary>
+        </member>
+        <member name="F:PNetU.NetworkView.viewID">
+            <summary>
+            identifier for the network view
+            </summary>
+        </member>
+        <member name="M:PNetU.NetworkView.Find(PNetC.NetworkViewId)">
+            <summary>
+            find a network view based on the given NetworkViewId
+            </summary>
+            <param name="viewID"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.NetworkView.Find(Lidgren.Network.NetIncomingMessage@,PNetU.NetworkView@)">
+            <summary>
+            find a networkview based on a networkviewid that was serialized into an rpc
+            </summary>
+            <param name="message">uses deserialize, so the read location does advance</param>
+            <param name="view"></param>
+            <returns></returns>
+        </member>
+        <member name="P:PNetU.NetworkView.defaultStreamSize">
+            <summary>
+            stream size. Helps prevent array resizing
+            </summary>
+        </member>
+        <member name="P:PNetU.NetworkView.StateSynchronization">
+            <summary>
+            method of serialization
+            </summary>
+        </member>
+        <member name="E:PNetU.NetworkView.OnRemove">
+            <summary>
+            Subscribe to this to know when an object is being destroyed by the server.
+            </summary>
+        </member>
+        <member name="E:PNetU.NetworkView.OnFinishedCreation">
+            <summary>
+            run once we've finished setting up the networkview variables
+            </summary>
+        </member>
+        <member name="P:PNetU.NetworkView.IsMine">
+            <summary>
+            If i'm the owner
+            </summary>
+        </member>
+        <member name="P:PNetU.NetworkView.OwnerId">
+            <summary>
+            ID of the owner. 0 is the server.
+            </summary>
+        </member>
+        <member name="T:PNetU.UnityDebugLogger">
+            <summary>
+            Logs to standard UnityEngine.Debug class
+            </summary>
+        </member>
+        <member name="T:NetworkedSceneObject">
+            <summary>
+            Objects that exist in a scene with pre-synchronized network id's
+            </summary>
+        </member>
+        <member name="F:NetworkedSceneObject.NetworkID">
+            <summary>
+            The scene/room Network ID of this item. Should unique per room
+            </summary>
+        </member>
+        <member name="M:NetworkedSceneObject.Awake">
+            <summary>
+            If you override, you need to run SetupPNetC, probably first.
+            </summary>
+        </member>
+        <member name="M:NetworkedSceneObject.SetupPNetC">
+            <summary>
+            Only do this if you override awake
+            </summary>
+        </member>
+        <member name="M:NetworkedSceneObject.SubscribeToRPC(System.Byte,System.Action{Lidgren.Network.NetIncomingMessage},System.Boolean)">
+            <summary>
+            Subscribe to an rpc
+            </summary>
+            <param name="rpcID">id of the rpc</param>
+            <param name="rpcProcessor">action to process the rpc with</param>
+            <param name="overwriteExisting">overwrite the existing processor if one exists.</param>
+            <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
+        </member>
+        <member name="M:NetworkedSceneObject.UnsubscribeFromRPC(System.Byte)">
+            <summary>
+            Unsubscribe from an rpc
+            </summary>
+            <param name="rpcID"></param>
+        </member>
+        <member name="M:NetworkedSceneObject.RPC(System.Byte,PNet.INetSerializable[])">
+            <summary>
+            Send an rpc to the server
+            </summary>
+            <param name="rpcID"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:NetworkedSceneObject.Serialize">
+            <summary>
+            serialize this into a string
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NetworkedSceneObject.SerializeObjectData">
+            <summary>
+            Get the data to serialize for this scene object
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:PNetU.Net">
+            <summary>
+            Networking class. Is basically a static class -> PNetC instance binding
+            </summary>
+        </member>
+        <member name="F:PNetU.Net.resourceCaching">
+            <summary>
+            resource caching for instantiation
+            </summary>
+        </member>
+        <member name="M:PNetU.Net.Connect(PNetC.ClientConfiguration)">
+            <summary>
+            Connect with the specified configuration
+            </summary>
+            <param name="configuration"></param>
+        </member>
+        <member name="M:PNetU.Net.Disconnect">
+            <summary>
+            Disconnect if connected
+            </summary>
+        </member>
+        <member name="M:PNetU.Net.RPC(System.Byte,PNet.INetSerializable[])">
+            <summary>
+            Send an rpc to the server
+            </summary>
+            <param name="rpcId"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetU.Net.FinishedRoomChange">
+            <summary>
+            Run this when the room changing has completed (tells the server you're actually ready to be in a room)
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.Peer">
+            <summary>
+            the PNetC.Net instance used by this static class
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnRoomChange">
+            <summary>
+            When the room is changing
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnDisconnectedFromServer">
+            <summary>
+            When disconnected from the server
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnConnectedToServer">
+            <summary>
+            When finished connecting to the server
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.WriteHailMessage">
+            <summary>
+            The function to use for writing the connect data (username/password/etc)
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.ProcessRPC">
+            <summary>
+            subscribe to this in order to receive static RPC's from the server. you need to manually process them.
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnDiscoveryResponse">
+            <summary>
+            When a discovery response is received
+            </summary>
+        </member>
+        <member name="E:PNetU.Net.OnFailedToConnect">
+            <summary>
+            When we've failed to connect
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.IsMessageQueueRunning">
+            <summary>
+            pause the processing of the network queue
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.LogLevel">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.Status">
+            <summary>
+            latest status
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.StatusReason">
+            <summary>
+            reason for the most latest status
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.PlayerId">
+            <summary>
+            The Network ID of this client
+            </summary>
+        </member>
+        <member name="P:PNetU.Net.Latency">
+            <summary>
+            last received latency value from the lidgren's calculations
+            </summary>
+        </member>
+        <member name="T:PNetU.UnityExtensions">
+            <summary>
+            Extensions for unity stuff
+            </summary>
+        </member>
+        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Quaternion,Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            Serialize the quaternion to the message
+            </summary>
+            <param name="quaternion"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Vector3,Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize the vector3 to the message
+            </summary>
+            <param name="vector3"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color)">
+            <summary>
+            Get the 3 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color)">
+            <summary>
+            Get the 4 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color32)">
+            <summary>
+            Get the 3 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color32)">
+            <summary>
+            Get the 4 bytes
+            </summary>
+            <param name="color"></param>
+            <returns></returns>
+        </member>
+        <member name="T:PNetU.UnityEngineHook">
+            <summary>
+            network hooking into the Update method of unity
+            </summary>
+        </member>
+        <member name="M:PNetU.UnityEngineHook.Update">
+            <summary>
+            Run every frame, as long as the script is enabled
+            </summary>
+        </member>
+        <member name="T:NetBehaviour">
+            <summary>
+            Simple class to override instead of monobehaviour, has some extra network functions
+            </summary>
+        </member>
+        <member name="M:NetBehaviour.OnFinishedCreating">
+            <summary>
+            Called once the network view has finished attaching and instantiating
+            </summary>
+        </member>
+        <member name="P:NetBehaviour.netView">
+            <summary>
+            Get the PNetU.NetworkView attached to the gameObject
+            </summary>
+        </member>
         <member name="T:PNetU.Vector3Serializer">
             <summary>
             Serializer for vectors
@@ -93,354 +440,6 @@
             <summary>
             16 bytes
             </summary>
-        </member>
-        <member name="T:PNetU.UnityExtensions">
-            <summary>
-            Extensions for unity stuff
-            </summary>
-        </member>
-        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Quaternion,Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            Serialize the quaternion to the message
-            </summary>
-            <param name="quaternion"></param>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNetU.UnityExtensions.Serialize(UnityEngine.Vector3,Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            serialize the vector3 to the message
-            </summary>
-            <param name="vector3"></param>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color)">
-            <summary>
-            Get the 3 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color)">
-            <summary>
-            Get the 4 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.RGBBytes(UnityEngine.Color32)">
-            <summary>
-            Get the 3 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.UnityExtensions.ARGBBytes(UnityEngine.Color32)">
-            <summary>
-            Get the 4 bytes
-            </summary>
-            <param name="color"></param>
-            <returns></returns>
-        </member>
-        <member name="T:PNetU.NetworkView">
-            <summary>
-            network synchronization
-            </summary>
-        </member>
-        <member name="M:PNetU.NetworkView.RPC(System.Byte,UnityEngine.RPCMode,PNet.INetSerializable[])">
-            <summary>
-            Send an rpc
-            </summary>
-            <param name="rpcID"></param>
-            <param name="mode"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetU.NetworkView.RPCToOwner(System.Byte,PNet.INetSerializable[])">
-            <summary>
-            Send an rpc to the owner of this object
-            </summary>
-            <param name="rpcID"></param>
-            <param name="args"></param>
-        </member>
-        <member name="F:PNetU.NetworkView.defaultStreamSize">
-            <summary>
-            stream size. Helps prevent array resizing
-            </summary>
-        </member>
-        <member name="M:PNetU.NetworkView.SetSerializationMethod(System.Action{Lidgren.Network.NetOutgoingMessage},System.Int32)">
-            <summary>
-            set the method to be used during stream serialization
-            </summary>
-            <param name="newMethod"></param>
-            <param name="defaultStreamSize"></param>
-        </member>
-        <member name="F:PNetU.NetworkView.OnDeserializeStream">
-            <summary>
-            subscribe to this in order to deserialize streaming data
-            </summary>
-        </member>
-        <member name="F:PNetU.NetworkView.SerializationTime">
-            <summary>
-            Time between each stream send serialization
-            </summary>
-        </member>
-        <member name="M:PNetU.NetworkView.SubscribeMarkedRPCsOnComponent(UnityEngine.MonoBehaviour)">
-            <summary>
-            Subscribe all the marked rpcs on the supplied component
-            </summary>
-            <param name="behaviour"></param>
-        </member>
-        <member name="M:PNetU.NetworkView.SubscribeToRPC(System.Byte,System.Action{Lidgren.Network.NetIncomingMessage},System.Boolean)">
-            <summary>
-            Subscribe to an rpc
-            </summary>
-            <param name="rpcID">id of the rpc</param>
-            <param name="rpcProcessor">action to process the rpc with</param>
-            <param name="overwriteExisting">overwrite the existing processor if one exists.</param>
-            <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
-        </member>
-        <member name="M:PNetU.NetworkView.UnsubscribeFromRPC(System.Byte)">
-            <summary>
-            Unsubscribe from an rpc
-            </summary>
-            <param name="rpcID"></param>
-        </member>
-        <member name="F:PNetU.NetworkView.DestroyGameObjectOnNetworkDestroy">
-            <summary>
-            Whether or not to destroy the gameobject this is attached to when destroying the networkview
-            </summary>
-        </member>
-        <member name="F:PNetU.NetworkView.viewID">
-            <summary>
-            identifier for the network view
-            </summary>
-        </member>
-        <member name="M:PNetU.NetworkView.Find(PNetC.NetworkViewId)">
-            <summary>
-            find a network view based on the given NetworkViewId
-            </summary>
-            <param name="viewID"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNetU.NetworkView.Find(Lidgren.Network.NetIncomingMessage@,PNetU.NetworkView@)">
-            <summary>
-            find a networkview based on a networkviewid that was serialized into an rpc
-            </summary>
-            <param name="message">uses deserialize, so the read location does advance</param>
-            <param name="view"></param>
-            <returns></returns>
-        </member>
-        <member name="P:PNetU.NetworkView.StateSynchronization">
-            <summary>
-            method of serialization
-            </summary>
-        </member>
-        <member name="E:PNetU.NetworkView.OnRemove">
-            <summary>
-            Subscribe to this to know when an object is being destroyed by the server.
-            </summary>
-        </member>
-        <member name="E:PNetU.NetworkView.OnFinishedCreation">
-            <summary>
-            run once we've finished setting up the networkview variables
-            </summary>
-        </member>
-        <member name="P:PNetU.NetworkView.IsMine">
-            <summary>
-            If i'm the owner
-            </summary>
-        </member>
-        <member name="P:PNetU.NetworkView.OwnerId">
-            <summary>
-            ID of the owner. 0 is the server.
-            </summary>
-        </member>
-        <member name="T:PNetU.UnityEngineHook">
-            <summary>
-            network hooking into the Update method of unity
-            </summary>
-        </member>
-        <member name="M:PNetU.UnityEngineHook.Update">
-            <summary>
-            Run every frame, as long as the script is enabled
-            </summary>
-        </member>
-        <member name="T:NetBehaviour">
-            <summary>
-            Simple class to override instead of monobehaviour, has some extra network functions
-            </summary>
-        </member>
-        <member name="M:NetBehaviour.OnFinishedCreating">
-            <summary>
-            Called once the network view has finished attaching and instantiating
-            </summary>
-        </member>
-        <member name="P:NetBehaviour.netView">
-            <summary>
-            Get the PNetU.NetworkView attached to the gameObject
-            </summary>
-        </member>
-        <member name="T:PNetU.UnityDebugLogger">
-            <summary>
-            Logs to standard UnityEngine.Debug class
-            </summary>
-        </member>
-        <member name="M:PNetU.UnityDebugLogger.Info(System.String,System.Object[])">
-            <summary>
-            informational message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetU.UnityDebugLogger.Warning(System.String,System.Object[])">
-            <summary>
-            warning message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetU.UnityDebugLogger.Error(System.String,System.Object[])">
-            <summary>
-            error message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="T:PNetU.Net">
-            <summary>
-            Networking class
-            </summary>
-        </member>
-        <member name="F:PNetU.Net.resourceCaching">
-            <summary>
-            resource caching for instantiation
-            </summary>
-        </member>
-        <member name="M:PNetU.Net.Connect(PNetC.ClientConfiguration)">
-            <summary>
-            Connect with the specified configuration
-            </summary>
-            <param name="configuration"></param>
-        </member>
-        <member name="M:PNetU.Net.Disconnect">
-            <summary>
-            Disconnect if connected
-            </summary>
-        </member>
-        <member name="M:PNetU.Net.RPC(System.Byte,PNet.INetSerializable[])">
-            <summary>
-            Send an rpc to the server
-            </summary>
-            <param name="rpcId"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetU.Net.FinishedRoomChange">
-            <summary>
-            Run this when the room changing has completed (tells the server you're actually ready to be in a room)
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.Peer">
-            <summary>
-            the PNetC.Net instance used by this static class
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnRoomChange">
-            <summary>
-            When the room is changing
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnDisconnectedFromServer">
-            <summary>
-            When disconnected from the server
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnConnectedToServer">
-            <summary>
-            When finished connecting to the server
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.WriteHailMessage">
-            <summary>
-            The function to use for writing the connect data (username/password/etc)
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.ProcessRPC">
-            <summary>
-            subscribe to this in order to receive static RPC's from the server. you need to manually process them.
-            </summary>
-        </member>
-        <member name="E:PNetU.Net.OnDiscoveryResponse">
-            <summary>
-            When a discovery response is received
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.IsMessageQueueRunning">
-            <summary>
-            pause the processing of the network queue
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.Status">
-            <summary>
-            latest status
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.StatusReason">
-            <summary>
-            reason for the most latest status
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.PlayerId">
-            <summary>
-            The Network ID of this client
-            </summary>
-        </member>
-        <member name="P:PNetU.Net.Latency">
-            <summary>
-            last received latency value from the lidgren's calculations
-            </summary>
-        </member>
-        <member name="T:NetworkedSceneObject">
-            <summary>
-            Objects that exist in a scene with pre-synchronized network id's
-            </summary>
-        </member>
-        <member name="F:NetworkedSceneObject.NetworkID">
-            <summary>
-            The scene/room Network ID of this item. Should unique per room
-            </summary>
-        </member>
-        <member name="M:NetworkedSceneObject.SubscribeToRPC(System.Byte,System.Action{Lidgren.Network.NetIncomingMessage},System.Boolean)">
-            <summary>
-            Subscribe to an rpc
-            </summary>
-            <param name="rpcID">id of the rpc</param>
-            <param name="rpcProcessor">action to process the rpc with</param>
-            <param name="overwriteExisting">overwrite the existing processor if one exists.</param>
-            <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
-        </member>
-        <member name="M:NetworkedSceneObject.UnsubscribeFromRPC(System.Byte)">
-            <summary>
-            Unsubscribe from an rpc
-            </summary>
-            <param name="rpcID"></param>
-        </member>
-        <member name="M:NetworkedSceneObject.RPC(System.Byte,PNet.INetSerializable[])">
-            <summary>
-            Send an rpc to the server
-            </summary>
-            <param name="rpcID"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:NetworkedSceneObject.Serialize">
-            <summary>
-            serialize this into a string
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:NetworkedSceneObject.SerializeObjectData">
-            <summary>
-            Get the data to serialize for this scene object
-            </summary>
-            <returns></returns>
         </member>
     </members>
 </doc>

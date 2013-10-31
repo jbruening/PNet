@@ -120,3 +120,4 @@ UpgradeLog*.XML
 /Example/Example Client/Example Client-csharp.sln
 *.DotSettings
 Local.testsettings
+Example/Example Client/Temp/

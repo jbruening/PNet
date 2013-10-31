@@ -1,3 +1,4 @@
+using System;
 using Lidgren.Network;
 using Debug = UnityEngine.Debug;
 using UnityEngine;
@@ -9,22 +10,30 @@ public class ExamplePNet : MonoBehaviour
     public string ip = "127.0.0.1";
     public int port = 14000;
 
-    private static readonly ExamplePNet Singleton = null;
+    private static ExamplePNet _singleton;
 
     void Awake()
     {
-        if (Singleton)
+        //singleton behaviour, to prevent multiple event subscriptions/connectings
+        if (_singleton)
         {
             Destroy(this);
             return;
         }
 
+        _singleton = this;
         DontDestroyOnLoad(this);
 
         Net.OnRoomChange += OnRoomChange;
+        Net.OnFailedToConnect += NetOnOnFailedToConnect;
         Net.OnDisconnectedFromServer += OnDisconnectedFromServer;
         Net.WriteHailMessage = WriteHailMessage;
         Net.ProcessRPC += ProcessRpc;
+    }
+
+    private void NetOnOnFailedToConnect(string s)
+    {
+        Debug.LogError("Failed to connect. " + s);
     }
 
     private void WriteHailMessage(NetOutgoingMessage netOutgoingMessage)
@@ -53,7 +62,7 @@ public class ExamplePNet : MonoBehaviour
     {
         Debug.Log("server switched us to room " + s);
 
-        //TODO: technically, this should be called after we actually switch scenes, but because we're not changing scenes, we'll call it right now
+        //TODO: this should probably be called after we actually switch scenes, but because we're not changing scenes, we'll call it right now
         Net.FinishedRoomChange();
     }
 
@@ -70,6 +79,7 @@ public class ExamplePNet : MonoBehaviour
 	void Start ()
 	{
 	    var config = new PNetC.ClientConfiguration(ip, port);
+        Debug.Log("connecting to " + ip + ":" + port);
 	    Net.Connect(config);
 	}
 }

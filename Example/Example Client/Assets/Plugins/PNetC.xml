@@ -4,61 +4,24 @@
         <name>PNetC</name>
     </assembly>
     <members>
-        <member name="T:PNetC.NetworkViewId">
-            <summary>
-            Identifier for a NetworkView
-            </summary>
-        </member>
-        <member name="M:PNetC.NetworkViewId.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            write to the message
-            </summary>
-            <param name="message">message to write to</param>
-        </member>
-        <member name="M:PNetC.NetworkViewId.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
-            <summary>
-            doesn't do anything for integrity
-            </summary>
-            <param name="message">message to read from</param>
-        </member>
-        <member name="P:PNetC.NetworkViewId.IsMine">
-            <summary>
-            Whether or not I own the object
-            </summary>
-        </member>
-        <member name="P:PNetC.NetworkViewId.guid">
-            <summary>
-            network id
-            </summary>
-        </member>
-        <member name="P:PNetC.NetworkViewId.Zero">
-            <summary>
-            Network ID of nothing
-            </summary>
-        </member>
-        <member name="P:PNetC.NetworkViewId.AllocSize">
-            <summary>
-            size when serializing to stream
-            </summary>
-        </member>
         <member name="T:PNetC.Net">
             <summary>
             Networking class
             </summary>
         </member>
-        <member name="F:PNetC.Net.LogLevel">
+        <member name="F:PNetC.Net.WriteHailMessage">
             <summary>
-            logging level. UNUSED
+            The function to use for writing the connect data (username/password/etc)
+            </summary>
+        </member>
+        <member name="M:PNetC.Net.CleanupEvents">
+            <summary>
+            This will cause all the events to clear out. This is mainly for Unity to use. You probably shouldn't use it.
             </summary>
         </member>
         <member name="F:PNetC.Net.IsMessageQueueRunning">
             <summary>
             pause the processing of the network queue
-            </summary>
-        </member>
-        <member name="F:PNetC.Net.WriteHailMessage">
-            <summary>
-            The function to use for writing the connect data (username/password/etc)
             </summary>
         </member>
         <member name="M:PNetC.Net.#ctor(PNetC.IEngineHook)">
@@ -167,180 +130,6 @@
             last received latency value from the lidgren's calculations
             </summary>
         </member>
-        <member name="T:PNetC.Debug">
-            <summary>
-            Debug
-            </summary>
-        </member>
-        <member name="F:PNetC.Debug.logger">
-            <summary>
-            Reference to the actual log receiver
-            </summary>
-        </member>
-        <member name="M:PNetC.Debug.Log(System.String,System.Object[])">
-            <summary>
-            Info message
-            </summary>
-            <param name="value"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetC.Debug.LogError(System.String,System.Object[])">
-            <summary>
-            Error message
-            </summary>
-            <param name="value"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetC.Debug.LogWarning(System.String,System.Object[])">
-            <summary>
-            Warning message
-            </summary>
-            <param name="value"></param>
-            <param name="args"></param>
-        </member>
-        <member name="T:PNetC.NullLogger">
-            <summary>
-            Logger, but logs to nowhere
-            </summary>
-        </member>
-        <member name="T:PNetC.ILogger">
-            <summary>
-            Interface for logging information
-            </summary>
-        </member>
-        <member name="M:PNetC.ILogger.Info(System.String,System.Object[])">
-            <summary>
-            informational message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetC.ILogger.Warning(System.String,System.Object[])">
-            <summary>
-            warning message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetC.ILogger.Error(System.String,System.Object[])">
-            <summary>
-            error message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetC.NullLogger.Info(System.String,System.Object[])">
-            <summary>
-            informational message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetC.NullLogger.Warning(System.String,System.Object[])">
-            <summary>
-            warning message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="M:PNetC.NullLogger.Error(System.String,System.Object[])">
-            <summary>
-            error message
-            </summary>
-            <param name="info"></param>
-            <param name="args"></param>
-        </member>
-        <member name="T:PNetC.ClientConfiguration">
-            <summary>
-            Configuration for the client
-            </summary>
-        </member>
-        <member name="F:PNetC.ClientConfiguration.Ip">
-            <summary>
-            the ip or domain name of the server
-            </summary>
-        </member>
-        <member name="F:PNetC.ClientConfiguration.Port">
-            <summary>
-            the port to connect to on the server
-            </summary>
-        </member>
-        <member name="F:PNetC.ClientConfiguration.AppIdentifier">
-            <summary>
-            this should be unique per game, and should be the same on the client and server
-            </summary>
-        </member>
-        <member name="F:PNetC.ClientConfiguration.BindPort">
-            <summary>
-            the port to bind the game to. 0 will cause it to bind to the first available port
-            </summary>
-        </member>
-        <member name="F:PNetC.ClientConfiguration.DeleteNetworkInstantiatesOnRoomChange">
-            <summary>
-            if true, delete network instantiates on changing rooms (after OnRoomChange is run)
-            </summary>
-        </member>
-        <member name="F:PNetC.ClientConfiguration.DeleteNetworkInstantiatesOnDisconnect">
-            <summary>
-            if true, delete network instantiates on disconnecting from a server
-            </summary>
-        </member>
-        <member name="M:PNetC.ClientConfiguration.#ctor(System.String,System.Int32,System.Int32,System.String)">
-            <summary>
-            
-            </summary>
-            <param name="port"> </param>
-            <param name="bindPort"></param>
-            <param name="appIdentifier"></param>
-            <param name="ip"> </param>
-        </member>
-        <member name="T:PNetC.IEngineHook">
-            <summary>
-            network hooking into the Update method of unity. Don't put in the scene.
-            </summary>
-        </member>
-        <member name="M:PNetC.IEngineHook.Instantiate(System.String,PNetC.NetworkView,PNetC.Vector3,PNetC.Quaternion)">
-            <summary>
-            Create an object, and return it. Said object should be a container to hold the NetworkView
-            </summary>
-            <param name="path"></param>
-            <param name="newView"></param>
-            <param name="location"></param>
-            <param name="rotation"></param>
-            <returns></returns>
-        </member>
-        <member name="T:PNetC.SynchronizedField`1">
-            <summary>
-            Creates a field which updates it's value on the network when changed
-            </summary>
-            <typeparam name="T">Must be serializable</typeparam>
-        </member>
-        <member name="F:PNetC.SynchronizedField`1.OnValueUpdated">
-            <summary>
-            Gets called when a new value is received over the network
-            </summary>
-        </member>
-        <member name="M:PNetC.SynchronizedField`1.Update">
-            <summary>
-            Use to trigger update on reference types
-            </summary>
-        </member>
-        <member name="M:PNetC.SynchronizedField`1.#ctor(PNetC.NetworkView)">
-            <summary>
-            Initializes the synchronized field
-            </summary>
-            <param name="netView">The NetworkView this value belongs to</param>
-        </member>
-        <member name="M:PNetC.SynchronizedField`1.Finalize">
-            <summary>
-            Destructor
-            </summary>
-        </member>
-        <member name="P:PNetC.SynchronizedField`1.Value">
-            <summary>
-            Use this to access or set the actual value
-            </summary>
-        </member>
         <member name="T:PNetC.NetworkLogLevel">
             <summary>
             Not used yet
@@ -411,96 +200,196 @@
             The scene/room Network ID of this item. Should be unique per object
             </summary>
         </member>
-        <member name="T:PNetC.NetworkView">
+        <member name="T:PNetC.IEngineHook">
             <summary>
-            network synchronization
+            network hooking into the Update method of unity. Don't put in the scene.
             </summary>
         </member>
-        <member name="M:PNetC.NetworkView.RPC(System.Byte,PNetC.RPCMode,PNet.INetSerializable[])">
+        <member name="M:PNetC.IEngineHook.Instantiate(System.String,PNetC.NetworkView,PNetC.Vector3,PNetC.Quaternion)">
             <summary>
-            Send an rpc
+            Create an object, and return it. Said object should be a container to hold the NetworkView
             </summary>
-            <param name="rpcID"></param>
-            <param name="mode"></param>
+            <param name="path"></param>
+            <param name="newView"></param>
+            <param name="location"></param>
+            <param name="rotation"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PNetC.IEngineHook.AddNetworkView(PNetC.NetworkView,PNetC.NetworkView,System.String)">
+            <summary>
+            Add a NetworkView to the same container as an already existing NetworkView
+            </summary>
+            <param name="view"></param>
+            <param name="newView"></param>
+            <param name="customFunction"></param>
+            <returns></returns>
+        </member>
+        <member name="E:PNetC.IEngineHook.EngineUpdate">
+            <summary>
+            This should be run every frame by whatever engine you're using PNetC in.
+            </summary>
+        </member>
+        <member name="T:PNetC.NetworkViewId">
+            <summary>
+            Identifier for a NetworkView
+            </summary>
+        </member>
+        <member name="M:PNetC.NetworkViewId.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            write to the message
+            </summary>
+            <param name="message">message to write to</param>
+        </member>
+        <member name="M:PNetC.NetworkViewId.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            doesn't do anything for integrity
+            </summary>
+            <param name="message">message to read from</param>
+        </member>
+        <member name="P:PNetC.NetworkViewId.IsMine">
+            <summary>
+            Whether or not I own the object
+            </summary>
+        </member>
+        <member name="P:PNetC.NetworkViewId.guid">
+            <summary>
+            network id
+            </summary>
+        </member>
+        <member name="P:PNetC.NetworkViewId.Zero">
+            <summary>
+            Network ID of nothing
+            </summary>
+        </member>
+        <member name="P:PNetC.NetworkViewId.AllocSize">
+            <summary>
+            size when serializing to stream
+            </summary>
+        </member>
+        <member name="T:PNetC.NetworkStateSynchronization">
+            <summary>
+            way to serialize the changes to the network view
+            </summary>
+        </member>
+        <member name="F:PNetC.NetworkStateSynchronization.Off">
+            <summary>
+            do not run serialization
+            </summary>
+        </member>
+        <member name="F:PNetC.NetworkStateSynchronization.ReliableDeltaCompressed">
+            <summary>
+            only if there are changes in the stream, reliably
+            </summary>
+        </member>
+        <member name="F:PNetC.NetworkStateSynchronization.Unreliable">
+            <summary>
+            always, but unreliably
+            </summary>
+        </member>
+        <member name="T:PNetC.NullLogger">
+            <summary>
+            Logger, but logs to nowhere
+            </summary>
+        </member>
+        <member name="T:PNetC.ILogger">
+            <summary>
+            Interface for logging information
+            </summary>
+        </member>
+        <member name="M:PNetC.ILogger.Full(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            message only done during full debugging
+            </summary>
+            <param name="sender"></param>
+            <param name="info"></param>
             <param name="args"></param>
         </member>
-        <member name="M:PNetC.NetworkView.RPCToOwner(System.Byte,PNet.INetSerializable[])">
+        <member name="M:PNetC.ILogger.Info(PNetC.Net,System.String,System.Object[])">
             <summary>
-            Send an rpc to the owner of this object
+            informational message
             </summary>
-            <param name="rpcID"></param>
+            <param name="sender"></param>
+            <param name="info"></param>
             <param name="args"></param>
         </member>
-        <member name="F:PNetC.NetworkView.DefaultStreamSize">
+        <member name="M:PNetC.ILogger.Warning(PNetC.Net,System.String,System.Object[])">
             <summary>
-            stream size. Helps prevent array resizing
+            warning message
+            </summary>
+            <param name="sender"></param>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.ILogger.Error(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            error message
+            </summary>
+            <param name="sender"></param>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.NullLogger.Full(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            message only done during full debugging
+            </summary>
+            <param name="sender"></param>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.NullLogger.Info(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            informational message
+            </summary>
+            <param name="sender"></param>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.NullLogger.Warning(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            warning message
+            </summary>
+            <param name="sender"></param>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.NullLogger.Error(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            error message
+            </summary>
+            <param name="sender"></param>
+            <param name="info"></param>
+            <param name="args"></param>
+        </member>
+        <member name="T:PNetC.SynchronizedField`1">
+            <summary>
+            Creates a field which updates it's value on the network when changed
+            </summary>
+            <typeparam name="T">Must be serializable</typeparam>
+        </member>
+        <member name="F:PNetC.SynchronizedField`1.OnValueUpdated">
+            <summary>
+            Gets called when a new value is received over the network
             </summary>
         </member>
-        <member name="M:PNetC.NetworkView.SetSerializationMethod(System.Action{Lidgren.Network.NetOutgoingMessage},System.Int32)">
+        <member name="M:PNetC.SynchronizedField`1.Update">
             <summary>
-            set the method to be used during stream serialization
-            </summary>
-            <param name="newMethod"></param>
-            <param name="defaultStreamSize"></param>
-        </member>
-        <member name="F:PNetC.NetworkView.StateSynchronization">
-            <summary>
-            method of serialization
+            Use to trigger update on reference types
             </summary>
         </member>
-        <member name="M:PNetC.NetworkView.DoStreamSerialize">
+        <member name="M:PNetC.SynchronizedField`1.#ctor(PNetC.NetworkView)">
             <summary>
-            Needs to be called by the implementing engine
+            Initializes the synchronized field
+            </summary>
+            <param name="netView">The NetworkView this value belongs to</param>
+        </member>
+        <member name="M:PNetC.SynchronizedField`1.Finalize">
+            <summary>
+            Destructor
             </summary>
         </member>
-        <member name="M:PNetC.NetworkView.SubscribeToRPC(System.Byte,System.Action{Lidgren.Network.NetIncomingMessage},System.Boolean)">
+        <member name="P:PNetC.SynchronizedField`1.Value">
             <summary>
-            Subscribe to an rpc
-            </summary>
-            <param name="rpcID">id of the rpc</param>
-            <param name="rpcProcessor">action to process the rpc with</param>
-            <param name="overwriteExisting">overwrite the existing processor if one exists.</param>
-            <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
-        </member>
-        <member name="M:PNetC.NetworkView.UnsubscribeFromRPC(System.Byte)">
-            <summary>
-            Unsubscribe from an rpc
-            </summary>
-            <param name="rpcID"></param>
-        </member>
-        <member name="F:PNetC.NetworkView.ViewID">
-            <summary>
-            identifier for the network view
-            </summary>
-        </member>
-        <member name="P:PNetC.NetworkView.Container">
-            <summary>
-            The object that this networkview is attached to.
-            </summary>
-        </member>
-        <member name="E:PNetC.NetworkView.OnDeserializeStream">
-            <summary>
-            subscribe to this in order to deserialize streaming data
-            </summary>
-        </member>
-        <member name="E:PNetC.NetworkView.OnRemove">
-            <summary>
-            Subscribe to this to know when an object is being destroyed by the server.
-            </summary>
-        </member>
-        <member name="E:PNetC.NetworkView.OnFinishedCreation">
-            <summary>
-            run once we've finished setting up the networkview variables
-            </summary>
-        </member>
-        <member name="P:PNetC.NetworkView.IsMine">
-            <summary>
-            If i'm the owner
-            </summary>
-        </member>
-        <member name="P:PNetC.NetworkView.OwnerId">
-            <summary>
-            ID of the owner. 0 is the server.
+            Use this to access or set the actual value
             </summary>
         </member>
         <member name="T:PNetC.NetworkViewManager">
@@ -527,6 +416,311 @@
             <param name="message">uses deserialize, so the read location does advance</param>
             <param name="view"></param>
             <returns></returns>
+        </member>
+        <member name="T:PNetC.Debug">
+            <summary>
+            Debug
+            </summary>
+        </member>
+        <member name="F:PNetC.Debug.Logger">
+            <summary>
+            Reference to the actual log receiver
+            </summary>
+        </member>
+        <member name="M:PNetC.Debug.Log(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            Only done when you want full logging
+            </summary>
+            <param name="sender"></param>
+            <param name="value"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.Debug.LogInfo(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            Info message. Semi important.
+            </summary>
+            <param name="sender"></param>
+            <param name="value"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.Debug.LogError(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            Error message
+            </summary>
+            <param name="sender"></param>
+            <param name="value"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.Debug.LogWarning(PNetC.Net,System.String,System.Object[])">
+            <summary>
+            Warning message
+            </summary>
+            <param name="sender"></param>
+            <param name="value"></param>
+            <param name="args"></param>
+        </member>
+        <member name="T:PNetC.Quaternion">
+            <summary>
+            rotation struct
+            </summary>
+        </member>
+        <member name="F:PNetC.Quaternion.X">
+            <summary>
+            delta of the 4d rotation
+            </summary>
+        </member>
+        <member name="F:PNetC.Quaternion.Y">
+            <summary>
+            delta of the 4d rotation
+            </summary>
+        </member>
+        <member name="F:PNetC.Quaternion.Z">
+            <summary>
+            delta of the 4d rotation
+            </summary>
+        </member>
+        <member name="F:PNetC.Quaternion.W">
+            <summary>
+            delta of the 4d rotation
+            </summary>
+        </member>
+        <member name="M:PNetC.Quaternion.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            write to the message
+            </summary>
+            <param name="message">message to write to</param>
+        </member>
+        <member name="M:PNetC.Quaternion.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            read the message
+            </summary>
+            <param name="message">message to read from</param>
+        </member>
+        <member name="M:PNetC.Quaternion.ToString">
+            <summary>
+            invariant culture
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:PNetC.Quaternion.AllocSize">
+            <summary>
+            size in bytes
+            </summary>
+        </member>
+        <member name="T:PNetC.Vector3">
+            <summary>
+            position/direction struct
+            </summary>
+        </member>
+        <member name="F:PNetC.Vector3.X">
+            <summary>
+            delta of the three axis
+            </summary>
+        </member>
+        <member name="F:PNetC.Vector3.Y">
+            <summary>
+            delta of the three axis
+            </summary>
+        </member>
+        <member name="F:PNetC.Vector3.Z">
+            <summary>
+            delta of the three axis
+            </summary>
+        </member>
+        <member name="M:PNetC.Vector3.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            write to the message
+            </summary>
+            <param name="message">message to write to</param>
+        </member>
+        <member name="M:PNetC.Vector3.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            read the message
+            </summary>
+            <param name="message">message to read from</param>
+        </member>
+        <member name="M:PNetC.Vector3.ToString">
+            <summary>
+            invariant culture
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:PNetC.Vector3.AllocSize">
+            <summary>
+            size in bytes
+            </summary>
+        </member>
+        <member name="T:PNetC.RPCMode">
+            <summary>
+            how to send the rpc
+            </summary>
+        </member>
+        <member name="F:PNetC.RPCMode.Server">
+            <summary>
+            to the server
+            </summary>
+        </member>
+        <member name="F:PNetC.RPCMode.Others">
+            <summary>
+            to everyone but me
+            </summary>
+        </member>
+        <member name="F:PNetC.RPCMode.All">
+            <summary>
+            to everyone
+            </summary>
+        </member>
+        <member name="F:PNetC.RPCMode.OthersBuffered">
+            <summary>
+            to everyone but me, buffered to new players after the initial call
+            </summary>
+        </member>
+        <member name="F:PNetC.RPCMode.AllBuffered">
+            <summary>
+            to everyone, buffered to new players after the initial call
+            </summary>
+        </member>
+        <member name="T:PNetC.NetworkView">
+            <summary>
+            network synchronization
+            </summary>
+        </member>
+        <member name="F:PNetC.NetworkView.ViewID">
+            <summary>
+            identifier for the network view
+            </summary>
+        </member>
+        <member name="F:PNetC.NetworkView.DefaultStreamSize">
+            <summary>
+            stream size. Helps prevent array resizing
+            </summary>
+        </member>
+        <member name="F:PNetC.NetworkView.StateSynchronization">
+            <summary>
+            method of serialization
+            </summary>
+        </member>
+        <member name="M:PNetC.NetworkView.RPC(System.Byte,PNetC.RPCMode,PNet.INetSerializable[])">
+            <summary>
+            Send an rpc
+            </summary>
+            <param name="rpcID"></param>
+            <param name="mode"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.NetworkView.RPCToOwner(System.Byte,PNet.INetSerializable[])">
+            <summary>
+            Send an rpc to the owner of this object
+            </summary>
+            <param name="rpcID"></param>
+            <param name="args"></param>
+        </member>
+        <member name="M:PNetC.NetworkView.SetSerializationMethod(System.Action{Lidgren.Network.NetOutgoingMessage},System.Int32)">
+            <summary>
+            set the method to be used during stream serialization
+            </summary>
+            <param name="newMethod"></param>
+            <param name="defaultStreamSize"></param>
+        </member>
+        <member name="M:PNetC.NetworkView.DoStreamSerialize">
+            <summary>
+            Needs to be called by the implementing engine
+            </summary>
+        </member>
+        <member name="M:PNetC.NetworkView.SubscribeToRPC(System.Byte,System.Action{Lidgren.Network.NetIncomingMessage},System.Boolean)">
+            <summary>
+            Subscribe to an rpc
+            </summary>
+            <param name="rpcID">id of the rpc</param>
+            <param name="rpcProcessor">action to process the rpc with</param>
+            <param name="overwriteExisting">overwrite the existing processor if one exists.</param>
+            <returns>Whether or not the rpc was subscribed to. Will return false if an existing rpc was attempted to be subscribed to, and overwriteexisting was set to false</returns>
+        </member>
+        <member name="M:PNetC.NetworkView.UnsubscribeFromRPC(System.Byte)">
+            <summary>
+            Unsubscribe from an rpc
+            </summary>
+            <param name="rpcID"></param>
+        </member>
+        <member name="M:PNetC.NetworkView.ToString">
+            <summary>
+            viewid, ownerid, container
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:PNetC.NetworkView.Container">
+            <summary>
+            The object that this networkview is attached to.
+            </summary>
+        </member>
+        <member name="P:PNetC.NetworkView.IsMine">
+            <summary>
+            If i'm the owner
+            </summary>
+        </member>
+        <member name="P:PNetC.NetworkView.OwnerId">
+            <summary>
+            ID of the owner. 0 is the server.
+            </summary>
+        </member>
+        <member name="E:PNetC.NetworkView.OnDeserializeStream">
+            <summary>
+            subscribe to this in order to deserialize streaming data
+            </summary>
+        </member>
+        <member name="E:PNetC.NetworkView.OnRemove">
+            <summary>
+            Subscribe to this to know when an object is being destroyed by the server.
+            </summary>
+        </member>
+        <member name="E:PNetC.NetworkView.OnFinishedCreation">
+            <summary>
+            run once we've finished setting up the networkview variables
+            </summary>
+        </member>
+        <member name="T:PNetC.ClientConfiguration">
+            <summary>
+            Configuration for the client
+            </summary>
+        </member>
+        <member name="F:PNetC.ClientConfiguration.Ip">
+            <summary>
+            the ip or domain name of the server
+            </summary>
+        </member>
+        <member name="F:PNetC.ClientConfiguration.Port">
+            <summary>
+            the port to connect to on the server
+            </summary>
+        </member>
+        <member name="F:PNetC.ClientConfiguration.AppIdentifier">
+            <summary>
+            this should be unique per game, and should be the same on the client and server
+            </summary>
+        </member>
+        <member name="F:PNetC.ClientConfiguration.BindPort">
+            <summary>
+            the port to bind the game to. 0 will cause it to bind to the first available port
+            </summary>
+        </member>
+        <member name="F:PNetC.ClientConfiguration.DeleteNetworkInstantiatesOnRoomChange">
+            <summary>
+            if true, delete network instantiates on changing rooms (after OnRoomChange is run)
+            </summary>
+        </member>
+        <member name="F:PNetC.ClientConfiguration.DeleteNetworkInstantiatesOnDisconnect">
+            <summary>
+            if true, delete network instantiates on disconnecting from a server
+            </summary>
+        </member>
+        <member name="M:PNetC.ClientConfiguration.#ctor(System.String,System.Int32,System.Int32,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="port"> </param>
+            <param name="bindPort"></param>
+            <param name="appIdentifier"></param>
+            <param name="ip"> </param>
         </member>
     </members>
 </doc>

@@ -10,10 +10,9 @@ namespace ExampleServer
     {
         static void Main(string[] args)
         {
-
-            PNetServer.InitializeServer(
-                Properties.Settings.Default.MaximumPlayers, 
-                Properties.Settings.Default.ListenPort);
+            var config = new ServerConfiguration(Properties.Settings.Default.MaximumPlayers,
+                                                 Properties.Settings.Default.ListenPort);
+            PNetServer.InitializeServer(config);
 
             PNetServer.ApproveConnection = ApproveConnection;
             PNetServer.OnPlayerConnected += OnPlayerConnected;
@@ -33,6 +32,7 @@ namespace ExampleServer
             _serverThread = new Thread(() => PNetServer.Start(Properties.Settings.Default.FrameTime));
             _serverThread.Start();
 
+            Console.WriteLine("Server is running");
             //let the console sit open, waiting for a quit
             //this will throw errors if the program isn't running as a console app, like on unix as a background process
             //recommend including Mono.Unix.Native, and separately handling unix signals if this is running on unix.
@@ -45,10 +45,25 @@ namespace ExampleServer
                 if (input == "quit")
                     break;
 
+                //if you wanted, you could also process other commands here to pass to the server/rooms.
+
                 Thread.Sleep(100);
             }
-            //we're exiting. close the server thread.
-            if (_serverThread.IsAlive) _serverThread.Abort();
+            
+            //shut down lidgren
+            PNetServer.Disconnect();
+            //shut down server. Will actually cause the server thread to finish running.
+            PNetServer.Shutdown();
+            //and give plenty of time for the server thread to close nicely
+            Thread.Sleep(50);
+            
+            //we're exiting. make sure the server thread is closed
+            if (_serverThread.IsAlive)
+            {
+                Console.WriteLine("Should not have had to abort thread. This could be a bug\nPress any key to continue shutting down.");
+                Console.ReadKey();
+                _serverThread.Abort();
+            }
         }
 
         //This is called AFTER a connection has been approved
@@ -69,11 +84,13 @@ namespace ExampleServer
         private static void Update()
         {
             //Approve connections that are waiting
-            foreach (var client in _clientsWaitingToBeApproved)
-            {
-                client.Approve();
-                //TODO: maybe deny clients if their login credentials weren't valid?
-            }
+            //remove them from the list after approving
+            _clientsWaitingToBeApproved.RemoveAll(c =>
+                {
+                    c.Approve();
+                    return true;
+                    //TODO: maybe deny clients if their login credentials weren't valid?
+                });
         }
 
         //This is called very first when a client connects to the server, before OnPlayerConnected

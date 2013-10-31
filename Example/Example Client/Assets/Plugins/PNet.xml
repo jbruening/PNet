@@ -4,6 +4,120 @@
         <name>PNet</name>
     </assembly>
     <members>
+        <member name="T:PNet.DictionarySerializer`2">
+            <summary>
+            THIS ONLY WORKS WITH BUILT IN TYPES AND STRING. USER DEFINED STRUCTS WILL BREAK
+            </summary>
+            <typeparam name="T"></typeparam>
+            <typeparam name="U"></typeparam>
+        </member>
+        <member name="T:PNet.INetSerializable">
+            <summary>
+            Interface used for objects that can read and write from network streams
+            </summary>
+        </member>
+        <member name="M:PNet.INetSerializable.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            write to the message
+            </summary>
+            <param name="message">message to write to</param>
+        </member>
+        <member name="M:PNet.INetSerializable.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            read the message
+            </summary>
+            <param name="message">message to read from</param>
+        </member>
+        <member name="P:PNet.INetSerializable.AllocSize">
+            <summary>
+            size to allocate for bytes in the message.  if you're under, it'll result in array resizing.
+            </summary>
+        </member>
+        <member name="F:PNet.DictionarySerializer`2.dictionary">
+            <summary>
+            serialized value
+            </summary>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.#ctor(System.Collections.Generic.Dictionary{`0,`1})">
+            <summary>
+            create a new serializer from the dictionary
+            </summary>
+            <param name="dictionary"></param>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.#ctor">
+            <summary>
+            create a new serializer with no values
+            </summary>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            deserialize from the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.DictionarySerializer`2.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            serialize to the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.DictionarySerializer`2.AllocSize">
+            <summary>
+            size in bytes
+            </summary>
+        </member>
+        <member name="T:PNet.ObjectArraySerializer`1">
+            <summary>
+            A serializer for an array of INetSerializable
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="F:PNet.ObjectArraySerializer`1.items">
+            <summary>
+            items
+            </summary>
+        </member>
+        <member name="F:PNet.ObjectArraySerializer`1.PreserveIndex">
+            <summary>
+            Whether or not the index is preserved with an array with nulls
+            Takes an additional bit per index
+            only makes sense for nullable types
+            </summary>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor">
+            <summary>
+            Create a new serializer
+            </summary>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor(`0[])">
+            <summary>
+            Create a new serializer from the specified array
+            </summary>
+            <param name="newItems"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.#ctor(System.Collections.Generic.List{`0})">
+            <summary>
+            Create a new serializer from the specified list
+            </summary>
+            <param name="newItems"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+            <summary>
+            Deserialize the array from the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:PNet.ObjectArraySerializer`1.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+            <summary>
+            Serialize the array to the message
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="P:PNet.ObjectArraySerializer`1.AllocSize">
+            <summary>
+            Size when writing to the stream
+            </summary>
+        </member>
         <member name="T:PNet.RPCUtils">
             <summary>
             Helpers for RPCs
@@ -103,47 +217,61 @@
             <param name="rpcId"></param>
             <param name="defaultContinueForwarding">what the default value for continue forwarding is set to</param>
         </member>
-        <member name="T:PNet.INetSerializable">
+        <member name="T:PNet.LidgrenExtensions">
             <summary>
-            Interface used for objects that can read and write from network streams
+            class for extensions to lidgren
             </summary>
         </member>
-        <member name="M:PNet.INetSerializable.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
+        <member name="M:PNet.LidgrenExtensions.Read``1(Lidgren.Network.NetIncomingMessage)">
             <summary>
-            write to the message
+            ONLY WORKS FOR VALUE TYPES AND STRING. NO ENUMS.
             </summary>
-            <param name="message">message to write to</param>
+            <typeparam name="T"></typeparam>
+            <param name="msg"></param>
+            <returns></returns>
         </member>
-        <member name="M:PNet.INetSerializable.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
+        <member name="M:PNet.LidgrenExtensions.ReadINet``1(Lidgren.Network.NetIncomingMessage)">
             <summary>
-            read the message
+            Read an INetSerializable out of the NetIncomingMessage
             </summary>
-            <param name="message">message to read from</param>
+            <typeparam name="T"></typeparam>
+            <param name="msg"></param>
+            <returns></returns>
         </member>
-        <member name="P:PNet.INetSerializable.AllocSize">
+        <member name="M:PNet.LidgrenExtensions.Write``1(Lidgren.Network.NetOutgoingMessage,``0)">
             <summary>
-            size to allocate for bytes in the message.  if you're under, it'll result in array resizing.
+            ONLY WORKS FOR VALUE TYPES AND STRING. NO ENUMS.
             </summary>
+            <typeparam name="T"></typeparam>
+            <param name="msg"></param>
+            <param name="val"></param>
+        </member>
+        <member name="T:PNet.ASerializable`2">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="F:PNet.ASerializable`2.Value">
+            <summary>
+            value of the class
+            </summary>
+        </member>
+        <member name="F:PNet.ASerializable`2.Instance">
+            <summary>
+            a static, single instance of the class. Can be used to reduce garbage collection
+            </summary>
+        </member>
+        <member name="M:PNet.ASerializable`2.Update(`1)">
+            <summary>
+            update Value with the newValue
+            </summary>
+            <param name="newValue"></param>
+            <returns>this</returns>
         </member>
         <member name="T:PNet.StringSerializer">
             <summary>
             serializer for strings
-            </summary>
-        </member>
-        <member name="F:PNet.StringSerializer.str">
-            <summary>
-            string to be serialized
-            </summary>
-        </member>
-        <member name="M:PNet.StringSerializer.#ctor(System.String)">
-            <summary>
-            create a new serializer for the specified string
-            </summary>
-            <param name="str"></param>
-        </member>
-        <member name="M:PNet.StringSerializer.#ctor">
-            <summary>
-            Create a new serializer, with nothing for the value
             </summary>
         </member>
         <member name="M:PNet.StringSerializer.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
@@ -168,22 +296,6 @@
             serializer for integers
             </summary>
         </member>
-        <member name="F:PNet.IntSerializer.inte">
-            <summary>
-            integer to be serialized
-            </summary>
-        </member>
-        <member name="M:PNet.IntSerializer.#ctor(System.Int32)">
-            <summary>
-            create a new serializer for the specified integer
-            </summary>
-            <param name="inte"></param>
-        </member>
-        <member name="M:PNet.IntSerializer.#ctor">
-            <summary>
-            Create a new serializer with a value of 0
-            </summary>
-        </member>
         <member name="M:PNet.IntSerializer.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
             <summary>
             serialize
@@ -206,16 +318,11 @@
             serializer for floats
             </summary>
         </member>
-        <member name="F:PNet.FloatSerializer.floa">
-            <summary>
-            float used for serialization
-            </summary>
-        </member>
         <member name="M:PNet.FloatSerializer.#ctor(System.Single)">
             <summary>
             create a new serializer for a float
             </summary>
-            <param name="inte"></param>
+            <param name="value"></param>
         </member>
         <member name="M:PNet.FloatSerializer.#ctor">
             <summary>
@@ -239,14 +346,73 @@
             get the size of this serializable
             </summary>
         </member>
+        <member name="T:PNet.ShortSerializer">
+            <summary>
+            serializer for a short
+            </summary>
+        </member>
+        <member name="M:PNet.ShortSerializer.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:PNet.ShortSerializer.#ctor(System.Int16)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="T:PNet.UShortSerializer">
+            <summary>
+            serializer for a ushort
+            </summary>
+        </member>
+        <member name="M:PNet.UShortSerializer.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:PNet.UShortSerializer.#ctor(System.UInt16)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="T:PNet.ByteSerializer">
+            <summary>
+            class to serialize single bytes
+            </summary>
+        </member>
+        <member name="M:PNet.ByteSerializer.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:PNet.ByteSerializer.#ctor(System.Byte)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="T:PNet.BoolSerializer">
+            <summary>
+            class to serialize single booleans
+            </summary>
+        </member>
+        <member name="M:PNet.BoolSerializer.#ctor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:PNet.BoolSerializer.#ctor(System.Boolean)">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
         <member name="T:PNet.ByteArraySerializer">
             <summary>
             class to serialize byte arrays
-            </summary>
-        </member>
-        <member name="F:PNet.ByteArraySerializer.Bytes">
-            <summary>
-            the data
             </summary>
         </member>
         <member name="M:PNet.ByteArraySerializer.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
@@ -261,51 +427,8 @@
             </summary>
             <param name="message"></param>
         </member>
-        <member name="T:PNet.ObjectArraySerializer`1">
-            <summary>
-            A serializer for an array of INetSerializable
-            WARNING: DOES NOT SAVE INDICES IF THERE ARE NULL VALUES
-            </summary>
-            <typeparam name="T"></typeparam>
-        </member>
-        <member name="F:PNet.ObjectArraySerializer`1.items">
-            <summary>
-            items
-            </summary>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.#ctor">
-            <summary>
-            Create a new serializer
-            </summary>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.#ctor(`0[])">
-            <summary>
-            Create a new serializer from the specified array
-            </summary>
-            <param name="newItems"></param>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.#ctor(System.Collections.Generic.List{`0})">
-            <summary>
-            Create a new serializer from the specified list
-            </summary>
-            <param name="newItems"></param>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
-            <summary>
-            Deserialize the array from the message
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNet.ObjectArraySerializer`1.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            Serialize the array to the message
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="P:PNet.ObjectArraySerializer`1.AllocSize">
-            <summary>
-            Size when writing to the stream
-            </summary>
+        <member name="P:PNet.ByteArraySerializer.AllocSize">
+            <summary />
         </member>
         <member name="T:PNet.IntDictionary`1">
             <summary>
@@ -334,6 +457,17 @@
             <param name="add"></param>
             <returns></returns>
         </member>
+        <member name="M:PNet.IntDictionary`1.Remove(System.Int32)">
+            <summary>
+            remove the item at the specified key
+            </summary>
+            <param name="key"></param>
+        </member>
+        <member name="M:PNet.IntDictionary`1.Clear">
+            <summary>
+            clear out all keys/values
+            </summary>
+        </member>
         <member name="M:PNet.IntDictionary`1.Add(System.Int32,`0)">
             <summary>
             NOT RECOMMENDED.
@@ -341,12 +475,6 @@
             </summary>
             <param name="key"></param>
             <param name="add"></param>
-        </member>
-        <member name="M:PNet.IntDictionary`1.Remove(System.Int32)">
-            <summary>
-            remove the item at the specified key
-            </summary>
-            <param name="key"></param>
         </member>
         <member name="M:PNet.IntDictionary`1.HasValue(System.Int32)">
             <summary>
@@ -421,46 +549,6 @@
             current item in the enumeration
             </summary>
         </member>
-        <member name="T:PNet.DictionarySerializer`2">
-            <summary>
-            THIS ONLY WORKS WITH BUILT IN TYPES AND STRING. USER DEFINED STRUCTS WILL BREAK
-            </summary>
-            <typeparam name="T"></typeparam>
-            <typeparam name="U"></typeparam>
-        </member>
-        <member name="F:PNet.DictionarySerializer`2.dictionary">
-            <summary>
-            serialized value
-            </summary>
-        </member>
-        <member name="M:PNet.DictionarySerializer`2.#ctor(System.Collections.Generic.Dictionary{`0,`1})">
-            <summary>
-            create a new serializer from the dictionary
-            </summary>
-            <param name="dictionary"></param>
-        </member>
-        <member name="M:PNet.DictionarySerializer`2.#ctor">
-            <summary>
-            create a new serializer with no values
-            </summary>
-        </member>
-        <member name="M:PNet.DictionarySerializer`2.OnDeserialize(Lidgren.Network.NetIncomingMessage)">
-            <summary>
-            deserialize from the message
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="M:PNet.DictionarySerializer`2.OnSerialize(Lidgren.Network.NetOutgoingMessage)">
-            <summary>
-            serialize to the message
-            </summary>
-            <param name="message"></param>
-        </member>
-        <member name="P:PNet.DictionarySerializer`2.AllocSize">
-            <summary>
-            size in bytes
-            </summary>
-        </member>
         <member name="T:PNet.Channels">
             <summary>
             Channels for various rpcs
@@ -505,35 +593,6 @@
             <summary>
             channel for synchronized fields
             </summary>
-        </member>
-        <member name="T:PNet.LidgrenExtensions">
-            <summary>
-            class for extensions to lidgren
-            </summary>
-        </member>
-        <member name="M:PNet.LidgrenExtensions.Read``1(Lidgren.Network.NetIncomingMessage)">
-            <summary>
-            ONLY WORKS FOR VALUE TYPES AND STRING. NO ENUMS.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="msg"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNet.LidgrenExtensions.ReadINet``1(Lidgren.Network.NetIncomingMessage)">
-            <summary>
-            Read an INetSerializable out of the NetIncomingMessage
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="msg"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PNet.LidgrenExtensions.Write``1(Lidgren.Network.NetOutgoingMessage,``0)">
-            <summary>
-            ONLY WORKS FOR VALUE TYPES AND STRING. NO ENUMS.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="msg"></param>
-            <param name="val"></param>
         </member>
     </members>
 </doc>
