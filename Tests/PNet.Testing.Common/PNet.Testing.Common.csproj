@@ -45,6 +45,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ASerializableTest.cs" />
     <Compile Include="IntDictionaryTest.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="SerializableTest.cs" />

@@ -44,10 +44,16 @@ namespace PNet
 
         public abstract int AllocSize { get; }
 
+        [ThreadStatic]
+        private static TSerialize _instance;
+
         /// <summary>
-        /// a static, single instance of the class. Can be used to reduce garbage collection
+        /// A static instance of the class. Thread safe.
         /// </summary>
-        public static readonly TSerialize Instance = new TSerialize();
+        public static TSerialize Instance
+        {
+            get { return _instance ?? (_instance = new TSerialize()); }
+        }
         /// <summary>
         /// update Value with the newValue
         /// </summary>
