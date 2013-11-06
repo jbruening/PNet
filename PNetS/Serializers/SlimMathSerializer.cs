@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SlimMath;
+﻿using SlimMath;
 using PNet;
 
 namespace PNetS
@@ -10,20 +6,15 @@ namespace PNetS
     /// <summary>
     /// Serializer for vectors
     /// </summary>
-    public class Vector3Serializer : INetSerializable
+    public class Vector3Serializer : ASerializable<Vector3Serializer, Vector3>
     {
-        /// <summary>
-        /// vector3 used for serialization/deserialization
-        /// </summary>
-        public Vector3 vector3;
-
         /// <summary>
         /// create a new serializer from the specified vector3
         /// </summary>
         /// <param name="vector3"></param>
         public Vector3Serializer(Vector3 vector3)
         {
-            this.vector3 = vector3;
+            Value = vector3;
         }
 
         /// <summary>
@@ -31,34 +22,34 @@ namespace PNetS
         /// </summary>
         public Vector3Serializer()
         {
-            this.vector3 = Vector3.Zero;
+            Value = Vector3.Zero;
         }
         /// <summary>
         /// serialize to the stream
         /// </summary>
         /// <param name="message"></param>
-        public void OnSerialize(Lidgren.Network.NetOutgoingMessage message)
+        public override void OnSerialize(Lidgren.Network.NetOutgoingMessage message)
         {
-            message.Write(vector3.X);
-            message.Write(vector3.Y);
-            message.Write(vector3.Z);
+            message.Write(Value.X);
+            message.Write(Value.Y);
+            message.Write(Value.Z);
         }
 
         /// <summary>
         /// deserialize from the stream
         /// </summary>
         /// <param name="message"></param>
-        public void OnDeserialize(Lidgren.Network.NetIncomingMessage message)
+        public override void OnDeserialize(Lidgren.Network.NetIncomingMessage message)
         {
-            vector3.X = message.ReadFloat();
-            vector3.Y = message.ReadFloat();
-            vector3.Z = message.ReadFloat();
+            Value.X = message.ReadFloat();
+            Value.Y = message.ReadFloat();
+            Value.Z = message.ReadFloat();
         }
 
         /// <summary>
         /// size of vector3 in bytes
         /// </summary>
-        public int AllocSize
+        public override int AllocSize
         {
             get { return 12; }
         }
@@ -67,20 +58,15 @@ namespace PNetS
     /// <summary>
     /// Serializer for quaternions
     /// </summary>
-    public class QuaternionSerializer : INetSerializable
+    public class QuaternionSerializer : ASerializable<QuaternionSerializer, Quaternion>
     {
-        /// <summary>
-        /// quaternion used for serialization/deserialization
-        /// </summary>
-        public Quaternion quaternion;
-
         /// <summary>
         /// create a new serializer from the specified quaternion
         /// </summary>
         /// <param name="quaternion"></param>
         public QuaternionSerializer(Quaternion quaternion)
         {
-            this.quaternion = quaternion;
+            Value = quaternion;
         }
 
         /// <summary>
@@ -88,37 +74,37 @@ namespace PNetS
         /// </summary>
         public QuaternionSerializer()
         {
-            this.quaternion = Quaternion.Identity;
+            Value = Quaternion.Identity;
         }
 
         /// <summary>
         /// serialize to the stream
         /// </summary>
         /// <param name="message"></param>
-        public void OnSerialize(Lidgren.Network.NetOutgoingMessage message)
+        public override void OnSerialize(Lidgren.Network.NetOutgoingMessage message)
         {
-            message.Write(quaternion.X);
-            message.Write(quaternion.Y);
-            message.Write(quaternion.Z);
-            message.Write(quaternion.W);
+            message.Write(Value.X);
+            message.Write(Value.Y);
+            message.Write(Value.Z);
+            message.Write(Value.W);
         }
 
         /// <summary>
         /// deserialize from the stream
         /// </summary>
         /// <param name="message"></param>
-        public void OnDeserialize(Lidgren.Network.NetIncomingMessage message)
+        public override void OnDeserialize(Lidgren.Network.NetIncomingMessage message)
         {
-            quaternion.X = message.ReadFloat();
-            quaternion.Y = message.ReadFloat();
-            quaternion.Z = message.ReadFloat();
-            quaternion.W = message.ReadFloat();
+            Value.X = message.ReadFloat();
+            Value.Y = message.ReadFloat();
+            Value.Z = message.ReadFloat();
+            Value.W = message.ReadFloat();
         }
 
         /// <summary>
         /// size of quaternion in bytes
         /// </summary>
-        public int AllocSize
+        public override int AllocSize
         {
             get { return 16; }
         }
