@@ -183,6 +183,32 @@ namespace PNet
     }
 
     /// <summary>
+    /// serializer for a double
+    /// </summary>
+    public class DoubleSerializer : ASerializable<DoubleSerializer, double>
+    {
+        public DoubleSerializer(){}
+        public DoubleSerializer(double value)
+        {
+            Value = value;
+        }
+        public override void OnSerialize(NetOutgoingMessage message)
+        {
+            message.Write(Value);
+        }
+
+        public override void OnDeserialize(NetIncomingMessage message)
+        {
+            Value = message.ReadDouble();
+        }
+
+        public override int AllocSize
+        {
+            get { return sizeof(double); }
+        }
+    }
+
+    /// <summary>
     /// serializer for a short
     /// </summary>
     public class ShortSerializer : ASerializable<ShortSerializer, short>

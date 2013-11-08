@@ -51,9 +51,9 @@ namespace PNetS
         /// </summary>
         public static bool isMessageQueueRunning = true;
         /// <summary>
-        /// Current time. NOT USED CURRENTLY
+        /// Current network time. Can be used with NetMessage.Read/Write time
         /// </summary>
-        public static double time { get; internal set; }
+        public static double Time { get { return GameState.NetFrameTime; } }
 
         internal static NetServer peer;
         /// <summary>

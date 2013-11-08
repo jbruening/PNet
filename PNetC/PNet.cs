@@ -88,9 +88,9 @@ namespace PNetC
         /// </summary>
         public bool IsMessageQueueRunning = true;
         /// <summary>
-        /// Not currently set
+        /// Network time of this frame
         /// </summary>
-        public double Time { get; internal set; }
+        public double Time { get; private set; }
 
         internal NetClient Peer;
         /// <summary>
@@ -337,6 +337,7 @@ namespace PNetC
         void Update()
         {
             if (!IsMessageQueueRunning) return;
+            Time = NetTime.Now;
             if (Peer == null) return; //in case something is running update before we've even tried to connect
             var messages = new List<NetIncomingMessage>();
             int counter = Peer.ReadMessages(messages);

@@ -132,6 +132,12 @@ namespace PNetU
         public static float Latency { get { return Peer.Latency; } }
 
         /// <summary>
+        /// Network time of this frame, or last, depending on script order execution
+        /// to make sure its this frame, set the UnityEngineHook to execute first
+        /// </summary>
+        public static double Time { get { return Peer.Time; } }
+
+        /// <summary>
         /// Connect with the specified configuration
         /// </summary>
         /// <param name="configuration"></param>

@@ -120,6 +120,7 @@ namespace PNetS
         {
             PreviousFrameTime = TimeSinceStartup;
             TimeSinceStartup = Watch.Elapsed.TotalSeconds;
+            NetFrameTime = Lidgren.Network.NetTime.Now;
 
             Action[] invokes;
             lock (InvokeLocker)
@@ -285,5 +286,6 @@ namespace PNetS
 
         internal static double PreviousFrameTime { get; private set; }
         internal static double TimeSinceStartup { get; private set; }
+        internal static double NetFrameTime { get; private set; }
     }
 }
