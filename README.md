@@ -9,8 +9,8 @@ Directions
 ----------
 This library uses Lidgren(client/server) and SlimMath(server), with some patches to Lidgren to work with Unity. An SVN patch file is included, as well as svn repo addresses. You will need to check out both of these repos, as well as patch Lidgren. Instructions are included in an additional text file.
 
-The PNet.dll, PNetU.dll, and Lidgren.Network.dll should be copied to a Plugins folder in unity. PNet, PNetS, SlimMath, and Lidgren.Network should be referenced in the server.
-
+The PNet.dll, PNetC.dll, PNetU.dll, and Lidgren.Network.dll should be copied to a Plugins folder in unity. PNet, PNetS, SlimMath, and Lidgren.Network should be referenced in the server.
+When writing for Unity, reference the PNetU namespace, as it is Unity glue code to PnetC.
 
 Notes
 -----
