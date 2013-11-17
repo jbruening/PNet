@@ -1,3 +1,174 @@
+Index: BoundingFrustum.cs
+===================================================================
+--- BoundingFrustum.cs	(revision 47)
++++ BoundingFrustum.cs	(working copy)
+@@ -33,14 +33,43 @@
+     [Serializable]
+     public class BoundingFrustum
+     {
+-        Plane near;
+-        Plane far;
+-        Plane top;
+-        Plane bottom;
+-        Plane left;
+-        Plane right;
++        /// <summary>
++        /// 
++        /// </summary>
++        public Plane Near;
++        /// <summary>
++        /// 
++        /// </summary>
++        public Plane Far;
++        /// <summary>
++        /// 
++        /// </summary>
++        public Plane Top;
++        /// <summary>
++        /// 
++        /// </summary>
++        public Plane Bottom;
++        /// <summary>
++        /// 
++        /// </summary>
++        public Plane Left;
++        /// <summary>
++        /// 
++        /// </summary>
++        public Plane Right;
+ 
+-        Matrix matrix;
++        Matrix _matrix;
++        /// <summary>
++        /// the matrix that represents the planes. Setting it will update the planes
++        /// </summary>
++        public Matrix Matrix
++        {
++            get { return _matrix; }
++            set
++            {
++                SetMatrix(ref value);
++            }
++        }
+         Gjk gjk = new Gjk();
+ 
+         /// <summary>
+@@ -58,43 +87,77 @@
+         /// <param name="value">The <see cref="SlimMath.Matrix"/> to extract the planes from.</param>
+         public void SetMatrix(ref Matrix value)
+         {
+-            this.matrix = value;
++            this._matrix = value;
+ 
+             //Near
+-            near.Normal.X = value.M13;
+-            near.Normal.Y = value.M23;
+-            near.Normal.Z = value.M33;
+-            near.D = value.M43;
++            Near.Normal.X = value.M13;
++            Near.Normal.Y = value.M23;
++            Near.Normal.Z = value.M33;
++            Near.D = value.M43;
+ 
+             //Far
+-            far.Normal.X = value.M14 - value.M13;
+-            far.Normal.Y = value.M24 - value.M23;
+-            far.Normal.Z = value.M34 - value.M33;
+-            far.D = value.M44 - value.M43;
++            Far.Normal.X = value.M14 - value.M13;
++            Far.Normal.Y = value.M24 - value.M23;
++            Far.Normal.Z = value.M34 - value.M33;
++            Far.D = value.M44 - value.M43;
+ 
+             //Top
+-            top.Normal.X = value.M14 - value.M12;
+-            top.Normal.Y = value.M24 - value.M22;
+-            top.Normal.Z = value.M34 - value.M32;
+-            top.D = value.M44 - value.M42;
++            Top.Normal.X = value.M14 - value.M12;
++            Top.Normal.Y = value.M24 - value.M22;
++            Top.Normal.Z = value.M34 - value.M32;
++            Top.D = value.M44 - value.M42;
+ 
+             //Bottom
+-            bottom.Normal.X = value.M14 + value.M12;
+-            bottom.Normal.Y = value.M24 + value.M22;
+-            bottom.Normal.Z = value.M34 + value.M32;
+-            bottom.D = value.M44 + value.M42;
++            Bottom.Normal.X = value.M14 + value.M12;
++            Bottom.Normal.Y = value.M24 + value.M22;
++            Bottom.Normal.Z = value.M34 + value.M32;
++            Bottom.D = value.M44 + value.M42;
+ 
+             //Left
+-            left.Normal.X = value.M14 + value.M11;
+-            left.Normal.Y = value.M24 + value.M21;
+-            left.Normal.Z = value.M34 + value.M31;
+-            left.D = value.M44 + value.M41;
++            Left.Normal.X = value.M14 + value.M11;
++            Left.Normal.Y = value.M24 + value.M21;
++            Left.Normal.Z = value.M34 + value.M31;
++            Left.D = value.M44 + value.M41;
+ 
+             //Right
+-            right.Normal.X = value.M14 - value.M11;
+-            right.Normal.Y = value.M24 - value.M21;
+-            right.Normal.Z = value.M34 - value.M31;
+-            right.D = value.M44 - value.M41;
++            Right.Normal.X = value.M14 - value.M11;
++            Right.Normal.Y = value.M24 - value.M21;
++            Right.Normal.Z = value.M34 - value.M31;
++            Right.D = value.M44 - value.M41;
+         }
++
++        /// <summary>
++        /// Causes Matrix to be updated with any changes to the Planes
++        /// </summary>
++        public void UpdateMatrix()
++        {
++            var matrix = new Matrix();
++
++            //Near
++            matrix.M13 = Near.Normal.X;
++            matrix.M23 = Near.Normal.Z;
++            matrix.M33 = Near.Normal.Z;
++            matrix.M43 = Near.D;
++
++            //Far
++            matrix.M14 = matrix.M13 + Far.Normal.X;
++            matrix.M24 = matrix.M23 + Far.Normal.Y;
++            matrix.M34 = matrix.M33 + Far.Normal.Z;
++            matrix.M44 = matrix.M43 + Far.D;
++
++            //Top
++            matrix.M12 = matrix.M14 - Top.Normal.X;
++            matrix.M22 = matrix.M24 - Top.Normal.Y;
++            matrix.M32 = matrix.M34 - Top.Normal.Z;
++            matrix.M42 = matrix.M44 - Top.D;
++
++            //Left
++            matrix.M11 = Left.Normal.X - matrix.M14;
++            matrix.M21 = Left.Normal.Y - matrix.M24;
++            matrix.M31 = Left.Normal.Z - matrix.M34;
++            matrix.M41 = Left.D - matrix.M44;
++
++            _matrix = matrix;
++        }
+     }
+ }
+Index: BoundingSphere.cs
+===================================================================
+--- BoundingSphere.cs	(revision 47)
++++ BoundingSphere.cs	(working copy)
+@@ -45,7 +45,7 @@
+         public float Radius;
+ 
+         /// <summary>
+-        /// Initializes a new instance of the <see cref="SlimMath.BoundingBox"/> struct.
++        /// Initializes a new instance of the <see cref="SlimMath.BoundingSphere"/> struct.
+         /// </summary>
+         /// <param name="center">The center of the sphere.</param>
+         /// <param name="radius">The radius of the sphere.</param>
 Index: Color3.cs
 ===================================================================
 --- Color3.cs	(revision 47)
