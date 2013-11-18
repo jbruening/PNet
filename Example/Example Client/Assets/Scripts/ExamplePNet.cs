@@ -42,7 +42,7 @@ public class ExamplePNet : MonoBehaviour
         //The data written here is what is in the ApproveConnection delegate on the server
     }
 
-    //This is run whenever a room has a Room or server RPC is run
+    //This is run whenever a room or server RPC is received
     private void ProcessRpc(byte b, NetIncomingMessage msg)
     {
         Debug.Log("Room rpc " + b + " received");

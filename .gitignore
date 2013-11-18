@@ -121,3 +121,4 @@ UpgradeLog*.XML
 *.DotSettings
 Local.testsettings
 Example/Example Client/Temp/
+Example/Example Client/Build/

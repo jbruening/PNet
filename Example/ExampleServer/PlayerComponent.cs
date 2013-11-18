@@ -89,17 +89,29 @@ namespace ExampleServer
 
         private void Serialize(NetOutgoingMessage msg)
         {
-            //TODO: serialize data into the stream
+            //serialize data into the stream
+            //this is only run if the netView.StateSynchronization is not set to Off
+            //TODO: implement smoothing/lag compensation
+            Vector3Serializer.Instance.Value = gameObject.Position;
+            Vector3Serializer.Instance.OnSerialize(msg);
         }
 
         private void OnDeserializeStream(NetIncomingMessage netIncomingMessage, Player player)
         {
-            //TODO: deserialize data from the stream
-
+            //deserialize data from the stream
+            //this is run if the client serializes data.
+            //TODO: optionally, ignore data if the StateSynchronization is Off
             if (player != netView.owner)
             {
                 //Uh oh! someone is serializing data into something they don't own. 
                 //Either you coded it so that non-owners can serialize, or someone is trying to cheat.
+                //ignore the value
+            }
+            else
+            {
+                //TODO: implement smoothing/lag compensation
+                Vector3Serializer.Instance.OnDeserialize(netIncomingMessage);
+                gameObject.Position = Vector3Serializer.Instance.Value;
             }
         }
     }

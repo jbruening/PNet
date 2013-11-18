@@ -1,6 +1,7 @@
 using System;
 using Lidgren.Network;
 using PNet;
+using PNetU;
 using UnityEngine;
 
 public class NetPlayer : NetBehaviour
@@ -25,11 +26,15 @@ public class NetPlayer : NetBehaviour
             
             //The object is mine, so let's stream things to the server
             netView.SetSerializationMethod(SerializeStream);
+            //turn serialization on
             netView.StateSynchronization = NetworkStateSynchronization.Unreliable;
-            netView.OnDeserializeStream += OnDeserializeStream;
+            //but do not subscribe to deserialization, as we want to ignore stuff for ourselves
         }
         else
         {
+            //subscribe to the stream from the server for objects owned by others.
+            netView.OnDeserializeStream += OnDeserializeStream;
+
             //Anything in this array shouldn't be enabled, so disable them
             foreach (var comp in _behavioursToDisableIfNotMine)
             {
@@ -42,14 +47,22 @@ public class NetPlayer : NetBehaviour
         }
     }
 
+    private readonly Vector3Serializer _serializer = new Vector3Serializer();
+
     private void OnDeserializeStream(NetIncomingMessage netIncomingMessage)
     {
-        //TODO: deserialize from stream. Will probably be position of the object
+        //deserialize position from the stream
+        //TODO: implement smoothing/lag compensation
+        _serializer.OnDeserialize(netIncomingMessage);
+        transform.position = _serializer.vector3;
     }
 
     private void SerializeStream(NetOutgoingMessage netOutgoingMessage)
     {
-        //TODO: serialize data into the stream. Probably something like position or input or something.
+        //send our position to the server
+        //this should only be happening on an object that is ours
+        _serializer.vector3 = transform.position;
+        _serializer.OnSerialize(netOutgoingMessage);
     }
 
     //TODO: use a shared library with client and server with const byte fields
