@@ -29,10 +29,6 @@ namespace PNetS
         List<bool> phases = new List<bool>();
         
         /// <summary>
-        /// use Name
-        /// </summary>
-        [Obsolete("Use Name", true)] public string name;
-        /// <summary>
         /// name of this room
         /// </summary>
         public string Name { get; set; }

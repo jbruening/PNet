@@ -126,6 +126,8 @@ namespace PNetU
                 Debug.Log("Attached extra networkview " + newView.ViewID.guid, uview.gameObject);
             }
 
+            uview.gameObject.SendMessage(customFunction, unewView, SendMessageOptions.DontRequireReceiver);
+
             return unewView;
         }
     }

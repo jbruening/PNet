@@ -13,41 +13,69 @@ namespace PNetS
     {
         internal void Update()
         {
-            foreach (var c in components)
+            for (var i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.update != null)
-                    try { c.update(); }
-                    catch (Exception e) { Debug.LogError(e.ToString()); }
+                    try
+                    {
+                        c.update();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
         }
 
         internal void LateUpdate()
         {
-            foreach (var c in components)
+            for (var i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.lateUpdate != null)
-                    try { c.lateUpdate(); }
-                    catch (Exception e) { Debug.LogError(e.ToString()); }
+                    try
+                    {
+                        c.lateUpdate();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
         }
 
         internal void OnPlayerConnected(Player player)
         {
-            foreach (var c in components)
+            for (int i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.onPlayerConnected != null)
-                    try { c.onPlayerConnected(player); }
-                    catch (Exception e) { Debug.LogError(e.ToString()); }
+                    try
+                    {
+                        c.onPlayerConnected(player);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
         }
 
         internal void OnPlayerDisconnected(Player player)
         {
-            foreach (var c in components)
+            for (int i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.onPlayerDisconnected != null)
-                    try { c.onPlayerDisconnected(player); }
-                    catch (Exception e) { Debug.LogError(e.ToString()); }
+                    try
+                    {
+                        c.onPlayerDisconnected(player);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
             if (player == Owner)
                 Owner = null;
@@ -55,51 +83,86 @@ namespace PNetS
 
         internal void OnPlayerLeftRoom(Player player)
         {
-            foreach(var c in components)
+            for (int i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.onPlayerLeftRoom != null)
-                    try { c.onPlayerLeftRoom(player); }
-                    catch(Exception e){Debug.LogError(e.ToString());}
+                    try
+                    {
+                        c.onPlayerLeftRoom(player);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
         }
 
         internal void OnPlayerEnteredRoom(Player player)
         {
-            foreach (var c in components)
+            for (int i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.onPlayerEnteredRoom != null)
-                    try { c.onPlayerEnteredRoom(player); }
-                    catch (Exception e) { Debug.LogError(e.ToString()); }
+                    try
+                    {
+                        c.onPlayerEnteredRoom(player);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
         }
 
         internal void OnComponentAdded(Component component)
         {
-            foreach (var c in components)
+            for (int i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.onComponentAdded != null)
-                    try { c.onComponentAdded(component); }
-                    catch (Exception e) { Debug.LogError(e.ToString()); }
+                    try
+                    {
+                        c.onComponentAdded(component);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
         }
 
         internal void OnFinishedInstantiate(Player player)
         {
-            foreach (var c in components)
+            for (int i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.onFinishedInstantiate != null)
-                    try { c.onFinishedInstantiate(player); }
-                    catch (Exception e) { Debug.LogError(e.ToString()); }
+                    try
+                    {
+                        c.onFinishedInstantiate(player);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
         }
 
         internal void OnDestroy()
         {
-            foreach (var c in components)
+            for (int i = 0; i < components.Count; i++)
             {
+                var c = components[i];
                 if (c.onDestroy != null)
-                    try { c.onDestroy(); }
-                    catch (Exception e) { Debug.LogError(e.ToString()); }
+                    try
+                    {
+                        c.onDestroy();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.ToString());
+                    }
             }
         }
     }
