@@ -75,8 +75,9 @@ public abstract class NetworkedSceneObject : MonoBehaviour
     /// <returns></returns>
     public string Serialize()
     {
+        var serObj = new PNetC.NetworkedSceneObject(NetworkID);
         var sb = new StringBuilder();
-        sb.AppendLine(_sceneObject.Serialize());
+        sb.Append(serObj.Serialize());
         sb.Append("type:").Append(this.GetType().Name).AppendLine(";");
         sb.Append("data:").Append(SerializeObjectData()).AppendLine(";");
         sb.Append("pos:").Append(transform.position.ToString()).AppendLine(";");

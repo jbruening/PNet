@@ -37,6 +37,15 @@ namespace PNetC
             _net = net;
             SceneObjects[_networkID] = this;
         }
+
+        /// <summary>
+        /// only used for serialization if you really need to. Does not actually make it accessible to the network
+        /// </summary>
+        /// <param name="networkID"></param>
+        public NetworkedSceneObject(int networkID)
+        {
+            _networkID = networkID;
+        }
         
         /// <summary>
         /// Should be called by implementing engine upon a scene change, if relevent
@@ -142,7 +151,7 @@ namespace PNetC
         {
             var sb = new StringBuilder();
             sb.AppendLine("-NetworkedSceneObject-");
-            sb.Append("id:").Append(NetworkID).AppendLine(";");
+            sb.Append("id: ").Append(NetworkID).AppendLine(";");
 
             return sb.ToString();
         }
