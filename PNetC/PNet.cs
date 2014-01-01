@@ -264,11 +264,14 @@ namespace PNetC
             else if (utilId == RPCUtils.Remove)
             {
                 var viewId = msg.ReadUInt16();
+                byte reasonCode;
+                if (!msg.ReadByte(out reasonCode))
+                    reasonCode = 0;
 
                 NetworkView find;
                 if (NetworkViewManager.Find(viewId, out find))
                 {
-                    find.DoOnRemove();
+                    find.DoOnRemove(reasonCode);
                 }
             }
             else if (utilId == RPCUtils.ChangeRoom)

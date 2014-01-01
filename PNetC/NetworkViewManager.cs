@@ -70,7 +70,7 @@ namespace PNetC
                 if (_allViews.TryGetValue(i, out view))
                 {
                     if (view != null)
-                        view.DoOnRemove();
+                        view.DoOnRemove(0);
                 }
             }
         }

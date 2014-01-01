@@ -282,11 +282,11 @@ namespace PNetU
         /// <summary>
         /// Subscribe to this to know when an object is being destroyed by the server.
         /// </summary>
-        public event Action OnRemove = delegate { };
+        public event Action<byte> OnRemove;
         /// <summary>
         /// run once we've finished setting up the networkview variables
         /// </summary>
-        public event Action OnFinishedCreation = delegate { };
+        public event Action OnFinishedCreation;
 
         /// <summary>
         /// Whether or not to destroy the gameobject this is attached to when destroying the networkview
@@ -323,7 +323,7 @@ namespace PNetU
             OnFinishedCreation = null;
         }
 
-        internal void DoOnRemove()
+        internal void DoOnRemove(byte reasonCode)
         {
             if (DestroyGameObjectOnNetworkDestroy)
             {
@@ -342,7 +342,7 @@ namespace PNetU
             
             try
             {
-                OnRemove();
+                OnRemove(reasonCode);
             }
             catch (Exception e)
             {

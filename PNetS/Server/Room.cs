@@ -187,12 +187,13 @@ namespace PNetS
         /// Destroy the specified view over the network
         /// </summary>
         /// <param name="view"></param>
-        public void NetworkDestroy(NetworkView view)
+        /// <param name="reasonCode">specify a reason to be destroying this networkview. Received on client</param>
+        public void NetworkDestroy(NetworkView view, byte reasonCode = 0)
         {
-            GameState.DestroyDelays += () => { DoNetworkDestroy(view); };
+            GameState.DestroyDelays += () => DoNetworkDestroy(view, reasonCode);
         }
 
-        void DoNetworkDestroy(NetworkView view)
+        void DoNetworkDestroy(NetworkView view, byte reasonCode)
         {
             m_Actors.Remove(view);
 
@@ -202,20 +203,25 @@ namespace PNetS
             var msg = PNetServer.peer.CreateMessage(3);
             msg.Write(RPCUtils.Remove);
             msg.Write(view.viewID.guid);
+            msg.Write(reasonCode);
 
             NetworkView.RemoveView(view);
 
             //send a destruction message to everyone, just in case.
-            var connections = players.Select(p => p.connection).ToList();
+            var connections = new List<NetConnection>(players.Count);
+            for (int i = 0; i < players.Count; i++)
+                connections.Add(players[i].connection);
             if (connections.Count == 0) return;
             PNetServer.peer.SendMessage(msg, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
         internal void SendMessage(NetOutgoingMessage message)
         {
-            var toSendConnections = players.Select(p => p.connection).ToList();
-            if (toSendConnections.Count == 0) return;
-            PNetServer.peer.SendMessage(message, toSendConnections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+            var connections = new List<NetConnection>(players.Count);
+            for (int i = 0; i < players.Count; i++)
+                connections.Add(players[i].connection);
+            if (connections.Count == 0) return;
+            PNetServer.peer.SendMessage(message, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
         }
 
         readonly List<NetBuffer> bufferedMessages = new List<NetBuffer>(16);

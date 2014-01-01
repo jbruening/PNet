@@ -63,11 +63,11 @@ namespace PNetC
         /// <summary>
         /// Subscribe to this to know when an object is being destroyed by the server.
         /// </summary>
-        public event Action OnRemove = delegate { };
+        public event Action<byte> OnRemove;
         /// <summary>
         /// run once we've finished setting up the networkview variables
         /// </summary>
-        public event Action OnFinishedCreation = delegate { };
+        public event Action OnFinishedCreation;
 
         internal NetworkView(NetworkViewManager manager)
         {
@@ -244,7 +244,7 @@ namespace PNetC
             }
         }
 
-        internal void DoOnRemove()
+        internal void DoOnRemove(byte reasonCode)
         {
             //do some cleanup
             _rpcProcessors.Clear();
@@ -253,7 +253,7 @@ namespace PNetC
 
             try
             {
-                if (OnRemove != null) OnRemove();
+                if (OnRemove != null) OnRemove(reasonCode);
             }
             catch(Exception e)
             {

@@ -153,7 +153,7 @@ namespace PNetS
                         try { a(); }
                         catch (Exception e)
                         {
-                            Debug.LogError("[Start] ", e.ToString());
+                            Debug.LogError("[Start] {0}", e.ToString());
                         }
                     });
             }
