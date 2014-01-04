@@ -195,6 +195,12 @@ namespace PNetS
                         Player player = GetPlayer(msg.SenderConnection);
                         find.OnDeserializeStream(msg, player);
                     }
+                    else
+                    {
+                        Debug.LogWarning("[PNetS.Consume] Player {0} attempted to send unreliable stream data for view {1}, but it does not exist",
+                            msg.SenderConnection.Tag, actorId);
+                        (msg.SenderConnection.Tag as Player).InternalErrorCount++;
+                    }
                 }
                 else if (msg.SequenceChannel == Channels.RELIABLE_STREAM)
                 {
@@ -204,6 +210,12 @@ namespace PNetS
                     {
                         Player player = GetPlayer(msg.SenderConnection);
                         find.OnDeserializeStream(msg, player);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[PNetS.Consume] Player {0} attempted to send reliable stream data for view {1}, but it does not exist",
+                            msg.SenderConnection.Tag, actorId);
+                        (msg.SenderConnection.Tag as Player).InternalErrorCount++;
                     }
                 }
                 else if (msg.SequenceChannel >= Channels.BEGIN_RPCMODES && msg.SequenceChannel <= Channels.OWNER_RPC)
@@ -231,7 +243,12 @@ namespace PNetS
                             find.Send(msg, info.mode, msg.SenderConnection);
                         }
                     }
-
+                    else
+                    {
+                        Debug.LogWarning("[PNetS.Consume] Player {0} attempted RPC {1} on view {2}, but the view does not exist",
+                            player, rpcId, viewID);
+                        player.InternalErrorCount++;
+                    }
                 }
                 else if (msg.SequenceChannel == Channels.SYNCHED_FIELD)
                 {
@@ -268,6 +285,12 @@ namespace PNetS
                             currentRoom.SendMessage(newMessage);
                         }
                     }
+                    else
+                    {
+                        Debug.LogWarning("[PNetS.Consume] Player {0} attempted static rpc {1}, but they are not in a room to do so",
+                            player, rpcId);
+                        (player).InternalErrorCount++;
+                    }
 
                 }
                 else if (msg.SequenceChannel == Channels.STATIC_UTILS)
@@ -277,6 +300,7 @@ namespace PNetS
                 else
                 {
                     Debug.LogWarning("data received over unhandled channel " + msg.SequenceChannel);
+                    (msg.SenderConnection.Tag as Player).InternalErrorCount++;
                 }
             }
             catch (Exception ex)
@@ -293,36 +317,18 @@ namespace PNetS
             if (utilId == RPCUtils.TimeUpdate)
             {
                 //Players shouldn't be doing this either..
+                Debug.LogWarning("[PNetS.ProcessUtils] Player {0} attempted to set time", msg.SenderConnection.Tag);
+                (msg.SenderConnection.Tag as Player).InternalErrorCount++;
             }
             else if (utilId == RPCUtils.Instantiate)
             {
                 //Players shouldn't be instantiating things
-
-                //read the path...
-
-                //var resourcePath = msg.ReadString();
-                //var viewId = msg.ReadUInt16();
-                //var ownerId = msg.ReadUInt16();
-
-                //var gobj = Resources.Load(resourcePath);
-                //var instance = (GameObject)GameObject.Instantiate(gobj);
-
-                //look for a networkview..
-
-                //var view = instance.GetComponent<NetworkView>();
-
-                //if (view)
-                //{
-                //    NetworkView.RegisterView(view, viewId);
-                //    view.viewID = new NetworkViewId() { guid = viewId, IsMine = PlayerId == ownerId };
-                //}
+                Debug.LogWarning("[PNetS.ProcessUtils] Player {0} attempted to instantiate something", msg.SenderConnection.Tag);
+                (msg.SenderConnection.Tag as Player).InternalErrorCount++;
             }
             else if (utilId == RPCUtils.FinishedRoomChange)
             {
                 //the player has finished loading into the new room. now actually put their player in the new room.
-
-                
-
                 var player = msg.SenderConnection.Tag as Player;
 
                 var newRoom = player.GetRoomSwitchingTo();
@@ -331,14 +337,17 @@ namespace PNetS
                 {
                     newRoom.AddPlayer(player);
                 }
+                else
+                {
+                    Debug.LogWarning("[PNetS.ProcessUtils] Player {0} attempted to finish joining a room, but it no longer exists", msg.SenderConnection.Tag);
+                    (msg.SenderConnection.Tag as Player).InternalErrorCount++;
+                }
             }
             else if (utilId == RPCUtils.Remove)
             {
                 //Players shouldn't be removing view ids
-
-                //var viewId = msg.ReadUInt16();
-
-                //NetworkView.RemoveView(viewId);   
+                Debug.LogWarning("[PNetS.ProcessUtils] Player {0} attempted to remove a network view", msg.SenderConnection.Tag);
+                (msg.SenderConnection.Tag as Player).InternalErrorCount++;
             }
             else if (utilId == RPCUtils.FinishedInstantiate)
             {
@@ -349,6 +358,11 @@ namespace PNetS
                 if (NetworkView.Find(viewId, out find))
                 {
                     find.gameObject.OnFinishedInstantiate(player);
+                }
+                else
+                {
+                    Debug.LogWarning("[PNetS.ProcessUtils] Player {0} attempted to finish instantiation for {1}, but that view ID doesn't exist", msg.SenderConnection.Tag, viewId);
+                    (msg.SenderConnection.Tag as Player).InternalErrorCount++;
                 }
             }
         }

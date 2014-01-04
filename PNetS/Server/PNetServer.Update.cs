@@ -26,13 +26,19 @@ namespace PNetS
 
         static List<IEnumerator<YieldInstruction>> rootRoutines = new List<IEnumerator<YieldInstruction>>();
 
+        private static int _lastFrameSize = 16;
         static void Update()
         {
-            List<NetIncomingMessage> messages = new List<NetIncomingMessage>();
+            //is reinstantiating faster? are we dealing with enough messages to make a difference?
+            var messages = new List<NetIncomingMessage>(_lastFrameSize * 2);
             int counter = peer.ReadMessages(messages);
+            _lastFrameSize = counter;
 
-            foreach (var msg in messages)
+            //for faster than foreach
+            for (int i = 0; i < counter; i++)
             {
+                var msg = messages[i];
+
                 //faster than switch, as most will be Data messages.
                 if (msg.MessageType == NetIncomingMessageType.Data)
                 {
@@ -89,9 +95,9 @@ namespace PNetS
                 }
                 else if (msg.MessageType == NetIncomingMessageType.StatusChanged)
                 {
-                    NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
+                    NetConnectionStatus status = (NetConnectionStatus) msg.ReadByte();
                     statusReason = msg.ReadString();
-                    Debug.LogError("Status: {0}, {1}", status, statusReason);
+                    Debug.Log("Status: {0}, {1}", status, statusReason);
 
                     if (status == NetConnectionStatus.Connected)
                     {
