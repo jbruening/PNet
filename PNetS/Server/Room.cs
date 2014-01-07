@@ -38,8 +38,6 @@ namespace PNetS
         /// <param name="roomToChangeLeftoverPlayersTo"></param>
         public void Close(Room roomToChangeLeftoverPlayersTo)
         {
-            GameState.RoomUpdates -= Update;
-            
             try
             {
                 for (int i = 0; i < _roomBehaviours.Count; ++i)
@@ -52,10 +50,21 @@ namespace PNetS
                 Debug.LogError("[Room Closing] {0}: {1}", Name, e);
             }
 
-            foreach (var player in players)
+            if (roomToChangeLeftoverPlayersTo == null)
             {
-                player.ChangeRoom(roomToChangeLeftoverPlayersTo);
+                foreach (var player in players)
+                {
+                    player.Disconnect("Room closing");
+                }
             }
+            else
+            {
+                foreach (var player in players)
+                {
+                    player.ChangeRoom(roomToChangeLeftoverPlayersTo);
+                }
+            }
+            
 
             foreach (var routine in rootRoutines)
             {
@@ -496,7 +505,7 @@ namespace PNetS
 
         private Room()
         {
-            GameState.RoomUpdates+= Update;
+            GameState.AllRooms.Add(this);
         }
 
         /// <summary>

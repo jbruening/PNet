@@ -22,7 +22,6 @@ namespace PNetS
         private static readonly Queue<Action> InvokeQueue = new Queue<Action>();
         private static readonly object InvokeLocker = new object();
 
-        internal static event Action RoomUpdates;
         internal static event Action DestroyDelays;
         internal static void AddStart(Action startMethod)
         {
@@ -30,8 +29,9 @@ namespace PNetS
         }
         static readonly Stopwatch Watch = new Stopwatch();
 
-        internal static void Quit() { _quit = true; }
         static bool _quit = true;
+
+        internal static List<Room> AllRooms = new List<Room>();
                
 
         static GameState()
@@ -101,6 +101,15 @@ namespace PNetS
                     Update();
                 Thread.Sleep(LOOP_TIGHTNESS);
             }
+            foreach (var room in AllRooms)
+            {
+                room.Close(null);
+            }
+        }
+
+        internal static void Quit()
+        {
+            _quit = true;
         }
 
         internal static GameObject CreateGameObject(SlimMath.Vector3 position, SlimMath.Quaternion rotation)
@@ -172,8 +181,11 @@ namespace PNetS
                 }
             }
 
-            if (RoomUpdates != null)
-                RoomUpdates();
+            for (int i = 0; i < AllRooms.Count; i++)
+            {
+                var room = AllRooms[i];
+                room.Update();
+            }
 
             try { update(); }
             catch (Exception e)
