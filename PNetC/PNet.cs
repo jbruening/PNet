@@ -148,7 +148,7 @@ namespace PNetC
             Configuration = configuration;
             if (Peer != null && Peer.Status != NetPeerStatus.NotRunning)
             {
-                Debug.LogError(this, "cannot connect while connected");
+                Debug.LogError(this, "cannot connect while peer is running");
                 return;
             }
 
@@ -156,7 +156,7 @@ namespace PNetC
                 throw new Exception("Cannot have a null EngineHook");
             
             EngineHook.EngineUpdate += Update;
-
+            _shutdownQueued = false;
             _config = new NetPeerConfiguration(Configuration.AppIdentifier);
             _config.Port =  Configuration.BindPort; //so we can run client and server on the same machine..
 
@@ -337,6 +337,8 @@ namespace PNetC
             }
         }
 
+        private bool _shutdownQueued = false;
+
         void Update()
         {
             if (!IsMessageQueueRunning) return;
@@ -344,6 +346,11 @@ namespace PNetC
             if (Peer == null) return; //in case something is running update before we've even tried to connect
             var messages = new List<NetIncomingMessage>();
             int counter = Peer.ReadMessages(messages);
+
+            if (_shutdownQueued && Peer.Status == NetPeerStatus.NotRunning)
+            {
+                FinalizeDisconnect();
+            }
 
             //for loops are way faster with lists than foreach
             for (int i = 0; i < messages.Count; i++)
@@ -380,6 +387,9 @@ namespace PNetC
                     var lastStatus = _status;
                     Status = (NetConnectionStatus) msg.ReadByte();
                     StatusReason = msg.ReadString();
+#if DEBUG
+                    StatusReason = string.Format("{0} changed to {1}: {2}", lastStatus, Status, msg.RemainingBits > 0 ? msg.ReadString() : "");
+#endif
                     Peer.Recycle(msg);
 
                     try
@@ -388,13 +398,7 @@ namespace PNetC
                         {
                             if (lastStatus != NetConnectionStatus.Disconnected)
                             {
-                                if (OnDisconnectedFromServer != null)
-                                    OnDisconnectedFromServer();
-
-                                if (Configuration.DeleteNetworkInstantiatesOnDisconnect)
-                                {
-                                    NetworkViewManager.DestroyAllViews();
-                                }
+                                _shutdownQueued = true;
                             }
                             else
                             {
@@ -420,6 +424,19 @@ namespace PNetC
                 }
                 else
                     Peer.Recycle(msg);
+            }
+        }
+
+        void FinalizeDisconnect()
+        {
+            _shutdownQueued = false;
+
+            if (OnDisconnectedFromServer != null)
+                OnDisconnectedFromServer();
+
+            if (Configuration.DeleteNetworkInstantiatesOnDisconnect)
+            {
+                NetworkViewManager.DestroyAllViews();
             }
         }
 

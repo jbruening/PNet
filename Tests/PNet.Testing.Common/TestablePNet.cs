@@ -9,7 +9,7 @@ namespace PNet.Testing.Common
 
         public TestablePNet(IEngineHook engineHook) : base(engineHook)
         {
-            Debug.Logger = new NullLogger();
+            Debug.Logger = new TestClientLogger();
         }
 
         public TestablePNet() : this(new TestEngineHook()){}

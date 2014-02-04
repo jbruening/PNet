@@ -44,11 +44,13 @@ namespace PNet.Testing.Common
 
         private bool _quit = false;
 
+        public bool UpdatePause = false;
+
         private void DoUpdateThread()
         {
             while (!_quit)
             {
-                if (EngineUpdate != null)
+                if (EngineUpdate != null && !UpdatePause)
                     EngineUpdate();
                 Thread.Sleep(UpdateSleepTime);
             }
