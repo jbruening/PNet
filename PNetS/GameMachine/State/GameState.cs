@@ -70,6 +70,19 @@ namespace PNetS
                 action();
         }
 
+        /// <summary>
+        /// get a gameobject from its id
+        /// </summary>
+        /// <param name="gameObjectId"></param>
+        /// <returns>null if that id does not exist</returns>
+        public static GameObject GetGameObject(int gameObjectId)
+        {
+            GameObject value;
+            if (GameObjects.TryGetValue(gameObjectId, out value))
+                return value;
+            return null;
+        }
+
         internal static void RemoveObject(GameObject gobj)
         {
             //
