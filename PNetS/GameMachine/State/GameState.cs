@@ -17,6 +17,14 @@ namespace PNetS
         static double _frameTime = 0.020d;
         private const int LOOP_TIGHTNESS = 5;
         static readonly IntDictionary<GameObject> GameObjects = new IntDictionary<GameObject>(256);
+        public static IEnumerable<GameObject> AllGameObjects
+        {
+            get
+            {
+                foreach (var gobj in GameObjects)
+                    yield return gobj;
+            }
+        }
         static List<Action> _starteds = new List<Action>(8);
         private static Thread _createdThread;
         private static readonly Queue<Action> InvokeQueue = new Queue<Action>();
