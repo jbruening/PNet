@@ -14,7 +14,12 @@ namespace PNet.Testing.Common
     public class IntDictionaryTest
     {
         private TestContext testContextInstance;
-        private IntDictionary<object> _target;
+        private IntDictionary<MockObject> _target;
+
+        class MockObject
+        {
+            public int Id;
+        }
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -64,10 +69,10 @@ namespace PNet.Testing.Common
         //
         #endregion
 
-        [TestMethod()]
+        [TestMethod]
         public void AddTest()
         {
-            var add = new object();
+            var add = new MockObject();
 
             for (int i = 0; i < 10; i++)
             {
@@ -83,7 +88,7 @@ namespace PNet.Testing.Common
         [TestMethod]
         public void RemoveAddTest()
         {
-            var add = new object();
+            var add = new MockObject();
 
             for (int i = 0; i < 10; i++)
             {
@@ -104,6 +109,31 @@ namespace PNet.Testing.Common
 
             //make sure out of bounds doesn't throw
             _target.Remove(int.MaxValue);
+        }
+
+        [TestMethod]
+        public void InflationTest()
+        {
+            const int InflationTestSize = 300;
+            for (int i = 0; i < InflationTestSize; i++)
+            {
+                var add = new MockObject();
+                add.Id = _target.Add(add);
+            }
+
+            foreach (var add in _target)
+            {
+                _target.Remove(add.Id);
+            }
+
+            for (int i = 0; i < InflationTestSize; i++)
+            {
+                var add = new MockObject();
+                add.Id = _target.Add(add);
+                Assert.IsTrue(add.Id < InflationTestSize);
+            }
+
+            Assert.AreEqual(_target.Capacity, InflationTestSize);
         }
     }
 }
