@@ -1,6 +1,8 @@
 ﻿using PNet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PNet.Testing.Common
 {
@@ -19,6 +21,11 @@ namespace PNet.Testing.Common
         class MockObject
         {
             public int Id;
+
+            internal void DoNothing()
+            {
+                
+            }
         }
 
         /// <summary>
@@ -134,6 +141,134 @@ namespace PNet.Testing.Common
             }
 
             Assert.AreEqual(_target.Capacity, InflationTestSize);
+        }
+
+        [TestMethod]
+        public void IntDictionaryComparisonTest()
+        {
+            const int TestSize = 10000000;
+            var intDic = new IntDictionary<MockObject>(32);
+            var dic = new Dictionary<int, MockObject>(32);
+
+            //jit shit.
+            var add = new MockObject();
+            add.Id = intDic.Add(add);
+            foreach (var kvp in intDic)
+            {
+                kvp.DoNothing();
+            }
+            intDic.Remove(add.Id);
+
+            add.Id = 0;
+            dic.Add(add.Id, add);
+            foreach (var kvp in dic)
+            {
+                kvp.Value.DoNothing();
+            }
+            dic.Remove(add.Id);
+
+            Stopwatch watch = new Stopwatch();
+            watch.Reset();
+
+            //the real tests
+            watch.Start();
+            for (int i = 0; i < TestSize; i++)
+            {
+                var foo = new MockObject();
+                foo.Id = intDic.Add(foo);
+            }
+            watch.Stop();
+
+            Debug.WriteLine("IntDic add: {0}", watch.Elapsed);
+            watch.Reset();
+
+            watch.Start();
+            for (int i = 0; i < TestSize; i++)
+            {
+                var foo = new MockObject();
+                foo.Id = i;
+                dic.Add(i, foo);
+            }
+            watch.Stop();
+
+            Debug.WriteLine("Dic add: {0}", watch.Elapsed);
+            watch.Reset();
+
+            watch.Start();
+            foreach (var kvp in intDic)
+            {
+                if (kvp != null)
+                    kvp.DoNothing();
+            }
+            watch.Stop();
+
+            Debug.WriteLine("Intdic foreach: {0}", watch.Elapsed);
+            watch.Reset();
+
+            watch.Start();
+            foreach (var kvp in dic)
+            {
+                kvp.Value.DoNothing();
+            }
+            watch.Stop();
+
+            Debug.WriteLine("Dic foreach: {0}", watch.Elapsed);
+            watch.Reset();
+
+            watch.Start();
+            for (int i = 0; i < intDic.Capacity; i++)
+            {
+                MockObject value;
+                if (intDic.TryGetValue(i, out value))
+                    value.DoNothing();
+            }
+            watch.Stop();
+
+            Debug.WriteLine("Intdic for: {0}", watch.Elapsed);
+            watch.Reset();
+
+            const int halfSize = TestSize / 2;
+
+            watch.Start();
+            for (int i = 0; i < halfSize; i++)
+            {
+                intDic.Remove(i);
+            }
+            watch.Stop();
+
+            Debug.WriteLine("Intdic remove: {0}", watch.Elapsed);
+            watch.Reset();
+
+            watch.Start();
+            for (int i = 0; i < halfSize; i++)
+            {
+                dic.Remove(i);
+            }
+            watch.Stop();
+
+            Debug.WriteLine("dic remove: {0}", watch.Elapsed);
+            watch.Reset();
+
+            watch.Start();
+            foreach (var kvp in intDic)
+            {
+                if (kvp != null)
+                    kvp.DoNothing();
+            }
+            watch.Stop();
+
+            Debug.WriteLine("intdic foreach after remove: {0}", watch.Elapsed);
+            watch.Reset();
+
+            watch.Start();
+            foreach (var kvp in dic)
+            {
+                kvp.Value.DoNothing();
+            }
+            watch.Stop();
+
+            Debug.WriteLine("dic foreach after remove: {0}", watch.Elapsed);
+            watch.Reset();
         }
     }
 }
