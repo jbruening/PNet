@@ -64,7 +64,7 @@ namespace PNet.Testing.Common
         [TestInitialize()]
         public void MyTestInitialize()
         {
-            _target = new IntDictionary<object>();
+            _target = new IntDictionary<MockObject>();
         }
         //
         //Use TestCleanup to run code after each test has run

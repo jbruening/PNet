@@ -22,7 +22,10 @@ namespace PNetS
             get
             {
                 foreach (var gobj in GameObjects)
-                    yield return gobj;
+                {
+                    if (gobj != null && !gobj.IsDisposed)
+                        yield return gobj;
+                }
             }
         }
         static List<Action> _starteds = new List<Action>(8);
