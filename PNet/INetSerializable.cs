@@ -30,7 +30,8 @@ namespace PNet
     /// <summary>
     /// 
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TSerialize"> </typeparam>
+    /// <typeparam name="TValue"> </typeparam>
     public abstract class ASerializable<TSerialize, TValue> : INetSerializable where TSerialize : ASerializable<TSerialize, TValue>, new()
     {
         /// <summary>

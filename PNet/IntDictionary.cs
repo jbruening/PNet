@@ -18,7 +18,7 @@ namespace PNet
     /// Of note: as this takes up as much memory as the last index + bool array the same size, this should probably be used for small collections.
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-    public class IntDictionary<T> : IEnumerable
+    public class IntDictionary<T> : IEnumerable, IEnumerable<T>
     {
         readonly List<T> _collection;
         readonly List<bool> _hasValueCollection;
@@ -199,84 +199,17 @@ namespace PNet
         /// </summary>
         public int Capacity { get { return _collection.Count; } }
 
-        
-
-        IEnumerator IEnumerable.GetEnumerator()
+        System.Collections.IEnumerator IEnumerable.GetEnumerator()
         {
-            return (IEnumerator) GetEnumerator();
-        }
-        /// <summary>
-        /// get the enumerator to enumerate the collection
-        /// </summary>
-        /// <returns></returns>
-        public IntDictionaryEnumerator<T> GetEnumerator()
-        {
-            return new IntDictionaryEnumerator<T>(_collection);
+            return GetEnumerator();
         }
 
-        // Defines the enumerator for the Boxes collection.
-        // (Some prefer this class nested in the collection class.)
-        /// <summary>
-        /// enumerator helper
-        /// </summary>
-        /// <typeparam name="U"></typeparam>
-        public class IntDictionaryEnumerator<U> : IEnumerator<U>
+        public IEnumerator<T>  GetEnumerator()
         {
-            private U currentT;
-            private int curIndex;
-
-            private   List<U> m_Collection;
-
-            /// <summary>
-            /// create a new enumerator helper for the intdictionary
-            /// </summary>
-            /// <param name="m_Collection"></param>
-            public    IntDictionaryEnumerator(List<U> m_Collection)
+            for(int i = 0; i < _collection.Count; i++)
             {
-                // TODO: Complete member initialization
-                this.m_Collection = m_Collection;
-                curIndex = -1;
-                currentT = default(U);
-            }
-
-            /// <summary>
-            /// go to the next iem in the collection
-            /// </summary>
-            /// <returns></returns>
-            public bool MoveNext()
-            {
-                //Avoids going beyond the end of the collection.
-                if (++curIndex >= m_Collection.Count)
-                {
-                    return false;
-                }
-                else
-                {
-                    // Set current box to next item in collection.
-                    currentT = m_Collection[curIndex];
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// reset the position of the enumerator
-            /// </summary>
-            public void Reset() { curIndex = -1; }
-
-            void IDisposable.Dispose() { }
-
-            /// <summary>
-            /// current item in the enumeration
-            /// </summary>
-            public U Current
-            {
-                get { return currentT; }
-            }
-
-
-            object IEnumerator.Current
-            {
-                get { return Current; }
+                if (_hasValueCollection[i])
+                    yield return _collection[i];
             }
         }
     }

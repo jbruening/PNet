@@ -17,6 +17,9 @@ namespace PNetS
         static double _frameTime = 0.020d;
         private const int LOOP_TIGHTNESS = 5;
         static readonly IntDictionary<GameObject> GameObjects = new IntDictionary<GameObject>(256);
+        /// <summary>
+        /// iterate all gameobjects. will not return null or disposed objects
+        /// </summary>
         public static IEnumerable<GameObject> AllGameObjects
         {
             get
