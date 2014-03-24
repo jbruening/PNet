@@ -24,8 +24,12 @@ in this folder, then apply the slimmath_patch.patch to that folder
 
 After you are done, you should have at least the following folders:
 
+Example
+lib
 Lidgren.Network
 PNet
+PNetC
 PNetS
 PNetU
 SlimMath
+Tests
