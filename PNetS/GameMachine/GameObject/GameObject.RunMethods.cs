@@ -15,16 +15,7 @@ namespace PNetS
         {
             for (var i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.update != null)
-                    try
-                    {
-                        c.update();
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                components[i].InternalUpdateCall();
             }
         }
 
@@ -32,16 +23,7 @@ namespace PNetS
         {
             for (var i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.lateUpdate != null)
-                    try
-                    {
-                        c.lateUpdate();
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                components[i].InternalLateUpdateCall();
             }
         }
 
@@ -49,16 +31,7 @@ namespace PNetS
         {
             for (int i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.onPlayerConnected != null)
-                    try
-                    {
-                        c.onPlayerConnected(player);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                components[i].InternalOnPlayerConnectedCall(player);
             }
         }
 
@@ -66,16 +39,7 @@ namespace PNetS
         {
             for (int i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.onPlayerDisconnected != null)
-                    try
-                    {
-                        c.onPlayerDisconnected(player);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                components[i].InternalOnPlayerDisconnectedCall(player);
             }
             if (player == Owner)
                 Owner = null;
@@ -85,16 +49,7 @@ namespace PNetS
         {
             for (int i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.onPlayerLeftRoom != null)
-                    try
-                    {
-                        c.onPlayerLeftRoom(player);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                components[i].InternalOnPlayerLeftRoomCall(player);
             }
         }
 
@@ -102,16 +57,7 @@ namespace PNetS
         {
             for (int i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.onPlayerEnteredRoom != null)
-                    try
-                    {
-                        c.onPlayerEnteredRoom(player);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                components[i].InternalOnPlayerEnteredRoomCall(player);
             }
         }
 
@@ -119,16 +65,8 @@ namespace PNetS
         {
             for (int i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.onComponentAdded != null)
-                    try
-                    {
-                        c.onComponentAdded(component);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                if (!object.ReferenceEquals(components[i], component))
+                    components[i].InternalOnComponentAddedCall(component);
             }
         }
 
@@ -136,16 +74,7 @@ namespace PNetS
         {
             for (int i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.onFinishedInstantiate != null)
-                    try
-                    {
-                        c.onFinishedInstantiate(player);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                components[i].InternalOnFinishedInstantiateCall(player);
             }
         }
 
@@ -153,16 +82,7 @@ namespace PNetS
         {
             for (int i = 0; i < components.Count; i++)
             {
-                var c = components[i];
-                if (c.onDestroy != null)
-                    try
-                    {
-                        c.onDestroy();
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.ToString());
-                    }
+                components[i].InternalOnDestroyCall();
             }
         }
     }

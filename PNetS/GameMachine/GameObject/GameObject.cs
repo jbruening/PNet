@@ -91,7 +91,7 @@ namespace PNetS
             gameObject._markedForDestruction = true; //just in case
             gameObject.Owner = null;
             gameObject.OnDestroy();
-            gameObject.components.ForEach(g => g.component.Dispose());
+            gameObject.components.ForEach(g => g.Dispose());
             gameObject.components = null;
             GameState.RemoveObject(gameObject);
             (gameObject as IDisposable).Dispose();

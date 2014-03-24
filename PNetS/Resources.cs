@@ -66,9 +66,9 @@ namespace PNetS
         {
             var dser = new GameObject();
             dser.Room = roomToInstantiateIn;
-            var awakes = new List<Action>();
             var config = new YamlConfig();
             var actualFilePath = Path.Combine(ResourceFolder, filePath + ".prefab");
+            var awakes = new List<Component>();
 
             config.AddActivator<GameObject>(() =>
             {
@@ -81,14 +81,14 @@ namespace PNetS
             //    return dser.components;
             //});
 
-            var trackers = new Stack<GameObject.ComponentTracker>();
+            //var trackers = new Stack<GameObject.ComponentTracker>();
 
-            config.AddActivator<GameObject.ComponentTracker>(() =>
-            {
-                var ntrack = new GameObject.ComponentTracker();
-                trackers.Push(ntrack);
-                return ntrack;
-            });
+            //config.AddActivator<Component>(() =>
+            //{
+                //var ntrack = new GameObject.ComponentTracker();
+                //trackers.Push(ntrack);
+                //return ntrack;
+            //});
 
             foreach (Type t in GetComponentTypes())
             {
@@ -97,13 +97,12 @@ namespace PNetS
                 {
                     Debug.LogWarning("[Resources.Load] file {0} has a NetworkView component on it, but was run as to not network instantiate. It will not be networked.", actualFilePath);
                 }
+                
                 GameObject dser1 = dser;
                 config.AddActivator(tLocal, () =>
                 {
-                    Action awake;
-                    var ntrack = trackers.Pop();
-                    var ret = dser1.DeserializeAddComponent(tLocal, out awake, ntrack);
-                    awakes.Add(awake);
+                    var ret = dser1.DeserializeAddComponent(tLocal);
+                    awakes.Add(ret);
                     return ret;
                 });
             }
@@ -122,7 +121,7 @@ namespace PNetS
             roomToInstantiateIn.OnGameObjectAdded(dser);
 
             foreach (var awake in awakes)
-                if (awake != null) awake();
+                if (awake != null) awake.InternalAwakeCall();
             
             dser.OnComponentAfterDeserialization();
 

@@ -161,7 +161,7 @@ namespace PNetS
             _allButOwner.Clear();
         }
 
-        void OnPlayerEnteredRoom(Player player)
+        protected override void OnPlayerEnteredRoom(Player player)
         {
             if (_isVisibleToAll)
             {
@@ -173,7 +173,7 @@ namespace PNetS
                 _allButOwner.Add(player.connection);
             }
         }
-        void OnPlayerLeftRoom(Player player)
+        protected override void OnPlayerLeftRoom(Player player)
         {
             _connections.Remove(player.connection);
             
@@ -245,7 +245,7 @@ namespace PNetS
 
         #region RPC Subscriptions
 
-        void OnComponentAdded(Component component)
+        protected override void OnComponentAdded(Component component)
         {
             SubscribeMarkedRPCsOnComponent(component);
         }

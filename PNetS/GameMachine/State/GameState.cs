@@ -37,9 +37,9 @@ namespace PNetS
         private static readonly object InvokeLocker = new object();
 
         internal static event Action DestroyDelays;
-        internal static void AddStart(Action startMethod)
+        internal static void AddStart(Action toStart)
         {
-            _starteds.Add(startMethod);
+            _starteds.Add(toStart);
         }
         static readonly Stopwatch Watch = new Stopwatch();
 

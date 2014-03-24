@@ -53,11 +53,34 @@ namespace PNetS
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> GetComponents<T>()
+        public T[] GetComponents<T>()
             where T : Component
         {
             return gameObject.GetComponents<T>();
         }
+
+        internal void InternalAwakeCall() { try { Awake(); } catch (Exception e) { Debug.LogError(e.ToString()); } }
+        protected virtual void Awake() { }
+        internal void InternalStartCall() { try { Start(); } catch (Exception e) { Debug.LogError(e.ToString()); }}
+        protected virtual void Start() { }
+        internal void InternalUpdateCall() { try { Update(); } catch (Exception e) { Debug.LogError(e.ToString()); }}
+        protected virtual void Update() { }
+        internal void InternalLateUpdateCall() { try { LateUpdate(); } catch (Exception e) { Debug.LogError(e.ToString()); }}
+        protected virtual void LateUpdate() { }
+        internal void InternalOnPlayerConnectedCall(Player player) { try { OnPlayerConnected(player); } catch (Exception e) { Debug.LogError(e.ToString()); }}
+        protected virtual void OnPlayerConnected(Player player) { }
+        internal void InternalOnPlayerDisconnectedCall(Player player) { try { OnPlayerDisconnected(player); } catch (Exception e) { Debug.LogError(e.ToString()); }}
+        protected virtual void OnPlayerDisconnected(Player player) { }
+        internal void InternalOnPlayerLeftRoomCall(Player player) { try { OnPlayerLeftRoom(player); } catch (Exception e) { Debug.LogError(e.ToString()); }}
+        protected virtual void OnPlayerLeftRoom(Player player) { }
+        internal void InternalOnPlayerEnteredRoomCall(Player player) { try { OnPlayerEnteredRoom(player); } catch (Exception e) { Debug.LogError(e.ToString()); }}
+        protected virtual void OnPlayerEnteredRoom(Player player) { }
+        internal void InternalOnComponentAddedCall(Component component) { try { OnComponentAdded(component); } catch (Exception e) { Debug.LogError(e.ToString()); }}
+        protected virtual void OnComponentAdded(Component component) { }
+        internal void InternalOnFinishedInstantiateCall(Player player) { try { OnFinishedInstantiate(player); } catch (Exception e) { Debug.LogError(e.ToString()); } }
+        protected virtual void OnFinishedInstantiate(Player player) { }
+        internal void InternalOnDestroyCall() { try { OnDestroy(); } catch (Exception e) { Debug.LogError(e.ToString()); } }
+        protected virtual void OnDestroy() { }
 
         internal void Dispose()
         {
