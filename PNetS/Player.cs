@@ -126,6 +126,7 @@ namespace PNetS
         /// </summary>
         public static Player Server { get; internal set; }
 
+        #region RPC
         /// <summary>
         /// Send a static RPC to the player.
         /// </summary>
@@ -136,12 +137,151 @@ namespace PNetS
             var size = 1;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = PNetServer.peer.CreateMessage(size);
-            message.Write(rpcId);
+            var message = CreateMessage(rpcId, size);
             RPCUtils.WriteParams(ref message, args);
-            
-            connection.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+
+            SendMessage(message);
         }
+
+        /// <summary>
+        /// Send a static RPC to the player. (prevents array allocation)
+        /// </summary>
+        /// <param name="rpcID"></param>
+        /// <param name="arg0"></param>
+        public void RPC(byte rpcID)
+        {
+            var size = 1;
+            var message = CreateMessage(rpcID, size);
+            SendMessage(message);
+        }
+
+        /// <summary>
+        /// Send a static RPC to the player. (prevents array allocation)
+        /// </summary>
+        /// <param name="rpcID"></param>
+        /// <param name="arg0"></param>
+        public void RPC(byte rpcID, INetSerializable arg0)
+        {
+            var size = 1;
+            size += arg0.AllocSize;
+
+            var message = CreateMessage(rpcID, size);            
+
+            arg0.OnSerialize(message);
+
+            SendMessage(message);
+        }
+
+        /// <summary>
+        /// Send a static RPC to the player. (prevents array allocation)
+        /// </summary>
+        /// <param name="rpcID"></param>
+        /// <param name="arg0"></param>
+        /// <param name="arg1"></param>
+        public void RPC(byte rpcID, INetSerializable arg0, INetSerializable arg1)
+        {
+            var size = 1;
+            size += arg0.AllocSize;
+            size += arg1.AllocSize;
+
+            var message = CreateMessage(rpcID, size);
+
+            arg0.OnSerialize(message);
+            arg1.OnSerialize(message);
+
+            SendMessage(message);
+        }
+        
+        /// <summary>
+        /// Send a static RPC to the player. (prevents array allocation)
+        /// </summary>
+        /// <param name="rpcID"></param>
+        /// <param name="arg0"></param>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        public void RPC(byte rpcID, INetSerializable arg0, INetSerializable arg1, INetSerializable arg2)
+        {
+            var size = 1;
+            size += arg0.AllocSize;
+            size += arg1.AllocSize;
+            size += arg2.AllocSize;
+
+            var message = CreateMessage(rpcID, size);
+
+            arg0.OnSerialize(message);
+            arg1.OnSerialize(message);
+            arg2.OnSerialize(message);
+
+            SendMessage(message);
+        }
+
+        /// <summary>
+        /// Send a static RPC to the player. (prevents array allocation)
+        /// </summary>
+        /// <param name="rpcID"></param>
+        /// <param name="arg0"></param>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        /// <param name="arg3"></param>
+        public void RPC(byte rpcID, INetSerializable arg0, INetSerializable arg1, INetSerializable arg2, INetSerializable arg3)
+        {
+            var size = 1;
+            size += arg0.AllocSize;
+            size += arg1.AllocSize;
+            size += arg2.AllocSize;
+            size += arg3.AllocSize;
+
+            var message = CreateMessage(rpcID, size);
+
+            arg0.OnSerialize(message);
+            arg1.OnSerialize(message);
+            arg2.OnSerialize(message);
+            arg3.OnSerialize(message);
+
+            SendMessage(message);
+        }
+        /// <summary>
+        /// Send a static RPC to the player. (prevents array allocation)
+        /// </summary>
+        /// <param name="rpcID"></param>
+        /// <param name="arg0"></param>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        /// <param name="arg3"></param>
+        /// <param name="arg4"></param>
+        public void RPC(byte rpcID, INetSerializable arg0, INetSerializable arg1, INetSerializable arg2, INetSerializable arg3, INetSerializable arg4)
+        {
+            var size = 1;
+            size += arg0.AllocSize;
+            size += arg1.AllocSize;
+            size += arg2.AllocSize;
+            size += arg3.AllocSize;
+            size += arg4.AllocSize;
+
+            var message = CreateMessage(rpcID, size);
+
+            arg0.OnSerialize(message);
+            arg1.OnSerialize(message);
+            arg2.OnSerialize(message);
+            arg3.OnSerialize(message);
+            arg4.OnSerialize(message);
+
+            SendMessage(message);
+        }
+
+        NetOutgoingMessage CreateMessage(byte rpcID, int size)
+        {
+            var message = PNetServer.peer.CreateMessage(size);
+            message.Write(rpcID);
+            return message;
+        }
+
+        void SendMessage(NetOutgoingMessage msg)
+        {
+            connection.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+        }
+
+        #endregion
 
         /// <summary>
         /// Returns a string that represents the current object.
