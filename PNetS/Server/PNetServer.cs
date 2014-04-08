@@ -375,6 +375,18 @@ namespace PNetS
         }
 
         /// <summary>
+        /// get the player with the specified Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Player, if a valid player. Otherwise null</returns>
+        public static Player GetPlayer(ushort id)
+        {
+            var con = connections[id];
+            if (con == null) return null;
+            return con.Tag as Player;
+        }
+
+        /// <summary>
         /// Get all the currently connected players
         /// Warning: Some of the values will be null, due to the way the internal lists are handled. 
         /// Just check for null first, before doing any operations
