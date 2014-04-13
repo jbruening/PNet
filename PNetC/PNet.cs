@@ -347,9 +347,15 @@ namespace PNetC
             var messages = new List<NetIncomingMessage>();
             int counter = Peer.ReadMessages(messages);
 
-            if (_shutdownQueued && Peer.Status == NetPeerStatus.NotRunning)
+            if (_shutdownQueued)
             {
-                FinalizeDisconnect();
+                if (Peer.Status == NetPeerStatus.NotRunning)
+                    FinalizeDisconnect();
+                else if (Peer.Status == NetPeerStatus.Running)
+                {
+                    //let's gracefully close things up.
+                    Peer.Shutdown(StatusReason);
+                }
             }
 
             //for loops are way faster with lists than foreach
@@ -396,14 +402,16 @@ namespace PNetC
                     {
                         if (_status == NetConnectionStatus.Disconnected)
                         {
-                            if (lastStatus != NetConnectionStatus.Disconnected)
+                            switch (lastStatus)
                             {
-                                _shutdownQueued = true;
-                            }
-                            else
-                            {
-                                if (OnFailedToConnect != null)
-                                    OnFailedToConnect(StatusReason);
+                                case NetConnectionStatus.Disconnecting:
+                                case NetConnectionStatus.Connected:
+                                    _shutdownQueued = true;
+                                    break;
+                                default:
+                                    if (OnFailedToConnect != null)
+                                        OnFailedToConnect(StatusReason);
+                                    break;
                             }
                         }
                         else if (_status == NetConnectionStatus.Connected)
