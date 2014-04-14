@@ -156,6 +156,11 @@ namespace PNetS
         {
             PreviousFrameTime = TimeSinceStartup;
             TimeSinceStartup = Watch.Elapsed.TotalSeconds;
+            if (Time.Scale != 1d)
+            {
+                var diff = TimeSinceStartup - PreviousFrameTime;
+                TimeSinceStartupScaleOffset += diff * Time.Scale;
+            }
             NetFrameTime = Lidgren.Network.NetTime.Now;
 
             Action[] invokes;
@@ -323,6 +328,10 @@ namespace PNetS
             FrameRoutineAdds.Clear();
         }
 
+        /// <summary>
+        /// Time.Scale affected TimeSinceStartup.
+        /// </summary>
+        internal static double TimeSinceStartupScaleOffset { get; private set; }
         internal static double PreviousFrameTime { get; private set; }
         internal static double TimeSinceStartup { get; private set; }
         internal static double NetFrameTime { get; private set; }
