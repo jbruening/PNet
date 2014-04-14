@@ -158,8 +158,10 @@ namespace PNetS
             TimeSinceStartup = Watch.Elapsed.TotalSeconds;
             if (Time.Scale != 1d)
             {
-                var diff = TimeSinceStartup - PreviousFrameTime;
-                TimeSinceStartupScaleOffset += diff * Time.Scale;
+                var delta = TimeSinceStartup - PreviousFrameTime;
+                var scaleDelta = delta * Time.Scale;
+                //add the value that we should have added this frame (if we weren't scaled) to the offset.
+                TimeSinceStartupScaleOffset += delta - scaleDelta;
             }
             NetFrameTime = Lidgren.Network.NetTime.Now;
 
