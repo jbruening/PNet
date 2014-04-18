@@ -61,6 +61,7 @@ namespace PNetU
                 //run some cleanup too, just in case
                 EngineUpdate = null;
                 Net.CleanupEvents();
+                Manager.Clear();
             }
         }
 

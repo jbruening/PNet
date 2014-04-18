@@ -64,5 +64,41 @@ namespace PNetC
         /// size when serializing to stream
         /// </summary>
         public int AllocSize { get { return 2; } }
+
+        /// <summary>
+        /// Returns the hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A 32-bit signed integer that is the hash code for this instance.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
+        public override int GetHashCode()
+        {
+            return guid;
+        }
+
+        /// <summary>
+        /// Whether or not the this viewid refers to the same id
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool Equals(NetworkViewId other)
+        {
+            return other.guid == guid;
+        }
+
+        /// <summary>
+        /// Indicates whether this instance and a specified object are equal.
+        /// </summary>
+        /// <returns>
+        /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
+        /// </returns>
+        /// <param name="obj">Another object to compare to. </param><filterpriority>2</filterpriority>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is NetworkViewId))
+                return false;
+            return Equals((NetworkViewId) obj);
+        }
     }
 }

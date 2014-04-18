@@ -325,6 +325,7 @@ namespace PNetU
 
         internal void DoOnRemove(byte reasonCode)
         {
+            UnityEngineHook.Instance.Manager.Remove(_networkView.ViewID);
             if (DestroyGameObjectOnNetworkDestroy)
             {
                 if (Debug.isDebugBuild)

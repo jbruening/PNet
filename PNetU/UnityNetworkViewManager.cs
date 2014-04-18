@@ -22,5 +22,10 @@ namespace PNetU
         {
             return _networkViews.Remove(viewId);
         }
+
+        internal void Clear()
+        {
+            _networkViews.Clear();
+        }
     }
 }
