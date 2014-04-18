@@ -35,7 +35,8 @@ namespace PNetS
             _lastFrameSize = counter;
 
             //for faster than foreach
-            for (int i = 0; i < counter; i++)
+// ReSharper disable once ForCanBeConvertedToForeach
+            for (int i = 0; i < messages.Count; i++)
             {
                 var msg = messages[i];
 
@@ -54,6 +55,11 @@ namespace PNetS
                         peer.SendDiscoveryResponse(resp, msg.SenderEndPoint);
                     }
                 }
+                else if (msg.MessageType == NetIncomingMessageType.DebugMessage)
+                {
+                    Debug.Log(msg.ReadString());
+                    peer.Recycle(msg);
+                }
                 else if (msg.MessageType == NetIncomingMessageType.WarningMessage)
                 {
                     Debug.LogWarning(msg.ReadString());
@@ -62,6 +68,7 @@ namespace PNetS
                 else if (msg.MessageType == NetIncomingMessageType.ConnectionLatencyUpdated)
                 {
                     var latency = msg.ReadFloat();
+                    //todo: do something with this latency.
                     peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ErrorMessage)
@@ -95,7 +102,7 @@ namespace PNetS
                 }
                 else if (msg.MessageType == NetIncomingMessageType.StatusChanged)
                 {
-                    NetConnectionStatus status = (NetConnectionStatus) msg.ReadByte();
+                    var status = (NetConnectionStatus) msg.ReadByte();
                     statusReason = msg.ReadString();
                     Debug.Log("Status: {0}, {1}", status, statusReason);
 

@@ -11,8 +11,6 @@ namespace PNetC
     /// </summary>
     public class Net
     {
-        private const int AssumedFrameNetbufferSize = 4096;
-
         /// <summary>
         /// When finished connecting to the server
         /// </summary>
@@ -321,13 +319,14 @@ namespace PNetC
 
         private bool _shutdownQueued;
 
+        private int _lastFrameCount = 16;
         void Update()
         {
             if (!IsMessageQueueRunning) return;
             Time = NetTime.Now;
             if (Peer == null) return; //in case something is running update before we've even tried to connect
-            var messages = new List<NetIncomingMessage>(AssumedFrameNetbufferSize);
-            Peer.ReadMessages(messages);
+            var messages = new List<NetIncomingMessage>(_lastFrameCount * 2);
+            _lastFrameCount = Peer.ReadMessages(messages);
 
             if (_shutdownQueued)
             {

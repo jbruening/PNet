@@ -199,9 +199,13 @@ namespace PNetS
                     }
                     else
                     {
-                        Debug.LogWarning("[PNetS.Consume] Player {0} attempted to send unreliable stream data for view {1}, but it does not exist",
-                            msg.SenderConnection.Tag, actorId);
-                        (msg.SenderConnection.Tag as Player).InternalErrorCount++;
+                        if (GetPlayer(msg.SenderConnection).CurrentRoom != null)
+                        {
+                            Debug.LogWarning(
+                                "[PNetS.Consume] Player {0} attempted to send unreliable stream data for view {1}, but it does not exist",
+                                msg.SenderConnection.Tag, actorId);
+                            (msg.SenderConnection.Tag as Player).InternalErrorCount++;
+                        }
                     }
                 }
                 else if (msg.SequenceChannel == Channels.RELIABLE_STREAM)
@@ -215,20 +219,24 @@ namespace PNetS
                     }
                     else
                     {
-                        Debug.LogWarning("[PNetS.Consume] Player {0} attempted to send reliable stream data for view {1}, but it does not exist",
-                            msg.SenderConnection.Tag, actorId);
-                        (msg.SenderConnection.Tag as Player).InternalErrorCount++;
+                        if (GetPlayer(msg.SenderConnection).CurrentRoom != null)
+                        {
+                            Debug.LogWarning(
+                                "[PNetS.Consume] Player {0} attempted to send reliable stream data for view {1}, but it does not exist",
+                                msg.SenderConnection.Tag, actorId);
+                            (msg.SenderConnection.Tag as Player).InternalErrorCount++;
+                        }
                     }
                 }
                 else if (msg.SequenceChannel >= Channels.BEGIN_RPCMODES && msg.SequenceChannel <= Channels.OWNER_RPC)
                 {
                     //rpc...
-                    var viewID = msg.ReadUInt16();
+                    var viewId = msg.ReadUInt16();
                     var rpcId = msg.ReadByte();
                     Player player = GetPlayer(msg.SenderConnection);
                     NetworkView find;
                     var info = new NetMessageInfo((RPCMode)(msg.SequenceChannel - Channels.BEGIN_RPCMODES), player);
-                    if (NetworkView.Find(viewID, out find))
+                    if (NetworkView.Find(viewId, out find))
                     {
                         find.CallRPC(rpcId, msg, info);
 
@@ -247,9 +255,13 @@ namespace PNetS
                     }
                     else
                     {
-                        Debug.LogWarning("[PNetS.Consume] Player {0} attempted RPC {1} on view {2}, but the view does not exist",
-                            player, rpcId, viewID);
-                        player.InternalErrorCount++;
+                        if (player.CurrentRoom != null)
+                        {
+                            Debug.LogWarning(
+                                "[PNetS.Consume] Player {0} attempted RPC {1} on view {2}, but the view does not exist",
+                                player, rpcId, viewId);
+                            player.InternalErrorCount++;
+                        }
                     }
                 }
                 else if (msg.SequenceChannel == Channels.SYNCHED_FIELD)
@@ -277,7 +289,7 @@ namespace PNetS
                     var currentRoom = player.CurrentRoom;
                     if (currentRoom != null)
                     {
-                        NetMessageInfo info = new NetMessageInfo(RPCMode.None, player);
+                        var info = new NetMessageInfo(RPCMode.None, player);
                         currentRoom.CallRPC(rpcId, msg, info);
 
                         if (info.continueForwarding)
