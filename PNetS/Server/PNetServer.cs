@@ -97,6 +97,8 @@ namespace PNetS
             _netPeerConfiguration = new NetPeerConfiguration(Configuration.AppIdentifier);
             _netPeerConfiguration.Port = Configuration.ListenPort;
             _netPeerConfiguration.MaximumConnections = Configuration.MaximumConnections;
+            _netPeerConfiguration.ReceiveBufferSize = Configuration.ReceiveBuffer;
+            _netPeerConfiguration.SendBufferSize = Configuration.SendBuffer;
             connections = new IntDictionary<NetConnection>(Configuration.MaximumConnections);
 
             _netPeerConfiguration.SetMessageTypeEnabled(NetIncomingMessageType.ConnectionApproval, true);
