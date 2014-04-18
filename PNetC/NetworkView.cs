@@ -10,11 +10,6 @@ namespace PNetC
     /// </summary>
     public sealed class NetworkView
     {
-        /// <summary>
-        /// The object that this networkview is attached to.
-        /// </summary>
-        public object Container { get; internal set; }
-
         internal readonly NetworkViewManager Manager;
 
         #region NetworkViewID
@@ -50,7 +45,7 @@ namespace PNetC
 
         private readonly Dictionary<byte, Action<NetIncomingMessage>> _rpcProcessors = new Dictionary<byte, Action<NetIncomingMessage>>();
         private readonly IntDictionary<Action<NetIncomingMessage>> _fieldProcessors = new IntDictionary<Action<NetIncomingMessage>>();
-        private Action<NetOutgoingMessage> _onSerializeStream = delegate { };
+        private Action<NetOutgoingMessage> _onSerializeStream;
 
         /// <summary>
         /// method of serialization
@@ -141,7 +136,8 @@ namespace PNetC
             {
                 var nMessage = Manager.Net.Peer.CreateMessage(DefaultStreamSize);
                 nMessage.Write(ViewID.guid);
-                _onSerializeStream(nMessage);
+                if (_onSerializeStream != null)
+                    _onSerializeStream(nMessage);
 
                 if (StateSynchronization == NetworkStateSynchronization.Unreliable)
                     Manager.Net.Peer.SendMessage(nMessage, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
@@ -249,11 +245,12 @@ namespace PNetC
             //do some cleanup
             _rpcProcessors.Clear();
             _fieldProcessors.Clear();
-            _onSerializeStream = delegate { };
+            _onSerializeStream = null;
 
             try
             {
                 if (OnRemove != null) OnRemove(reasonCode);
+                OnRemove = null;
             }
             catch(Exception e)
             {
@@ -261,7 +258,6 @@ namespace PNetC
             }
 
             Manager.RemoveView(this);
-            Container = null;
         }
 
         /// <summary>
@@ -270,7 +266,7 @@ namespace PNetC
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("NV {0}:{1}:{2}", ViewID.guid, OwnerId, Container);
+            return string.Format("NV {0}:{1}", ViewID.guid, OwnerId);
         }
     }
 }

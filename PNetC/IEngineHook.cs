@@ -17,8 +17,7 @@ namespace PNetC
         /// <param name="newView"></param>
         /// <param name="location"></param>
         /// <param name="rotation"></param>
-        /// <returns></returns>
-        object Instantiate(string path, NetworkView newView, Vector3 location, Quaternion rotation);
+        void Instantiate(string path, NetworkView newView, Vector3 location, Quaternion rotation);
 
         /// <summary>
         /// Add a NetworkView to the same container as an already existing NetworkView
@@ -26,7 +25,6 @@ namespace PNetC
         /// <param name="view"></param>
         /// <param name="newView"></param>
         /// <param name="customFunction"></param>
-        /// <returns></returns>
-        object AddNetworkView(NetworkView view, NetworkView newView, string customFunction);
+        void AddNetworkView(NetworkView view, NetworkView newView, string customFunction);
     }
 }

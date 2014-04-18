@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using NetworkView = PNetC.NetworkView;
-using Object = UnityEngine.Object;
+using Debug = UnityEngine.Debug;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace PNetU
 {
@@ -11,6 +12,9 @@ namespace PNetU
     /// </summary>
     internal class UnityEngineHook : MonoBehaviour, PNetC.IEngineHook
     {
+        readonly UnityNetworkViewManager _manager = new UnityNetworkViewManager();
+        internal UnityNetworkViewManager Manager { get { return _manager; } }
+
         public event Action EngineUpdate;
 
         static UnityEngineHook _instance;
@@ -61,7 +65,7 @@ namespace PNetU
         }
 
         internal static Dictionary<string, GameObject> ResourceCache = new Dictionary<string, GameObject>();
-        public object Instantiate(string path, PNetC.NetworkView newView, PNetC.Vector3 location, PNetC.Quaternion rotation)
+        public void Instantiate(string path, PNetC.NetworkView newView, PNetC.Vector3 location, PNetC.Quaternion rotation)
         {
             GameObject gobj;
             bool isCached = false;
@@ -78,7 +82,7 @@ namespace PNetU
             if (instance == null)
             {
                 Debug.LogWarning("could not find prefab " + path + " to instantiate");
-                return null;
+                instance = new GameObject("BROKEN NETWORK PREFAB " + newView.ViewID);
             }
 
             if (Debug.isDebugBuild)
@@ -87,12 +91,11 @@ namespace PNetU
             }
 
             //look for a networkview..
-
             var view = instance.GetComponent<NetworkView>();
             if (view == null)
                 view = instance.AddComponent<NetworkView>();
 
-            view.SetNetworkView(newView);
+            _manager.AddView(newView, view);
 
             var nBehaviours = instance.GetComponents<NetBehaviour>();
 
@@ -104,31 +107,26 @@ namespace PNetU
             }
 
             view.DoOnFinishedCreation();
-
-            return view;
         }
 
-        public object AddNetworkView(PNetC.NetworkView view, PNetC.NetworkView newView, string customFunction)
+        public void AddNetworkView(PNetC.NetworkView view, PNetC.NetworkView newView, string customFunction)
         {
-            var uview = view.Container as NetworkView;
-
-            if (uview == null)
+            NetworkView uview;
+            if (!_manager.TryGetView(view.ViewID, out uview))
             {
                 Debug.LogError("Could not attach extra networkview because we could not pull the source");
-                return null;
             }
 
             var unewView = uview.gameObject.AddComponent<NetworkView>();
-            unewView.SetNetworkView(newView);
+            _manager.AddView(newView, unewView);
 
             if (Debug.isDebugBuild)
             {
                 Debug.Log("Attached extra networkview " + newView.ViewID.guid, uview.gameObject);
             }
 
-            uview.gameObject.SendMessage(customFunction, unewView, SendMessageOptions.DontRequireReceiver);
-
-            return unewView;
+            if (!string.IsNullOrEmpty(customFunction))
+                uview.gameObject.SendMessage(customFunction, unewView, SendMessageOptions.DontRequireReceiver);
         }
     }
 }

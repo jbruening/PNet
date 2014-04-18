@@ -76,7 +76,7 @@ namespace UnitTestsPNetC
         [TestMethod()]
         public void CreateTest()
         {
-            ushort viewId = 15;
+            var viewId = new NetworkViewId{guid =15};
             ushort ownerId = 14;
             
             _net.TestablePlayerID = 12;
@@ -84,7 +84,7 @@ namespace UnitTestsPNetC
             
             
             //test regular creation with an empty pool
-            Assert.AreEqual(viewId, actual.ViewID.guid);
+            Assert.AreEqual(viewId, actual.ViewID);
             Assert.AreEqual(ownerId, actual.OwnerId);
             Assert.IsFalse(actual.IsMine);
         }
@@ -95,11 +95,11 @@ namespace UnitTestsPNetC
             ushort playerID = 15;
             _net.TestablePlayerID = playerID;
 
-            var actual = _target.Create(16, playerID);
+            var actual = _target.Create(new NetworkViewId{guid =16}, playerID);
             
             Assert.IsTrue(actual.IsMine, "The networkview should be mine");
 
-            actual = _target.Create(16, 17);
+            actual = _target.Create(new NetworkViewId{guid = 16}, 17);
 
             Assert.IsFalse(actual.IsMine, "The networkview should not be mine");
         }
@@ -107,9 +107,9 @@ namespace UnitTestsPNetC
         [TestMethod()]
         public void RecycleTest()
         {
-            ushort vid1 = 15;
-            ushort vid2 = 16;
-            ushort vid3 = 17;
+            var vid1 = new NetworkViewId{guid =15};
+            var vid2 = new NetworkViewId{guid =16};
+            var vid3 = new NetworkViewId{guid =17};
 
             ushort owner1 = 1;
             ushort owner2 = 2;

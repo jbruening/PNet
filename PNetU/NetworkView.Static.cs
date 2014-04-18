@@ -8,11 +8,13 @@ namespace PNetU
         /// <summary>
         /// find a network view based on the given NetworkViewId
         /// </summary>
-        /// <param name="viewID"></param>
+        /// <param name="viewId"></param>
         /// <returns></returns>
-        public static NetworkView Find(NetworkViewId viewID)
+        public static NetworkView Find(NetworkViewId viewId)
         {
-            return Net.Peer.NetworkViewManager.Find(viewID).Container as NetworkView;
+            NetworkView view;
+            UnityEngineHook.Instance.Manager.TryGetView(viewId, out view);
+            return view;
         }
 
         /// <summary>
@@ -23,10 +25,9 @@ namespace PNetU
         /// <returns></returns>
         public static bool Find(ref NetIncomingMessage message, out NetworkView view)
         {
-            PNetC.NetworkView netview;
-            var result = Net.Peer.NetworkViewManager.Find(ref message, out netview);
-            view = netview.Container as NetworkView;
-            return result;
+            var viewId = new NetworkViewId();
+            viewId.OnDeserialize(message);
+            return UnityEngineHook.Instance.Manager.TryGetView(viewId, out view);
         }
     }
 }

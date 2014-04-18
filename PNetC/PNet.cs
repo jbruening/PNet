@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Lidgren.Network;
 using PNet;
 using System.ComponentModel;
@@ -13,6 +11,8 @@ namespace PNetC
     /// </summary>
     public class Net
     {
+        private const int AssumedFrameNetbufferSize = 4096;
+
         /// <summary>
         /// When finished connecting to the server
         /// </summary>
@@ -113,21 +113,10 @@ namespace PNetC
         /// </summary>
         public Net(IEngineHook engineHook)
         {
+            if (engineHook == null)
+                throw new ArgumentNullException("engineHook");
             EngineHook = engineHook;
             NetworkViewManager = new NetworkViewManager(this);
-        }
-
-        /// <summary>
-        /// Connect to the specified ip on the specified port
-        /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <param name="bindport">port to actually listen on. Default is just the first available port</param>
-        [Obsolete("Use the overload that takes a ClientConfiguration")]
-        public void Connect(string ip, int port, int bindport = 0)
-        {
-            Configuration = new ClientConfiguration(ip, port, bindport);
-            Connect(Configuration);
         }
         /// <summary>
         /// the current configuration
@@ -151,9 +140,6 @@ namespace PNetC
                 Debug.LogError(this, "cannot connect while peer is running");
                 return;
             }
-
-            if (EngineHook == null) 
-                throw new Exception("Cannot have a null EngineHook");
             
             EngineHook.EngineUpdate += Update;
             _shutdownQueued = false;
@@ -209,11 +195,11 @@ namespace PNetC
             Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
-        private void FinishedInstantiate(ushort netID)
+        private void FinishedInstantiate(NetworkViewId netId)
         {
-            NetOutgoingMessage msg = Peer.CreateMessage(3);
+            var msg = Peer.CreateMessage(3);
             msg.Write(RPCUtils.FinishedInstantiate);
-            msg.Write(netID);
+            netId.OnSerialize(msg);
 
             Peer.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
             Debug.Log(this, "Finished instantiation, sending ack");
@@ -225,13 +211,13 @@ namespace PNetC
 
             if (utilId == RPCUtils.TimeUpdate)
             {
-
+                throw new NotImplementedException("RPCUtils.TimeUpdate");
             }
             else if (utilId == RPCUtils.Instantiate)
             {
                 //read the path...
                 var resourcePath = msg.ReadString();
-                var viewId = msg.ReadUInt16();
+                var viewId = NetworkViewId.Deserialize(msg);
                 var ownerId = msg.ReadUInt16();
 
                 var position = new Vector3();
@@ -241,19 +227,14 @@ namespace PNetC
 
                 var view = NetworkViewManager.Create(viewId, ownerId);
 
-                
-
-                object netviewContainer = null;
-
                 try
                 {
-                     netviewContainer = EngineHook.Instantiate(resourcePath, view, position, rotation);
+                    EngineHook.Instantiate(resourcePath, view, position, rotation);
                 }
                 catch(Exception e)
                 {
                     Debug.LogError(this, "[EngineHook.Instantiate] {0}", e);
                 }
-                view.Container = netviewContainer;
 
                 Debug.Log(this, "Created {0}", view);
 
@@ -263,7 +244,9 @@ namespace PNetC
             }
             else if (utilId == RPCUtils.Remove)
             {
-                var viewId = msg.ReadUInt16();
+
+                var viewId = new NetworkViewId();
+                viewId.OnDeserialize(msg);
                 byte reasonCode;
                 if (!msg.ReadByte(out reasonCode))
                     reasonCode = 0;
@@ -272,6 +255,10 @@ namespace PNetC
                 if (NetworkViewManager.Find(viewId, out find))
                 {
                     find.DoOnRemove(reasonCode);
+                }
+                else
+                {
+                    Debug.LogError(this, "Attempted to remove {0}, but it could not be found", viewId);
                 }
             }
             else if (utilId == RPCUtils.ChangeRoom)
@@ -299,8 +286,8 @@ namespace PNetC
             }
             else if (utilId == RPCUtils.AddView)
             {
-                var addToId = msg.ReadUInt16();
-                var idToAdd = msg.ReadUInt16();
+                var addToId = NetworkViewId.Deserialize(msg);
+                var idToAdd = NetworkViewId.Deserialize(msg);
                 string customFunction;
                 msg.ReadString(out customFunction);
 
@@ -310,18 +297,13 @@ namespace PNetC
                 {
                     var newView = NetworkViewManager.Create(idToAdd, view.OwnerId);
 
-                    object container = null;
                     try
                     {
-                        container = EngineHook.AddNetworkView(view, newView, customFunction);
+                        EngineHook.AddNetworkView(view, newView, customFunction);
                     }
                     catch (Exception e)
                     {
                         Debug.LogError(this, "[EngineHook.AddNetworkView] {0}", e);
-                    }
-                    if (container != null)
-                    {
-                        newView.Container = container;
                     }
                 }
                 else
@@ -337,15 +319,15 @@ namespace PNetC
             }
         }
 
-        private bool _shutdownQueued = false;
+        private bool _shutdownQueued;
 
         void Update()
         {
             if (!IsMessageQueueRunning) return;
             Time = NetTime.Now;
             if (Peer == null) return; //in case something is running update before we've even tried to connect
-            var messages = new List<NetIncomingMessage>();
-            int counter = Peer.ReadMessages(messages);
+            var messages = new List<NetIncomingMessage>(AssumedFrameNetbufferSize);
+            Peer.ReadMessages(messages);
 
             if (_shutdownQueued)
             {
@@ -359,6 +341,7 @@ namespace PNetC
             }
 
             //for loops are way faster with lists than foreach
+// ReSharper disable once ForCanBeConvertedToForeach
             for (int i = 0; i < messages.Count; i++)
             {
                 var msg = messages[i];
@@ -382,6 +365,14 @@ namespace PNetC
                 {
                     Latency = msg.ReadFloat();
                     Peer.Recycle(msg);
+                }
+                else if (msg.MessageType == NetIncomingMessageType.DebugMessage)
+                {
+                    Debug.Log(this, msg.ReadString());
+                }
+                else if (msg.MessageType == NetIncomingMessageType.WarningMessage)
+                {
+                    Debug.LogWarning(this, msg.ReadString());
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ErrorMessage)
                 {
@@ -453,7 +444,6 @@ namespace PNetC
             return Peer.CreateMessage(initialCapacity);
         }
 
-
         private void Consume(NetIncomingMessage msg)
         {
             try
@@ -461,14 +451,14 @@ namespace PNetC
                 //faster than switch, as this is in most to least common order
                 if (msg.SequenceChannel == Channels.UNRELIABLE_STREAM)
                 {
-                    var actorId = msg.ReadUInt16();
+                    var actorId = NetworkViewId.Deserialize(msg);
                     NetworkView find;
                     if (NetworkViewManager.Find(actorId, out find))
                         find.DoOnDeserializeStream(msg);
                 }
                 else if (msg.SequenceChannel == Channels.RELIABLE_STREAM)
                 {
-                    var actorId = msg.ReadUInt16();
+                    var actorId = NetworkViewId.Deserialize(msg);
                     NetworkView find;
                     if (NetworkViewManager.Find(actorId, out find))
                         find.DoOnDeserializeStream(msg);
@@ -476,17 +466,17 @@ namespace PNetC
                 else if (msg.SequenceChannel >= Channels.BEGIN_RPCMODES && msg.SequenceChannel <= Channels.OWNER_RPC)
                 {
                     //rpc...
-                    var viewID = msg.ReadUInt16();
+                    var viewId = NetworkViewId.Deserialize(msg);
                     var rpcId = msg.ReadByte();
                     NetworkView find;
-                    if (NetworkViewManager.Find(viewID, out find))
+                    if (NetworkViewManager.Find(viewId, out find))
                         find.CallRPC(rpcId, msg);
                     else
-                        Debug.LogWarning(this, "couldn't find view " + viewID + " to send rpc " + rpcId);
+                        Debug.LogWarning(this, "couldn't find view {0} to send rpc {1}", viewId, rpcId);
                 }
                 else if (msg.SequenceChannel == Channels.SYNCHED_FIELD)
                 {
-                    var viewId = msg.ReadUInt16();
+                    var viewId = NetworkViewId.Deserialize(msg);
                     var fieldId = msg.ReadByte();
                     NetworkView find;
                     if (NetworkViewManager.Find(viewId, out find))
@@ -511,7 +501,7 @@ namespace PNetC
                 }
                 else
                 {
-                    Debug.LogWarning(this, "data received over unhandled channel " + msg.SequenceChannel);
+                    Debug.LogWarning(this, "data received over unhandled channel {0}", msg.SequenceChannel);
                 }
             }
             catch (Exception er)

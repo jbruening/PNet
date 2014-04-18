@@ -5,10 +5,11 @@ using PNet;
 namespace PNetC
 {
     /// <summary>
-    /// A container, object pool, and general manager for the network views associated with a Net object
+    /// A container, object pool, and general manager for the network views associated with all Networked objects
     /// </summary>
     public sealed class NetworkViewManager
     {
+        private const int ViewPoolSize = 150;
         readonly IntDictionary<NetworkView> _allViews = new IntDictionary<NetworkView>();
         private readonly Stack<NetworkView> _netViewPool = new Stack<NetworkView>(150);
         internal readonly Net Net;
@@ -24,11 +25,11 @@ namespace PNetC
         /// <summary>
         /// find a network view based on the given NetworkViewId
         /// </summary>
-        /// <param name="viewID"></param>
+        /// <param name="viewId"></param>
         /// <returns></returns>
-        public NetworkView Find(NetworkViewId viewID)
+        public NetworkView Find(NetworkViewId viewId)
         {
-            return _allViews[viewID.guid];
+            return _allViews[viewId.guid];
         }
 
         /// <summary>
@@ -39,17 +40,21 @@ namespace PNetC
         /// <returns></returns>
         public bool Find(ref NetIncomingMessage message, out NetworkView view)
         {
-            var id = NetworkViewId.Deserialize(message);
+            var id = new NetworkViewId();
+            id.OnDeserialize(message);
 
             return Find(id, out view);
         }
 
-        internal bool Find(ushort id, out NetworkView view)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="view"></param>
+        /// <returns></returns>
+        public bool Find(NetworkViewId id, out NetworkView view)
         {
-            view = _allViews[id];
-            if (view != null)
-                return true;
-            return false;
+            return _allViews.TryGetValue(id.guid, out view);
         }
 
         internal void RemoveView(NetworkView view)
@@ -75,15 +80,17 @@ namespace PNetC
             }
         }
 
-        private void RegisterView(NetworkView view, ushort viewId)
+        private void RegisterView(NetworkView view, NetworkViewId viewId)
         {
-            _allViews.Add(viewId, view);
+            _allViews.Add(viewId.guid, view);
         }
 
-        internal NetworkView Create(ushort viewId, ushort ownerId)
+        internal NetworkView Create(NetworkViewId viewId, ushort ownerId)
         {
+            viewId.IsMine = Net.PlayerId == ownerId;
+
             var newView = GetNetworkView();
-            newView.ViewID = new NetworkViewId {guid = viewId, IsMine = Net.PlayerId == ownerId};
+            newView.ViewID = viewId;
             newView.OwnerId = ownerId;
             RegisterView(newView, viewId);
             return newView;
@@ -99,7 +106,7 @@ namespace PNetC
         //pool recycle for networkviews
         void RecycleNetworkView(NetworkView view)
         {
-            if (_netViewPool.Count < 150)
+            if (_netViewPool.Count < ViewPoolSize)
                 _netViewPool.Push(view);
         }
     }

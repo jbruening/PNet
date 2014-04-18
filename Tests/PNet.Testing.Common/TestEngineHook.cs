@@ -14,16 +14,15 @@ namespace PNet.Testing.Common
         public event Action EngineUpdate;
 
         public Dictionary<string, NetworkView> Instantiates = new Dictionary<string, NetworkView>();
-        public object Instantiate(string path, NetworkView newView, Vector3 location, Quaternion rotation)
+        public void Instantiate(string path, NetworkView newView, Vector3 location, Quaternion rotation)
         {
             Console.WriteLine("{0} instantiated", path);
             Instantiates.Add(path, newView);
-            return path;
         }
 
-        public object AddNetworkView(NetworkView view, NetworkView newView, string customFunction)
+        public void AddNetworkView(NetworkView view, NetworkView newView, string customFunction)
         {
-            return null;
+            
         }
 
         public void RunOneUpdate()

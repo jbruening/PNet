@@ -53,6 +53,7 @@
     <Compile Include="UnityDebugLogger.cs" />
     <Compile Include="UnityEngineHook.cs" />
     <Compile Include="UnityExtensions.cs" />
+    <Compile Include="UnityNetworkViewManager.cs" />
     <Compile Include="UnitySerializers.cs" />
   </ItemGroup>
   <ItemGroup>

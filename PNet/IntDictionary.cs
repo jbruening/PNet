@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Collections;
 
 namespace PNet
@@ -18,7 +16,7 @@ namespace PNet
     /// Of note: as this takes up as much memory as the last index + bool array the same size, this should probably be used for small collections.
     /// </remarks>
     /// <typeparam name="T"></typeparam>
-    public class IntDictionary<T> : IEnumerable, IEnumerable<T>
+    public class IntDictionary<T> : IEnumerable<T>
     {
         readonly List<T> _collection;
         readonly List<bool> _hasValueCollection;
@@ -199,7 +197,7 @@ namespace PNet
         /// </summary>
         public int Capacity { get { return _collection.Count; } }
 
-        System.Collections.IEnumerator IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }

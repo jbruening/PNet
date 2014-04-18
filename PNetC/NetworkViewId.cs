@@ -40,15 +40,24 @@ namespace PNetC
         }
 
         /// <summary>
-        /// doesn't do anything for integrity
+        /// Be careful! It is not recommended to be directly serializing networkviewids.
         /// </summary>
         /// <param name="message">message to read from</param>
-        [Obsolete("Use NetworkView.Find(NetIncomingMessage, out NetworkView)")]
-        public void OnDeserialize(NetIncomingMessage message){}
-
-        internal static ushort Deserialize(NetIncomingMessage message)
+        public void OnDeserialize(NetIncomingMessage message)
         {
-            return message.ReadUInt16();
+            guid = message.ReadUInt16();
+        }
+
+        /// <summary>
+        /// Deserialize a networkviewid from the networkmessage
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        internal static NetworkViewId Deserialize(NetIncomingMessage message)
+        {
+            var id = new NetworkViewId();
+            id.OnDeserialize(message);
+            return id;
         }
 
         /// <summary>
