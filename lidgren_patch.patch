@@ -1,6 +1,6 @@
 Index: Lidgren.Network.csproj
 ===================================================================
---- Lidgren.Network.csproj	(revision 338)
+--- Lidgren.Network.csproj	(revision 352)
 +++ Lidgren.Network.csproj	(working copy)
 @@ -10,7 +10,7 @@
      <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -23,7 +23,7 @@ Index: Lidgren.Network.csproj
      <WarningLevel>4</WarningLevel>
      <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
      <DocumentationFile>bin\Debug\Lidgren.Network.XML</DocumentationFile>
-+    <PlatformTarget>x86</PlatformTarget>
++    <PlatformTarget>AnyCPU</PlatformTarget>
    </PropertyGroup>
    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
      <DebugType>pdbonly</DebugType>
@@ -43,7 +43,7 @@ Index: Lidgren.Network.csproj
    </ItemGroup>
 Index: NetBuffer.cs
 ===================================================================
---- NetBuffer.cs	(revision 338)
+--- NetBuffer.cs	(revision 352)
 +++ NetBuffer.cs	(working copy)
 @@ -69,8 +69,39 @@
  		{
@@ -89,7 +89,7 @@ Index: NetBuffer.cs
  			MethodInfo[] methods = typeof(NetIncomingMessage).GetMethods(BindingFlags.Instance | BindingFlags.Public);
 Index: NetConstants.cs
 ===================================================================
---- NetConstants.cs	(revision 338)
+--- NetConstants.cs	(revision 352)
 +++ NetConstants.cs	(working copy)
 @@ -33,7 +33,7 @@
  
@@ -102,7 +102,7 @@ Index: NetConstants.cs
  		internal const int DefaultWindowSize = 64;
 Index: NetPeer.Internal.cs
 ===================================================================
---- NetPeer.Internal.cs	(revision 338)
+--- NetPeer.Internal.cs	(revision 352)
 +++ NetPeer.Internal.cs	(working copy)
 @@ -1,5 +1,5 @@
  ﻿#if !__ANDROID__ && !IOS
@@ -113,7 +113,7 @@ Index: NetPeer.Internal.cs
  using System;
 Index: NetUtility.cs
 ===================================================================
---- NetUtility.cs	(revision 338)
+--- NetUtility.cs	(revision 352)
 +++ NetUtility.cs	(working copy)
 @@ -17,7 +17,7 @@
  USE OR OTHER DEALINGS IN THE SOFTWARE.
