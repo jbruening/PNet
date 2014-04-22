@@ -16,12 +16,11 @@ namespace PNetS.GameMachine.State
             foreach (IEnumerator coroutine in unblockedCoroutines)
             {
                 var yRoute = coroutine.Current as YieldInstruction;
-                if (yRoute is PNetS.Coroutine)
+                if (yRoute != null)
                 {
-                    //yielding on a coroutine. gotta handle specially...
-                    //running IsDone is equivilent to MoveNext for coroutines
-                    var croute = yRoute as PNetS.Coroutine;
-                    if (!croute.IsDone())
+                    //yielding on a yieldinstruction
+                    //running IsDone is equivilent to MoveNext for yieldinstructions
+                    if (!yRoute.IsDone())
                     {
                         shouldRunNextFrame.Add(coroutine);
                         continue;

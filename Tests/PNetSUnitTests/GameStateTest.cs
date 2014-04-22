@@ -97,6 +97,7 @@ namespace PNetSUnitTests
             var test = gobj.AddComponent<TestCoroutine>();
 
             test.StartCoroutine(test.DoThing());
+            //one extra Run is required as it's assumed that this would be the same frame that the coroutine would be started in.
             test.RunCoroutines();
             Assert.AreEqual(test.OuterCount, 1);
             Assert.AreEqual(test.InnerCount, 0);
@@ -155,6 +156,34 @@ namespace PNetSUnitTests
                 if (MoreEnumCount < 5)
                     StartCoroutine(MoreEnumerator());
             }
+
+            public bool HasWaitedForFrames { get; private set; }
+            public IEnumerator FrameWaiter()
+            {
+                yield return new WaitForFrames(3);
+                HasWaitedForFrames = true;
+            }
+        }
+
+        [TestMethod]
+        public void TestWaitFrames()
+        {
+            var gobj = new GameObject();
+            var test = gobj.AddComponent<TestCoroutine>();
+
+            test.StartCoroutine(test.FrameWaiter());
+            Assert.IsFalse(test.HasWaitedForFrames);
+            //one extra Run is required as it's assumed that this would be the same frame that the coroutine would be started in.
+            test.RunCoroutines();
+            Assert.IsFalse(test.HasWaitedForFrames);
+            
+            //now these are real frames.
+            test.RunCoroutines();
+            Assert.IsFalse(test.HasWaitedForFrames);
+            test.RunCoroutines();
+            Assert.IsFalse(test.HasWaitedForFrames);
+            test.RunCoroutines();
+            Assert.IsTrue(test.HasWaitedForFrames);
         }
     }
 }

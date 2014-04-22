@@ -47,6 +47,7 @@
     <Compile Include="GameMachine\State\GameState.Coroutine.cs" />
     <Compile Include="GameMachine\Yield\Coroutine.cs" />
     <Compile Include="GameMachine\State\Time.cs" />
+    <Compile Include="GameMachine\Yield\WaitForFrames.cs" />
     <Compile Include="GameMachine\Yield\YieldInstruction.cs" />
     <Compile Include="Log\Log.cs" />
     <Compile Include="NetworkView\NetMessageInfo.cs" />
