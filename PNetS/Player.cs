@@ -147,7 +147,6 @@ namespace PNetS
         /// Send a static RPC to the player. (prevents array allocation)
         /// </summary>
         /// <param name="rpcID"></param>
-        /// <param name="arg0"></param>
         public void RPC(byte rpcID)
         {
             var size = 1;

@@ -27,14 +27,11 @@ namespace PNetS
         /// <summary>
         /// when the yieldinstruction finishes
         /// </summary>
-        public override bool IsDone
+        public override bool IsDone()
         {
-            get
-            {
-                if (Time.time - startTime > waitTime)
-                    return true;
-                return false;
-            }
+            if (Time.time - startTime > waitTime)
+                return true;
+            return false;
         }
     }
 }

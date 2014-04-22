@@ -14,7 +14,7 @@ namespace PNetS
     /// <summary>
     /// A container for players/network views
     /// </summary>
-    public sealed class Room
+    public sealed partial class Room
     {
         private List<Player> m_Players = new List<Player>();
         /// <summary>
@@ -64,13 +64,6 @@ namespace PNetS
                     player.ChangeRoom(roomToChangeLeftoverPlayersTo);
                 }
             }
-            
-
-            foreach (var routine in rootRoutines)
-            {
-                GameState.RemoveRoutine(routine);
-            }
-            rootRoutines = null;
             
             foreach (var act in m_Actors)
             {
@@ -463,25 +456,6 @@ namespace PNetS
 
             player.CurrentRoom = null;
         }
-
-        /// <summary>
-        /// in order to actually start a coroutine chain, you need to set IsRootRoutine to true on the first call in a coroutine call chain.
-        /// </summary>
-        /// <param name="routine"></param>
-        /// <param name="IsRootRoutine"></param>
-        /// <returns></returns>
-        public Coroutine StartCoroutine(IEnumerator<YieldInstruction> routine, bool IsRootRoutine = false)
-        {
-            if (IsRootRoutine)
-            {
-                GameState.AddRoutine(routine);
-                rootRoutines.Add(routine);
-            }
-            return new Coroutine(routine);
-        }
-
-        internal List<IEnumerator<YieldInstruction>> rootRoutines = new List<IEnumerator<YieldInstruction>>();
-
 
         Dictionary<ushort, NetworkedSceneObjectView> roomObjects = new Dictionary<ushort, NetworkedSceneObjectView>(8);
 
