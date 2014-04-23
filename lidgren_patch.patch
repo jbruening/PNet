@@ -87,6 +87,106 @@ Index: NetBuffer.cs
  		{
  			s_readMethods = new Dictionary<Type, MethodInfo>();
  			MethodInfo[] methods = typeof(NetIncomingMessage).GetMethods(BindingFlags.Instance | BindingFlags.Public);
+Index: NetConnection.cs
+===================================================================
+--- NetConnection.cs	(revision 352)
++++ NetConnection.cs	(working copy)
+@@ -19,6 +19,8 @@
+ 		internal NetConnectionStatus m_status;
+ 		internal NetConnectionStatus m_visibleStatus;
+ 		internal IPEndPoint m_remoteEndPoint;
++        internal int m_usedSendChannelsCount;
++        internal NetSenderChannelBase[] m_usedSendChannels;
+ 		internal NetSenderChannelBase[] m_sendChannels;
+ 		internal NetReceiverChannelBase[] m_receiveChannels;
+ 		internal NetOutgoingMessage m_localHailMessage;
+@@ -85,6 +87,8 @@
+ 			m_status = NetConnectionStatus.None;
+ 			m_visibleStatus = NetConnectionStatus.None;
+ 			m_remoteEndPoint = remoteEndPoint;
++            m_usedSendChannelsCount = 0;
++            m_usedSendChannels = new NetSenderChannelBase[NetConstants.NumTotalChannels];
+ 			m_sendChannels = new NetSenderChannelBase[NetConstants.NumTotalChannels];
+ 			m_receiveChannels = new NetReceiverChannelBase[NetConstants.NumTotalChannels];
+ 			m_queuedOutgoingAcks = new NetQueue<NetTuple<NetMessageType, int>>(4);
+@@ -242,31 +246,40 @@
+ 			//
+ 			// send queued messages
+ 			//
+-			if (m_peer.m_executeFlushSendQueue)
+-			{
+-				for (int i = m_sendChannels.Length - 1; i >= 0; i--)    // Reverse order so reliable messages are sent first
+-				{
+-					var channel = m_sendChannels[i];
+-					NetException.Assert(m_sendBufferWritePtr < 1 || m_sendBufferNumMessages > 0);
+-					if (channel != null)
+-						channel.SendQueuedMessages(now);
+-					NetException.Assert(m_sendBufferWritePtr < 1 || m_sendBufferNumMessages > 0);
+-				}
+-			}
++            SendQueuedMessages(now);
+ 
+ 			//
+ 			// Put on wire data has been written to send buffer but not yet sent
+ 			//
+-			if (m_sendBufferWritePtr > 0)
+-			{
+-				m_peer.VerifyNetworkThread();
+-				NetException.Assert(m_sendBufferWritePtr > 0 && m_sendBufferNumMessages > 0);
+-				m_peer.SendPacket(m_sendBufferWritePtr, m_remoteEndPoint, m_sendBufferNumMessages, out connectionReset);
+-				m_statistics.PacketSent(m_sendBufferWritePtr, m_sendBufferNumMessages);
+-				m_sendBufferWritePtr = 0;
+-				m_sendBufferNumMessages = 0;
+-			}
++            SendPacket();
+ 		}
++
++        private void SendQueuedMessages(float now)
++        {
++            if (m_peer.m_executeFlushSendQueue)
++            {
++                for (int i = 0; i < m_usedSendChannelsCount; i++)
++                {
++                    NetException.Assert(m_sendBufferWritePtr < 1 || m_sendBufferNumMessages > 0);
++                    m_usedSendChannels[i].SendQueuedMessages(now);
++                    NetException.Assert(m_sendBufferWritePtr < 1 || m_sendBufferNumMessages > 0);
++                }
++            }
++        }
++
++        private void SendPacket()
++        {
++            if (m_sendBufferWritePtr > 0)
++            {
++                m_peer.VerifyNetworkThread();
++                NetException.Assert(m_sendBufferWritePtr > 0 && m_sendBufferNumMessages > 0);
++                bool connectionReset;
++                m_peer.SendPacket(m_sendBufferWritePtr, m_remoteEndPoint, m_sendBufferNumMessages, out connectionReset);
++                m_statistics.PacketSent(m_sendBufferWritePtr, m_sendBufferNumMessages);
++                m_sendBufferWritePtr = 0;
++                m_sendBufferNumMessages = 0;
++            }
++        }
+ 		
+ 		// Queue an item for immediate sending on the wire
+ 		// This method is called from the ISenderChannels
+@@ -363,7 +376,16 @@
+ 							chan = new NetReliableSenderChannel(this, NetUtility.GetWindowSize(method));
+ 							break;
+ 					}
++
+ 					m_sendChannels[channelSlot] = chan;
++
++                    // rebuild m_usedSendChannels
++                    m_usedSendChannelsCount = 0;
++                    for (int i = m_sendChannels.Length - 1; i >= 0; i--) // Reverse order so reliable messages are sent first
++                    {
++                        if (m_sendChannels[i] != null)
++                            m_usedSendChannels[m_usedSendChannelsCount++] = m_sendChannels[i];
++                    }
+ 				}
+ 			}
+ 
 Index: NetConnectionStatistics.cs
 ===================================================================
 --- NetConnectionStatistics.cs	(revision 352)
@@ -104,19 +204,33 @@ Index: NetConstants.cs
 ===================================================================
 --- NetConstants.cs	(revision 352)
 +++ NetConstants.cs	(working copy)
-@@ -33,9 +33,9 @@
+@@ -25,18 +25,19 @@
+ 	/// </summary>
+ 	internal static class NetConstants
+ 	{
+-		internal const int NumTotalChannels = 99;
++        internal const int NumTotalChannels = 99; // Don't change!
+ 
+-		internal const int NetChannelsPerDeliveryMethod = 32;
++        internal const int NetChannelsPerDeliveryMethod = 32; // Don't change!
+ 
+-		internal const int NumSequenceNumbers = 1024;
++		internal const int NumSequenceNumbers = 1024; // Must be power of two
++        internal const int NumSequenceNumberMask = NumSequenceNumbers - 1; // Don't change!
  
  		internal const int HeaderByteSize = 5;
  
 -		internal const int UnreliableWindowSize = 128;
 -		internal const int ReliableOrderedWindowSize = 64;
 -		internal const int ReliableSequencedWindowSize = 64;
+-		internal const int DefaultWindowSize = 64;
 +		internal const int UnreliableWindowSize = 1024;
 +		internal const int ReliableOrderedWindowSize = 64; // MAX: 64
 +        internal const int ReliableSequencedWindowSize = 64; // MAX: 64
- 		internal const int DefaultWindowSize = 64;
++        internal const int DefaultWindowSize = 64; // MAX: 64
  
  		internal const int MaxFragmentationGroups = ushort.MaxValue - 1;
+ 
 Index: NetPeer.Internal.cs
 ===================================================================
 --- NetPeer.Internal.cs	(revision 352)
@@ -149,7 +263,25 @@ Index: NetReliableSenderChannel.cs
  			m_storedMessages = new NetStoredReliableMessage[m_windowSize];
  			m_queuedSends = new NetQueue<NetOutgoingMessage>(8);
  			m_resendDelay = m_connection.GetResendDelay();
-@@ -66,37 +69,39 @@
+@@ -34,7 +37,7 @@
+ 
+ 		internal override int GetAllowedSends()
+ 		{
+-			int retval = m_windowSize - ((m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart) % NetConstants.NumSequenceNumbers;
++            int retval = m_windowSize - ((m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart) & NetConstants.NumSequenceNumberMask;
+ 			NetException.Assert(retval >= 0 && retval <= m_windowSize);
+ 			return retval;
+ 		}
+@@ -54,7 +57,7 @@
+ 			m_queuedSends.Enqueue(message);
+ 
+ 			int queueLen = m_queuedSends.Count;
+-			int left = m_windowSize - ((m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart) % NetConstants.NumSequenceNumbers;
++			int left = m_windowSize - ((m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart) & NetConstants.NumSequenceNumberMask;
+ 			if (queueLen <= left)
+ 				return NetSendResult.Sent;
+ 			return NetSendResult.Queued;
+@@ -66,48 +69,54 @@
  			//
  			// resends
  			//
@@ -215,8 +347,33 @@ Index: NetReliableSenderChannel.cs
 +            }
  
  			int num = GetAllowedSends();
- 			if (num < 1)
-@@ -121,8 +126,9 @@
+-			if (num < 1)
++			if (num == 0)
+ 				return;
+ 
+ 			// queued sends
+-			while (m_queuedSends.Count > 0 && num > 0)
++            int queued = m_queuedSends.Count;
++            while (queued > 0 && num > 0)
+ 			{
+ 				NetOutgoingMessage om;
+-				if (m_queuedSends.TryDequeue(out om))
+-					ExecuteSend(now, om);
++                if (m_queuedSends.TryDequeue(out om))
++                {
++                    ExecuteSend(now, om);
++                    queued--;
++                }
+ 				num--;
+ 				NetException.Assert(num == GetAllowedSends());
+ 			}
+@@ -116,13 +125,14 @@
+ 		private void ExecuteSend(float now, NetOutgoingMessage message)
+ 		{
+ 			int seqNr = m_sendStart;
+-			m_sendStart = (m_sendStart + 1) % NetConstants.NumSequenceNumbers;
++			m_sendStart = (m_sendStart + 1) & NetConstants.NumSequenceNumberMask;
+ 
  			m_connection.QueueSendMessage(message, seqNr);
  
  			int storeIndex = seqNr % m_windowSize;
@@ -227,7 +384,7 @@ Index: NetReliableSenderChannel.cs
  			m_storedMessages[storeIndex].NumSent++;
  			m_storedMessages[storeIndex].Message = message;
  			m_storedMessages[storeIndex].LastSent = now;
-@@ -148,6 +154,7 @@
+@@ -148,6 +158,7 @@
  #if !DEBUG
  			}
  #endif
@@ -235,15 +392,93 @@ Index: NetReliableSenderChannel.cs
  			m_storedMessages[storeIndex] = new NetStoredReliableMessage();
  		}
  
-@@ -182,7 +189,7 @@
+@@ -173,7 +184,7 @@
+ 
+ 				m_receivedAcks[m_windowStart] = false;
+ 				DestoreMessage(m_windowStart % m_windowSize);
+-				m_windowStart = (m_windowStart + 1) % NetConstants.NumSequenceNumbers;
++				m_windowStart = (m_windowStart + 1) & NetConstants.NumSequenceNumberMask;
+ 
+ 				// advance window if we already have early acks
+ 				while (m_receivedAcks.Get(m_windowStart))
+@@ -182,8 +193,8 @@
  					m_receivedAcks[m_windowStart] = false;
  					DestoreMessage(m_windowStart % m_windowSize);
  
 -					NetException.Assert(m_storedMessages[m_windowStart % m_windowSize].Message == null); // should already be destored
+-					m_windowStart = (m_windowStart + 1) % NetConstants.NumSequenceNumbers;
 +                    NetException.Assert((m_usedStoredMessages & ((ulong)1 << (m_windowStart % m_windowSize))) == 0); // should already be destored
- 					m_windowStart = (m_windowStart + 1) % NetConstants.NumSequenceNumbers;
++					m_windowStart = (m_windowStart + 1) & NetConstants.NumSequenceNumberMask;
  					//m_connection.m_peer.LogDebug("Advancing window to #" + m_windowStart);
  				}
+ 
+Index: NetUnreliableSenderChannel.cs
+===================================================================
+--- NetUnreliableSenderChannel.cs	(revision 352)
++++ NetUnreliableSenderChannel.cs	(working copy)
+@@ -29,7 +29,10 @@
+ 
+ 		internal override int GetAllowedSends()
+ 		{
+-			int retval = m_windowSize - ((m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart) % m_windowSize;
++            int subtract = (m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart;
++            if(subtract >= m_windowSize)
++                return 0;
++			int retval = m_windowSize - subtract;
+ 			NetException.Assert(retval >= 0 && retval <= m_windowSize);
+ 			return retval;
+ 		}
+@@ -57,15 +60,19 @@
+ 		internal override void SendQueuedMessages(float now)
+ 		{
+ 			int num = GetAllowedSends();
+-			if (num < 1)
++			if (num == 0)
+ 				return;
+ 
+ 			// queued sends
+-			while (m_queuedSends.Count > 0 && num > 0)
++            int queued = m_queuedSends.Count;
++            while (queued > 0 && num > 0)
+ 			{
+ 				NetOutgoingMessage om;
+-				if (m_queuedSends.TryDequeue(out om))
+-					ExecuteSend(om);
++                if (m_queuedSends.TryDequeue(out om))
++                {
++                    ExecuteSend(om);
++                    queued--;
++                }
+ 				num--;
+ 			}
+ 		}
+@@ -75,7 +82,7 @@
+ 			m_connection.m_peer.VerifyNetworkThread();
+ 
+ 			int seqNr = m_sendStart;
+-			m_sendStart = (m_sendStart + 1) % NetConstants.NumSequenceNumbers;
++			m_sendStart = (m_sendStart + 1) & NetConstants.NumSequenceNumberMask;
+ 
+ 			m_connection.QueueSendMessage(message, seqNr);
+ 
+@@ -107,7 +114,7 @@
+ 				NetException.Assert(seqNr == m_windowStart);
+ 
+ 				m_receivedAcks[m_windowStart] = false;
+-				m_windowStart = (m_windowStart + 1) % NetConstants.NumSequenceNumbers;
++				m_windowStart = (m_windowStart + 1) & NetConstants.NumSequenceNumberMask;
+ 
+ 				return;
+ 			}
+@@ -118,7 +125,7 @@
+ 			while (m_windowStart != seqNr)
+ 			{
+ 				m_receivedAcks[m_windowStart] = false;
+-				m_windowStart = (m_windowStart + 1) % NetConstants.NumSequenceNumbers;
++				m_windowStart = (m_windowStart + 1) & NetConstants.NumSequenceNumberMask;
+ 			}
+ 		}
+ 	}
 Index: NetUtility.cs
 ===================================================================
 --- NetUtility.cs	(revision 352)
