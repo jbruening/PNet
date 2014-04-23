@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections;
+using System.Reflection;
 using System.Threading;
 using PNet.Testing.Common;
 using PNetS;
@@ -87,6 +88,102 @@ namespace PNetSUnitTests
             }
 
             Assert.IsTrue(didCatchFail, "Should have caught the failure");
+        }
+
+        [TestMethod()]
+        public void CoroutineTest()
+        {
+            var gobj = new GameObject();
+            var test = gobj.AddComponent<TestCoroutine>();
+
+            test.StartCoroutine(test.DoThing());
+            //one extra Run is required as it's assumed that this would be the same frame that the coroutine would be started in.
+            test.RunCoroutines();
+            Assert.AreEqual(test.OuterCount, 1);
+            Assert.AreEqual(test.InnerCount, 0);
+            test.RunCoroutines();
+            Assert.AreEqual(test.OuterCount, 1);
+            Assert.AreEqual(test.InnerCount, 1);
+            test.RunCoroutines();
+            Assert.AreEqual(test.OuterCount, 1);
+            Assert.AreEqual(test.InnerCount, 2);
+            test.RunCoroutines();
+            Assert.AreEqual(test.OuterCount, 2);
+            Assert.AreEqual(test.InnerCount, 2);
+
+            test.StartCoroutine(test.MoreEnumerator());
+            test.RunCoroutines();
+            Assert.AreEqual(test.MoreEnumCount, 0);
+            test.RunCoroutines();
+            Assert.AreEqual(test.MoreEnumCount, 1);
+            test.RunCoroutines();
+            Assert.AreEqual(test.MoreEnumCount, 2);
+            test.RunCoroutines();
+            Assert.AreEqual(test.MoreEnumCount, 3);
+            test.RunCoroutines();
+            Assert.AreEqual(test.MoreEnumCount, 4);
+            test.RunCoroutines();
+            Assert.AreEqual(test.MoreEnumCount, 5);
+            test.RunCoroutines();
+            Assert.AreEqual(test.MoreEnumCount, 5);
+        }
+
+        class TestCoroutine : Component
+        {
+            public int OuterCount;
+            public int InnerCount;
+            public int MoreEnumCount;
+
+            public IEnumerator DoThing()
+            {
+                OuterCount++;
+                yield return null;
+                yield return StartCoroutine(EmbeddedThing());
+                OuterCount++;
+            }
+
+            IEnumerator EmbeddedThing()
+            {
+                InnerCount++;
+                yield return null;
+                InnerCount++;
+            }
+
+            public IEnumerator MoreEnumerator()
+            {
+                yield return null;
+                MoreEnumCount++;
+                if (MoreEnumCount < 5)
+                    StartCoroutine(MoreEnumerator());
+            }
+
+            public bool HasWaitedForFrames { get; private set; }
+            public IEnumerator FrameWaiter()
+            {
+                yield return new WaitForFrames(3);
+                HasWaitedForFrames = true;
+            }
+        }
+
+        [TestMethod]
+        public void TestWaitFrames()
+        {
+            var gobj = new GameObject();
+            var test = gobj.AddComponent<TestCoroutine>();
+
+            test.StartCoroutine(test.FrameWaiter());
+            Assert.IsFalse(test.HasWaitedForFrames);
+            //one extra Run is required as it's assumed that this would be the same frame that the coroutine would be started in.
+            test.RunCoroutines();
+            Assert.IsFalse(test.HasWaitedForFrames);
+            
+            //now these are real frames.
+            test.RunCoroutines();
+            Assert.IsFalse(test.HasWaitedForFrames);
+            test.RunCoroutines();
+            Assert.IsFalse(test.HasWaitedForFrames);
+            test.RunCoroutines();
+            Assert.IsTrue(test.HasWaitedForFrames);
         }
     }
 }

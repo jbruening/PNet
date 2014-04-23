@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
+[assembly:InternalsVisibleTo("PNetSUnitTests")]
 namespace PNetS
 {
     /// <summary>
@@ -42,6 +44,8 @@ namespace PNetS
         /// <param name="listenPort"></param>
         /// <param name="tickRate"></param>
         /// <param name="appIdentifier"></param>
+        /// <param name="sendBuffer"></param>
+        /// <param name="receiveBuffer"></param>
         public ServerConfiguration(
             int maximumConnections = 32, 
             int listenPort = 14000, 

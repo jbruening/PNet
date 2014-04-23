@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,22 +10,15 @@ namespace PNetS
     public static partial class PNetServer
     {
         /// <summary>
-        /// in order to actually start a coroutine chain, you need to set IsRootRoutine to true on the first call in a coroutine call chain.
+        /// Start a coroutine
+        /// Not thread safe
         /// </summary>
         /// <param name="routine"></param>
-        /// <param name="IsRootRoutine"></param>
         /// <returns></returns>
-        public static Coroutine StartCoroutine(IEnumerator<YieldInstruction> routine, bool IsRootRoutine = false)
+        public static Coroutine StartCoroutine(IEnumerator routine)
         {
-            if (IsRootRoutine)
-            {
-                GameState.AddRoutine(routine);
-                rootRoutines.Add(routine);
-            }
-            return new Coroutine(routine);
+            return GameState.StartCoroutine(routine);
         }
-
-        static List<IEnumerator<YieldInstruction>> rootRoutines = new List<IEnumerator<YieldInstruction>>();
 
         private static int _lastFrameSize = 16;
         static void Update()

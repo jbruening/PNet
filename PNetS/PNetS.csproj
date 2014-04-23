@@ -43,8 +43,11 @@
     <Compile Include="GameMachine\GameObject\GameObject.RunMethods.cs" />
     <Compile Include="GameMachine\GameObject\GameObject.Components.cs" />
     <Compile Include="GameMachine\GameObject\Prefab.cs" />
+    <Compile Include="GameMachine\State\Coroutine.cs" />
+    <Compile Include="GameMachine\State\GameState.Coroutine.cs" />
     <Compile Include="GameMachine\Yield\Coroutine.cs" />
     <Compile Include="GameMachine\State\Time.cs" />
+    <Compile Include="GameMachine\Yield\WaitForFrames.cs" />
     <Compile Include="GameMachine\Yield\YieldInstruction.cs" />
     <Compile Include="Log\Log.cs" />
     <Compile Include="NetworkView\NetMessageInfo.cs" />
@@ -59,6 +62,7 @@
     <Compile Include="Resources.cs" />
     <Compile Include="ServerConfiguration.cs" />
     <Compile Include="Server\PNetServer.Update.cs" />
+    <Compile Include="Server\Room.Coroutine.cs" />
     <Compile Include="Server\RoomBehaviour.cs" />
     <Compile Include="Utils\NetworkStateSynchronization.cs" />
     <Compile Include="NetworkView\NetworkView.Static.cs" />

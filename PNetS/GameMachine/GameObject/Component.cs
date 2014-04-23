@@ -20,24 +20,6 @@ namespace PNetS
         public GameObject gameObject { get; internal set; }
 
         /// <summary>
-        /// in order to actually start a coroutine chain, you need to set IsRootRoutine to true on the first call in a coroutine call chain.
-        /// </summary>
-        /// <param name="routine"></param>
-        /// <param name="IsRootRoutine"></param>
-        /// <returns></returns>
-        public Coroutine StartCoroutine(IEnumerator<YieldInstruction> routine, bool IsRootRoutine = false)
-        {
-            if (IsRootRoutine)
-            {
-                GameState.AddRoutine(routine);
-                rootRoutines.Add(routine);
-            }
-            return new Coroutine(routine);
-        }
-        [YamlSerialize(YamlSerializeMethod.Never)]
-        internal List<IEnumerator<YieldInstruction>> rootRoutines = new List<IEnumerator<YieldInstruction>>();
-
-        /// <summary>
         /// Get the first component on the gameObject of type T
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -59,6 +41,31 @@ namespace PNetS
             return gameObject.GetComponents<T>();
         }
 
+        #region coroutine
+
+        /// <summary>
+        /// Start a coroutine
+        /// Not thread safe.
+        /// </summary>
+        /// <param name="routine"></param>
+        /// <returns></returns>
+        public Coroutine StartCoroutine(IEnumerator routine)
+        {
+            routine.MoveNext();
+            _shouldRunNextFrame.Add(routine);
+            return new Coroutine(routine);
+        }
+
+        List<IEnumerator> _unblockedCoroutines = new List<IEnumerator>();
+        List<IEnumerator> _shouldRunNextFrame = new List<IEnumerator>();
+
+        internal void RunCoroutines()
+        {
+            GameMachine.State.Coroutine.Run(ref _unblockedCoroutines, ref _shouldRunNextFrame);
+        }
+
+        #endregion
+
         internal void Dispose()
         {
             try
@@ -67,12 +74,6 @@ namespace PNetS
             {
                 Debug.LogError("[Disposing {0}] {1}", gameObject.Name, e);
             }
-            foreach (var routine in rootRoutines)
-            {
-                GameState.RemoveRoutine(routine);
-            }
-
-            rootRoutines = null;
         }
         /// <summary>
         /// The object is being deleted

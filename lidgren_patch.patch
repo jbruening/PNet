@@ -23,7 +23,7 @@ Index: Lidgren.Network.csproj
      <WarningLevel>4</WarningLevel>
      <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
      <DocumentationFile>bin\Debug\Lidgren.Network.XML</DocumentationFile>
-+    <PlatformTarget>x86</PlatformTarget>
++    <PlatformTarget>AnyCPU</PlatformTarget>
    </PropertyGroup>
    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
      <DebugType>pdbonly</DebugType>

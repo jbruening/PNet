@@ -11,26 +11,36 @@ namespace PNetS
     /// </summary>
     public sealed class Coroutine : YieldInstruction
     {
-        internal IEnumerator<YieldInstruction> routine;
+        internal IEnumerator Routine;
+        private bool innerFinished = false;
 
-        internal Coroutine(IEnumerator<YieldInstruction> routine)
+        internal Coroutine(IEnumerator routine)
         {
-            this.routine = routine;
+            Routine = routine;
         }
 
         /// <summary>
         /// method that says if the YieldInstruction is done
         /// </summary>
-        public override bool IsDone
+        public override bool IsDone()
         {
-            get
+            if (innerFinished) return true;
+
+            if (Routine.Current != null)
             {
-                if (routine.Current != null && routine.Current.IsDone)
-                    return true;
-                
-                //if the routine finishes, then we need to say we're finished
-                return !routine.MoveNext();
+                if (Routine.Current is YieldInstruction)
+                {
+                    if ((Routine.Current as YieldInstruction).IsDone())
+                    {
+                        innerFinished = true;
+                        return false;
+                    }
+                }
             }
+                
+            //if the routine finishes, then we need to say we're finished
+            innerFinished = !Routine.MoveNext();
+            return false;
         }
     }
 }

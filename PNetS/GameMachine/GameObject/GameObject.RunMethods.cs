@@ -28,6 +28,22 @@ namespace PNetS
             }
         }
 
+        internal void RunCoroutines()
+        {
+            for (var i = 0; i < components.Count; i++)
+            {
+                var c = components[i];
+                try
+                {
+                    c.component.RunCoroutines();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("[RunCoroutine {0}] {1}", Name, e);
+                }
+            }
+        }
+
         internal void LateUpdate()
         {
             for (var i = 0; i < components.Count; i++)

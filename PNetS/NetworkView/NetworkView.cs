@@ -430,7 +430,7 @@ namespace PNetS
                 if (m_StateSynchronization != NetworkStateSynchronization.Off && !m_IsSerializing)
                 {
                     m_IsSerializing = true;
-                    StartCoroutine(Serialize(), true);
+                    StartCoroutine(Serialize());
                 }
                 else if (m_StateSynchronization == NetworkStateSynchronization.Off && m_IsSerializing)
                 {

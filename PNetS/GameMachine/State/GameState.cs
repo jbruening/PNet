@@ -12,7 +12,7 @@ namespace PNetS
     /// <summary>
     /// current state of the gamemachine
     /// </summary>
-    public static class GameState
+    public static partial class GameState
     {
         static double _frameTime = 0.020d;
         private const int LOOP_TIGHTNESS = 5;
@@ -196,7 +196,7 @@ namespace PNetS
                         try { a(); }
                         catch (Exception e)
                         {
-                            Debug.LogError("[Start] {0}", e.ToString());
+                            Debug.LogError("[Start] {0}", e);
                         }
                     });
             }
@@ -211,7 +211,7 @@ namespace PNetS
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("[Update Loop] {0}", e.ToString());
+                    Debug.LogError("[Update Loop] {0}", e);
                 }
             }
 
@@ -221,13 +221,42 @@ namespace PNetS
                 room.Update();
             }
 
+            //server update
             try { update(); }
             catch (Exception e)
             {
-                Debug.LogError("[Server Update] {0}", e.ToString());
+                Debug.LogError("[Server Update] {0}", e);
             }
 
-            LoopRoutines();
+            #region coroutines
+            for (int i = 0; i < GameObjects.Capacity; i++)
+            {
+                GameObject get;
+                if (!GameObjects.TryGetValue(i, out get)) continue;
+                try
+                {
+                    get.RunCoroutines();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("[Gameobject {0} Coroutine] {1}", get.Name, e);
+                }
+            }
+
+            for (int i = 0; i < AllRooms.Count; i++)
+            {
+                try
+                {
+                    AllRooms[i].RunCoroutines();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("[Room {0} Coroutine] {1}", AllRooms[i].Name, e);
+                }
+            }
+
+            RunCoroutines();
+            #endregion
 
             for (int i = 0; i < GameObjects.Capacity; i++ )
             {
@@ -239,7 +268,7 @@ namespace PNetS
                 }
                 catch(Exception e)
                 {
-                    Debug.LogError("[Late Update] {0}", e.ToString());
+                    Debug.LogError("[Late Update] {0}", e);
                 }
             }
 
@@ -252,7 +281,7 @@ namespace PNetS
             }
             catch(Exception e)
             {
-                Debug.LogError("[Destruction] {0}", e.ToString());
+                Debug.LogError("[Destruction] {0}", e);
             }
         }
 
@@ -264,71 +293,6 @@ namespace PNetS
         /// static late update
         /// </summary>
         public static Action lateUpdate = delegate { };
-
-        private static readonly List<IEnumerator<YieldInstruction>> Routines = new List<IEnumerator<YieldInstruction>>();
-        private static readonly List<IEnumerator<YieldInstruction>> FrameRoutineAdds = new List<IEnumerator<YieldInstruction>>();
-
-        internal static void AddRoutine(IEnumerator<YieldInstruction> toAdd)
-        {
-            FrameRoutineAdds.Add(toAdd);
-        }
-
-        private static int _removeOffsetting = 0;
-
-        internal static void RemoveRoutine(IEnumerator<YieldInstruction> toRemove)
-        {
-            var ind = Routines.FindIndex(c => object.ReferenceEquals(c, toRemove));
-
-            if (ind != -1)
-            {
-                Routines.RemoveAt(ind);
-                _removeOffsetting += 1;
-            }
-        }
-
-        internal static void LoopRoutines()
-        {
-            var toRemove = new List<int>(8);
-
-            for (var i = Routines.Count - 1; i >= 0; i--)
-            {
-                //used for keeping track of routine removes during the routine
-                _removeOffsetting = 0;
-                var yield = Routines[i].Current;
-                var remaining = false;
-
-                try
-                {
-
-                    if (yield != null)
-                    {
-                        remaining = !yield.IsDone || Routines[i].MoveNext();
-                    }
-                    else
-                    {
-                        //haven't started...
-                        remaining = Routines[i].MoveNext();
-                    }
-                }
-                catch(Exception e)
-                {
-                    Debug.LogError("[Yield] {0}", e.ToString());
-                }
-
-
-                i -= _removeOffsetting;
-                if (!remaining)
-                {
-                    //remove it
-                    Routines.RemoveAt(i);
-                }
-            }
-            
-            //add new routines
-            if (FrameRoutineAdds.Count <= 0) return;
-            Routines.AddRange(FrameRoutineAdds);
-            FrameRoutineAdds.Clear();
-        }
 
         /// <summary>
         /// Time.Scale affected TimeSinceStartup.

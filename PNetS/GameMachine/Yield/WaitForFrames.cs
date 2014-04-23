@@ -9,19 +9,17 @@ namespace PNetS
     /// <summary>
     /// Yield for the specified time
     /// </summary>
-    public class WaitForSeconds : YieldInstruction
+    public class WaitForFrames : YieldInstruction
     {
-        float waitTime;
-        double startTime;
+        private int _waitFrames;
+        private int _frameCounter;
 
         /// <summary>
         /// wait for the specified number of seconds
         /// </summary>
-        /// <param name="seconds"></param>
-        public WaitForSeconds(float seconds)
+        public WaitForFrames(int waitFrames)
         {
-            this.waitTime = seconds;
-            this.startTime = Time.time;
+            _waitFrames = waitFrames;
         }
 
         /// <summary>
@@ -29,9 +27,12 @@ namespace PNetS
         /// </summary>
         public override bool IsDone()
         {
-            if (Time.time - startTime > waitTime)
-                return true;
-            return false;
+            _frameCounter++;
+            if (_frameCounter < _waitFrames)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
