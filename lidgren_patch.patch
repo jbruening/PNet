@@ -422,8 +422,8 @@ Index: NetUnreliableSenderChannel.cs
  		{
 -			int retval = m_windowSize - ((m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart) % m_windowSize;
 +            int subtract = (m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart;
-+            if(subtract >= m_windowSize)
-+                return 0;
++            while (subtract >= m_windowSize)
++                subtract -= m_windowSize;
 +			int retval = m_windowSize - subtract;
  			NetException.Assert(retval >= 0 && retval <= m_windowSize);
  			return retval;
