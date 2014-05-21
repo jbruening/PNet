@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lidgren.Network;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace PNetS
         /// </summary>
         Server = 0,
         /// <summary>
-        /// Send to everyone but the caller
+        /// Send to everyone but the caller(from a client)/owner(from server)
         /// </summary>
         Others = 1,
         /// <summary>
@@ -23,11 +24,11 @@ namespace PNetS
         /// </summary>
         All = 2,
         /// <summary>
-        /// Send to everyone but the caller, buffered
+        /// Send to everyone but the caller(from a client)/owner(from server), buffered
         /// </summary>
         OthersBuffered = 5,
         /// <summary>
-        /// Send to everyon buffered
+        /// Send to everyone buffered
         /// </summary>
         AllBuffered = 6,
         /// <summary>
@@ -39,5 +40,26 @@ namespace PNetS
         /// send to no one?
         /// </summary>
         None = 10,
+
+        /// <summary>
+        /// send to everyone but the owner, in an unordered fashion
+        /// </summary>
+        OthersUnordered = 11,
+        /// <summary>
+        /// send to everyone, in an unordered fashion
+        /// </summary>
+        AllUnordered = 12,
+    }
+
+    public static class RPCModeExtensions
+    {
+        public static NetDeliveryMethod GetDeliveryMethod(this RPCMode mode)
+        {
+            if (mode != RPCMode.AllUnordered && mode != RPCMode.OthersUnordered)
+            {
+                return NetDeliveryMethod.ReliableOrdered;
+            }
+            return NetDeliveryMethod.ReliableUnordered;
+        }
     }
 }

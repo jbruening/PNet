@@ -540,23 +540,16 @@ namespace PNetS
             {
                 //all and other are identical if originalsender is null.
                 if (mode == RPCMode.All || mode == RPCMode.AllBuffered || originalSender == null)
-                    PNetServer.peer.SendMessage(msg, _connections, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+                    PNetServer.peer.SendMessage(msg, _connections, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
                 else
                 {
-                    var conns = new List<NetConnection>(_connections.Count);
-                    //LINQ and foreach are slow, and this is called a lot.
-                    for(var i = 0; i < _connections.Count;i++)
-                    {
-                        if (_connections[i] != originalSender)
-                            conns.Add(_connections[i]);
-                    }
-                    if (conns.Count != 0)
-                        PNetServer.peer.SendMessage(msg, conns, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+                    if (_allButOwner.Count != 0)
+                        PNetServer.peer.SendMessage(msg, _allButOwner, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
                 }
             }
             else
             {
-                PNetServer.peer.SendMessage(msg, owner.connection, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+                PNetServer.peer.SendMessage(msg, owner.connection, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
             }
         }
 

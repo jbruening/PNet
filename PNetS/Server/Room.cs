@@ -554,21 +554,6 @@ namespace PNetS
             }
         }
 
-        private readonly List<RoomBehaviour> _roomBehaviours = new List<RoomBehaviour>();
-        internal void Update()
-        {
-            try
-            {
-                for (int i = 0; i < _roomBehaviours.Count; ++i)
-                {
-                    _roomBehaviours[i].Update();
-                }
-            }catch(Exception e)
-            {
-                Debug.LogError("[Room Update] {0}: {1}", Name, e);
-            }
-        }
-
         /// <summary>
         /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>'s name.
         /// </summary>
