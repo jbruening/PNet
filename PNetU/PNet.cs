@@ -25,11 +25,19 @@ namespace PNetU
             //do da setup
             Peer = new PNetC.Net(UnityEngineHook.Instance);
             PNetC.Debug.Logger = new UnityDebugLogger();
+            
+            OnDisconnectedFromServer += Peer_OnDisconnectedFromServer;
+        }
+
+        static void Peer_OnDisconnectedFromServer()
+        {
+            UnityEngineHook.Instance.Manager.Clear();
         }
 
         internal static void CleanupEvents()
         {
             //TODO: clean out all the Peer events
+            OnDisconnectedFromServer -= Peer_OnDisconnectedFromServer;
         }
 
         #region PNetC.Net instance -> PNetU.Net static bindings

@@ -106,6 +106,9 @@ namespace PNetC
         //pool recycle for networkviews
         void RecycleNetworkView(NetworkView view)
         {
+            if (!view.EventsAreCleared())
+                Debug.LogError(Net, "Networkview {0} didn't appear to cleanup properly", view.ViewID.guid);
+
             if (_netViewPool.Count < ViewPoolSize)
                 _netViewPool.Push(view);
         }

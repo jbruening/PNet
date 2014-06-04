@@ -158,7 +158,7 @@ namespace PNetU
         /// <summary>
         /// subscribe to this in order to deserialize streaming data
         /// </summary>
-        public Action<NetIncomingMessage> OnDeserializeStream = delegate { };
+        public Action<NetIncomingMessage> OnDeserializeStream;
 
         IEnumerator Serialize()
         {
@@ -223,7 +223,8 @@ namespace PNetU
                             method.Name + 
                             " for type " + 
                             method.DeclaringType.Name + 
-                            " does not match the RPC delegate of Action<NetInComingMessage>, but is marked to process RPC's. Please either fix this method, or remove the attribute");
+                            " does not match the RPC delegate of Action<NetIncomingMessage>, but is marked to process RPC's. Please either fix this method, or remove the attribute", 
+                            behaviour);
                 }
             }
         }
@@ -297,6 +298,14 @@ namespace PNetU
         {
             _networkView.OnDeserializeStream -= StreamDeserializeCaller;
             _networkView.OnRemove -= DoOnRemove;
+            
+            OnRemove = null;
+            OnFinishedCreation = null;
+            OnDeserializeStream = null;
+
+            if (_networkView != null) //this will get run usually if we're switching scenes
+                UnityEngineHook.Instance.Manager.Remove(_networkView.ViewID);
+
             _networkView = null;
         }
 
@@ -325,7 +334,11 @@ namespace PNetU
 
         internal void DoOnRemove(byte reasonCode)
         {
+            _networkView.OnRemove -= DoOnRemove;
+
             UnityEngineHook.Instance.Manager.Remove(_networkView.ViewID);
+            _networkView = null;
+
             if (DestroyGameObjectOnNetworkDestroy)
             {
                 if (Debug.isDebugBuild)

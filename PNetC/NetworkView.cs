@@ -240,12 +240,23 @@ namespace PNetC
             }
         }
 
+        internal bool EventsAreCleared()
+        {
+            return _rpcProcessors.Count == 0
+                && _onSerializeStream == null
+                && OnFinishedCreation == null
+                && OnDeserializeStream == null
+                ;
+        }
+
         internal void DoOnRemove(byte reasonCode)
         {
             //do some cleanup
             _rpcProcessors.Clear();
             _fieldProcessors.Clear();
             _onSerializeStream = null;
+            OnFinishedCreation = null;
+            OnDeserializeStream = null;
 
             try
             {
