@@ -263,7 +263,7 @@ namespace PNetC
             {
                 var newRoom = msg.ReadString();
 
-                Debug.Log(this, "Changing to room {0}", newRoom);
+                Debug.LogInfo(this, "Changing to room {0}", newRoom);
 
                 if (OnRoomChange != null)
                 {
@@ -355,11 +355,6 @@ namespace PNetC
                     if (OnDiscoveryResponse != null) OnDiscoveryResponse(msg);
                     Peer.Recycle(msg);
                 }
-                else if (msg.MessageType == NetIncomingMessageType.WarningMessage)
-                {
-                    Debug.LogWarning(this, msg.ReadString());
-                    Peer.Recycle(msg);
-                }
                 else if (msg.MessageType == NetIncomingMessageType.ConnectionLatencyUpdated)
                 {
                     Latency = msg.ReadFloat();
@@ -367,15 +362,12 @@ namespace PNetC
                 }
                 else if (msg.MessageType == NetIncomingMessageType.DebugMessage)
                 {
-                    Debug.Log(this, msg.ReadString());
+                    Debug.LogInfo(this, msg.ReadString());
+                    Peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.WarningMessage)
                 {
                     Debug.LogWarning(this, msg.ReadString());
-                }
-                else if (msg.MessageType == NetIncomingMessageType.ErrorMessage)
-                {
-                    Debug.LogError(this, msg.ReadString());
                     Peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.StatusChanged)
@@ -383,6 +375,8 @@ namespace PNetC
                     var lastStatus = _status;
                     Status = (NetConnectionStatus) msg.ReadByte();
                     StatusReason = msg.ReadString();
+
+                    Debug.LogInfo(this, "Status changed from {0} to {1}: {2}", lastStatus, Status, StatusReason);
 #if DEBUG
                     StatusReason = string.Format("{0} changed to {1}: {2}", lastStatus, Status, msg.RemainingBits > 0 ? msg.ReadString() : "");
 #endif

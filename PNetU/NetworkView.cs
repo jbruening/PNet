@@ -295,18 +295,12 @@ namespace PNetU
         public bool DestroyGameObjectOnNetworkDestroy = true;
 
         private void OnDestroy()
-        {
-            _networkView.OnDeserializeStream -= StreamDeserializeCaller;
-            _networkView.OnRemove -= DoOnRemove;
-            
+        {            
             OnRemove = null;
             OnFinishedCreation = null;
             OnDeserializeStream = null;
 
-            if (_networkView != null) //this will get run usually if we're switching scenes
-                UnityEngineHook.Instance.Manager.Remove(_networkView.ViewID);
-
-            _networkView = null;
+            CleanupNetView();
         }
 
         #region NetworkViewID
@@ -334,21 +328,16 @@ namespace PNetU
 
         internal void DoOnRemove(byte reasonCode)
         {
-            _networkView.OnRemove -= DoOnRemove;
-
-            UnityEngineHook.Instance.Manager.Remove(_networkView.ViewID);
-            _networkView = null;
+            CleanupNetView();
 
             if (DestroyGameObjectOnNetworkDestroy)
             {
-                if (Debug.isDebugBuild)
-                    Debug.Log("Network Destruction. Destroying networkview and gameobject");
+                UnityDebugLogger.Full("Network Destruction. Destroying networkview and gameobject", this);
                 Destroy(gameObject);
             }
             else
             {
-                if (Debug.isDebugBuild)
-                    Debug.Log("Network destruction. Only destroying networkview", gameObject);
+                UnityDebugLogger.Full("Network destruction. Only destroying networkview", this);
                 Destroy(this);
             }
 
@@ -357,10 +346,23 @@ namespace PNetU
             try
             {
                 OnRemove(reasonCode);
+                OnRemove = null;
             }
             catch (Exception e)
             {
-                Debug.LogError(e, gameObject);
+                Debug.LogError(e, this);
+            }
+        }
+
+        void CleanupNetView()
+        {
+            if (_networkView != null) //this will get run usually if we're switching scenes
+            {
+                UnityEngineHook.Instance.Manager.Remove(_networkView.ViewID);
+                _networkView.OnDeserializeStream -= StreamDeserializeCaller;
+                _networkView.OnRemove -= DoOnRemove;
+
+                _networkView = null;
             }
         }
     }

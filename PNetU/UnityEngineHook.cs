@@ -86,10 +86,7 @@ namespace PNetU
                 instance = new GameObject("BROKEN NETWORK PREFAB " + newView.ViewID);
             }
 
-            if (Debug.isDebugBuild)
-            {
-                Debug.Log(string.Format("network instantiate of {0}. Loc: {1} Rot: {2}", path, location, rotation));
-            }
+            UnityDebugLogger.Full("network instantiate of {0}. Loc: {1} Rot: {2}", null, path, location, rotation);
 
             //look for a networkview..
             var view = instance.GetComponent<NetworkView>();
@@ -115,16 +112,16 @@ namespace PNetU
             NetworkView uview;
             if (!_manager.TryGetView(view.ViewID, out uview))
             {
-                Debug.LogError("Could not attach extra networkview because we could not pull the source");
+                Debug.LogError(
+                    string.Format("Could not attach extra networkview {0} to networkview {1}. It might have been destroyed accidentally, or not yet instantiated", 
+                    newView.ViewID, 
+                    view.ViewID));
             }
 
             var unewView = uview.gameObject.AddComponent<NetworkView>();
             _manager.AddView(newView, unewView);
 
-            if (Debug.isDebugBuild)
-            {
-                Debug.Log("Attached extra networkview " + newView.ViewID.guid, uview.gameObject);
-            }
+            UnityDebugLogger.Info("Attached extra networkview " + newView.ViewID.guid, uview.gameObject);
 
             if (!string.IsNullOrEmpty(customFunction))
                 uview.gameObject.SendMessage(customFunction, unewView, SendMessageOptions.DontRequireReceiver);
