@@ -501,18 +501,18 @@ namespace PNetS
 
         internal void SendBuffer(Player player)
         {
-            foreach (var b in buffer)
+            for(int i = 0; i < buffer.Count; i++)
             {
                 var message = PNetServer.peer.CreateMessage();
-                b.Clone(message);
+                buffer[i].Clone(message);
                 Debug.Log("Sending buffered message to player " + player.Id);
                 PNetServer.peer.SendMessage(message, player.connection, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
             }
 
-            foreach (var b in fieldBuffer.Values)
+            foreach (var b in fieldBuffer)
             {
                 var message = PNetServer.peer.CreateMessage();
-                b.Clone(message);
+                b.Value.Clone(message);
 
                 PNetServer.peer.SendMessage(message, player.connection, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
             }
