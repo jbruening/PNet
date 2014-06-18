@@ -270,6 +270,7 @@ namespace PNetS
 
             var buff = new NetBuffer();
             message.Clone(buff);
+            PNetServer.peer.Recycle(message);
             return buff;
         }
         
