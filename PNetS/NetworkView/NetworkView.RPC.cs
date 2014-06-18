@@ -121,6 +121,100 @@ namespace PNetS
             FinishRPCSend(player, message);
         }
 
+        #region non-allocating overloads
+        public void RPC(byte rpcID, Player player)
+        {
+            var size = DEFAULT_RPC_HEADER_SIZE;
+            var message = CreateMessage(size, rpcID);
+            FinishRPCSend(player, message);
+        }
+        public void RPC(byte rpcID, Player player, 
+            INetSerializable arg0)
+        {
+            var size = DEFAULT_RPC_HEADER_SIZE;
+            size += arg0.AllocSize;
+
+            var msg = CreateMessage(size, rpcID);
+            arg0.OnSerialize(msg);
+
+            FinishRPCSend(player, msg);
+        }
+        public void RPC(byte rpcID, Player player, 
+            INetSerializable arg0,
+            INetSerializable arg1)
+        {
+            var size = DEFAULT_RPC_HEADER_SIZE;
+            size += arg0.AllocSize;
+            size += arg1.AllocSize;
+
+            var msg = CreateMessage(size, rpcID);
+            arg0.OnSerialize(msg);
+            arg1.OnSerialize(msg);
+
+            FinishRPCSend(player, msg);
+        }
+        public void RPC(byte rpcID, Player player,
+            INetSerializable arg0,
+            INetSerializable arg1,
+            INetSerializable arg2)
+        {
+            var size = DEFAULT_RPC_HEADER_SIZE;
+            size += arg0.AllocSize;
+            size += arg1.AllocSize;
+            size += arg2.AllocSize;
+
+            var msg = CreateMessage(size, rpcID);
+            arg0.OnSerialize(msg);
+            arg1.OnSerialize(msg);
+            arg2.OnSerialize(msg);
+
+            FinishRPCSend(player, msg);
+        }
+        public void RPC(byte rpcID, Player player,
+            INetSerializable arg0,
+            INetSerializable arg1,
+            INetSerializable arg2,
+            INetSerializable arg3)
+        {
+            var size = DEFAULT_RPC_HEADER_SIZE;
+            size += arg0.AllocSize;
+            size += arg1.AllocSize;
+            size += arg2.AllocSize;
+            size += arg3.AllocSize;
+
+            var msg = CreateMessage(size, rpcID);
+            arg0.OnSerialize(msg);
+            arg1.OnSerialize(msg);
+            arg2.OnSerialize(msg);
+            arg3.OnSerialize(msg);
+
+            FinishRPCSend(player, msg);
+        }
+        public void RPC(byte rpcID, Player player,
+            INetSerializable arg0,
+            INetSerializable arg1,
+            INetSerializable arg2,
+            INetSerializable arg3,
+            INetSerializable arg4)
+        {
+            var size = DEFAULT_RPC_HEADER_SIZE;
+            size += arg0.AllocSize;
+            size += arg1.AllocSize;
+            size += arg2.AllocSize;
+            size += arg3.AllocSize;
+            size += arg4.AllocSize;
+
+            var msg = CreateMessage(size, rpcID);
+            arg0.OnSerialize(msg);
+            arg1.OnSerialize(msg);
+            arg2.OnSerialize(msg);
+            arg3.OnSerialize(msg);
+            arg4.OnSerialize(msg);
+
+            FinishRPCSend(player, msg);
+        }
+        #endregion
+
         /// <summary>
         /// send an rpc using a custom method to write to the message, with a custom value to send into it
         /// DO NOT STORE THE NETOUTGOINGMESSAGE. LIDGREN WILL RECYCLE IT.
@@ -155,6 +249,53 @@ namespace PNetS
             messageSerializer(ref message);
 
             FinishRPCSend(player, message);
+        }
+
+        #endregion
+
+        #region manual buffering
+        /// <summary>
+        /// Create a netbuffer object that can be used to send a message without reserialization
+        /// </summary>
+        /// <param name="rpcID"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public NetBuffer CreateBuffer(byte rpcID, params INetSerializable[] args)
+        {
+            var size = DEFAULT_RPC_HEADER_SIZE;
+            RPCUtils.AllocSize(ref size, args);
+            var message = CreateMessage(size, rpcID);
+
+            RPCUtils.WriteParams(ref message, args);
+
+            var buff = new NetBuffer();
+            message.Clone(buff);
+            return buff;
+        }
+        
+        /// <summary>
+        /// Send the netbuffer to the specified player
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="buffer"></param>
+        public void SendBuffer(Player player, NetBuffer buffer)
+        {
+            var message = PNetServer.peer.CreateMessage(buffer.LengthBytes);
+            buffer.Clone(message);
+
+            FinishRPCSend(player, message);
+        }
+        /// <summary>
+        /// Send the netbuffer in the specified mode.
+        /// Highly recommended that you don't use the buffered rpc modes, as this is kind of a manual buffering solution anyway.
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <param name="buffer"></param>
+        public void SendBuffer(RPCMode mode, NetBuffer buffer)
+        {
+            var message = PNetServer.peer.CreateMessage(buffer.LengthBytes);
+            buffer.Clone(message);
+            FinishRPCSend(mode, message);
         }
 
         #endregion

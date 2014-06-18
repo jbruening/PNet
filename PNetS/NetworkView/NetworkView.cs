@@ -135,12 +135,11 @@ namespace PNetS
         /// </summary>
         public void ClearSubscriptions()
         {
-            var message = PNetServer.peer.CreateMessage(3);
-            message.Write(PNet.RPCUtils.Remove);
-            message.Write(viewID.guid);
-
             if (_allButOwner.Count > 0)
             {
+                var message = PNetServer.peer.CreateMessage(3);
+                message.Write(PNet.RPCUtils.Remove);
+                message.Write(viewID.guid);
                 PNetServer.peer.SendMessage(message, _allButOwner, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
             }
 
@@ -231,6 +230,8 @@ namespace PNetS
 
         void SendSecondaryView(NetworkView newView, List<NetConnection> conns)
         {
+            if (conns.Count <= 0) return;
+
             var message = PNetServer.peer.CreateMessage();
 
             message.Write(RPCUtils.AddView);
@@ -239,8 +240,7 @@ namespace PNetS
             if (newView._customSecondaryFunction != null)
                 message.Write(newView._customSecondaryFunction);
 
-            if (conns.Count > 0)
-                PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
+            PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
         #region RPC Subscriptions
@@ -545,6 +545,11 @@ namespace PNetS
                 {
                     if (_allButOwner.Count != 0)
                         PNetServer.peer.SendMessage(msg, _allButOwner, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
+                    else
+                    {
+                        //need to recycle unused messages...
+                        PNetServer.peer.Recycle(msg);
+                    }
                 }
             }
             else
@@ -574,6 +579,8 @@ namespace PNetS
             var conns = _connections.Where(c => c != originalSender).ToList();
             if (conns.Count != 0)
                 PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
+            else
+                PNetServer.peer.Recycle(message);
         }
         #endregion
     }

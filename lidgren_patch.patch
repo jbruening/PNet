@@ -242,6 +242,19 @@ Index: NetPeer.Internal.cs
  #endif
  
  using System;
+Index: NetPeer.MessagePools.cs
+===================================================================
+--- NetPeer.MessagePools.cs	(revision 352)
++++ NetPeer.MessagePools.cs	(working copy)
+@@ -184,7 +184,7 @@
+ 			m_incomingMessagesPool.Enqueue(toRecycle);
+ 		}
+ 
+-		internal void Recycle(NetOutgoingMessage msg)
++		public void Recycle(NetOutgoingMessage msg)
+ 		{
+ 			if (m_outgoingMessagesPool == null)
+ 				return;
 Index: NetReliableSenderChannel.cs
 ===================================================================
 --- NetReliableSenderChannel.cs	(revision 352)

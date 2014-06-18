@@ -169,6 +169,8 @@ namespace PNetS
                 return;
             }
 
+            if (connections.Count <= 0) return;
+
             var message = PNetServer.peer.CreateMessage(33 + (gobj.Resource.Length * 2));
             message.Write(RPCUtils.Instantiate);
             message.Write(gobj.Resource);
@@ -180,9 +182,8 @@ namespace PNetS
             vs.OnSerialize(message);
             var qs = new QuaternionSerializer(gobj.Rotation);
             qs.OnSerialize(message);
-
-            if (connections.Count > 0)
-                PNetServer.peer.SendMessage(message, connections , NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
+            
+            PNetServer.peer.SendMessage(message, connections , NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
         /// <summary>
@@ -202,11 +203,6 @@ namespace PNetS
             //if we don't do it now, it'll just get cleared once gamestate leaves the delegate call
             GameObject.DestroyNow(view.gameObject);
 
-            var msg = PNetServer.peer.CreateMessage(3);
-            msg.Write(RPCUtils.Remove);
-            msg.Write(view.viewID.guid);
-            msg.Write(reasonCode);
-
             NetworkView.RemoveView(view);
 
             //send a destruction message to everyone, just in case.
@@ -214,6 +210,11 @@ namespace PNetS
             for (int i = 0; i < players.Count; i++)
                 connections.Add(players[i].connection);
             if (connections.Count == 0) return;
+
+            var msg = PNetServer.peer.CreateMessage(3);
+            msg.Write(RPCUtils.Remove);
+            msg.Write(view.viewID.guid);
+            msg.Write(reasonCode);
             PNetServer.peer.SendMessage(msg, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
@@ -222,8 +223,10 @@ namespace PNetS
             var connections = new List<NetConnection>(players.Count);
             for (int i = 0; i < players.Count; i++)
                 connections.Add(players[i].connection);
-            if (connections.Count == 0) return;
-            PNetServer.peer.SendMessage(message, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+            if (connections.Count > 0)
+                PNetServer.peer.SendMessage(message, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+            else
+                PNetServer.peer.Recycle(message);
         }
 
         readonly List<NetBuffer> bufferedMessages = new List<NetBuffer>(16);
