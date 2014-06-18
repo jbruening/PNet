@@ -17,9 +17,6 @@ namespace PNetS
         /// <param name="args"></param>
         public void RPC(byte rpcID, RPCMode mode, params INetSerializable[] args)
         {
-            if (_connections.Count == 0)
-                return;
-
             var size = DEFAULT_RPC_HEADER_SIZE;
             RPCUtils.AllocSize(ref size, args);
 
@@ -47,9 +44,6 @@ namespace PNetS
             INetSerializable arg3 = null,
             INetSerializable arg4 = null)
         {
-            if (_connections.Count == 0)
-                return;
-
             var size = DEFAULT_RPC_HEADER_SIZE;
             if (arg0 != null) size += arg0.AllocSize;
             if (arg1 != null) size += arg1.AllocSize;

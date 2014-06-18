@@ -539,7 +539,7 @@ namespace PNetS
             if (mode != RPCMode.Owner)
             {
                 //all and other are identical if originalsender is null.
-                if (mode == RPCMode.All || mode == RPCMode.AllBuffered || originalSender == null)
+                if ((mode == RPCMode.All || mode == RPCMode.AllBuffered || originalSender == null) && _connections.Count > 0)
                     PNetServer.peer.SendMessage(msg, _connections, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
                 else
                 {
