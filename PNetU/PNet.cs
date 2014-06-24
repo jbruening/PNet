@@ -146,6 +146,12 @@ namespace PNetU
         public static double Time { get { return Peer.Time; } }
 
         /// <summary>
+        /// PNetServer.Time of this frame, or last, depending on the script order execution
+        /// to make sure its this frame, set the UnityEngineHook to execute first
+        /// </summary>
+        public static double ServerTime { get { return Peer.ServerTime; } }
+
+        /// <summary>
         /// Connect with the specified configuration
         /// </summary>
         /// <param name="configuration"></param>

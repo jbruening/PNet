@@ -90,6 +90,19 @@ namespace PNetC
         /// </summary>
         public double Time { get; private set; }
 
+        /// <summary>
+        /// PNetServer.Time of the current frame.
+        /// Returns 0 if there is no connection
+        /// </summary>
+        public double ServerTime
+        {
+            get
+            {
+                if (Peer.ServerConnection == null) return 0;
+                return Peer.ServerConnection.GetRemoteTime(Time);
+            }
+        }
+
         internal NetClient Peer;
         /// <summary>
         /// The Network ID of this client

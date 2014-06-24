@@ -59,6 +59,17 @@ namespace PNetS
         /// </summary>
         public NetConnectionStatus Status { get { return connection.Status; } }
 
+        /// <summary>
+        /// remote player's network time (PNetC.Time), at the current PNetServer.Time
+        /// </summary>
+        public double RemoteTime
+        {
+            get
+            {
+                return connection.GetRemoteTime(GameState.NetFrameTime);
+            }
+        }
+
         internal NetConnection connection;
         /// <summary>
         /// current room the player is in. can be null
