@@ -358,7 +358,9 @@ namespace PNetU
         {
             if (_networkView != null) //this will get run usually if we're switching scenes
             {
-                UnityEngineHook.Instance.Manager.Remove(_networkView.ViewID);
+                if (UnityEngineHook.ValidInstance)
+                    UnityEngineHook.Instance.Manager.Remove(_networkView.ViewID);
+
                 _networkView.OnDeserializeStream -= StreamDeserializeCaller;
                 _networkView.OnRemove -= DoOnRemove;
 

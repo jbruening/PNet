@@ -18,25 +18,41 @@ namespace PNetU
         public event Action EngineUpdate;
 
         static UnityEngineHook _instance;
+        //because we're dontdestroyonload, if we're ever destroyed
+        //we shouldn't attempt to recreate an instance if requested
+        //because someone might be erronously calling us.
+        static bool _destroyed = false;
         public static UnityEngineHook Instance 
         { 
             get 
             {
-                if (_instance == null)
+                if (_instance == null && !_destroyed)
                 {
                     var gobj = new GameObject("PNetU Singleton Engine Hook");
                     _instance = gobj.AddComponent<UnityEngineHook>();
                     //gobj.hideFlags = HideFlags.DontSave;
                     DontDestroyOnLoad(gobj);
                 }
-                return _instance; 
+                return _instance;
             } 
         }
+        public static bool ValidInstance
+        {
+            get
+            {
+                if (_instance != null || (_instance == null && !_destroyed))
+                    return true;
+                return false;
+            }
+        }
+
         void Awake()
         {
             if (_instance == null)
             {
                 _instance = this;
+                //we're probably creating a new object after having explicitly destroyed, so reset.
+                _destroyed = false;
                 DontDestroyOnLoad(this);
             }
 
@@ -57,6 +73,7 @@ namespace PNetU
         {
             if (_instance == this)
             {
+                _destroyed = true;
                 Net.Peer.Disconnect();
                 //run some cleanup too, just in case
                 EngineUpdate = null;

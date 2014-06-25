@@ -31,13 +31,16 @@ namespace PNetU
 
         static void Peer_OnDisconnectedFromServer()
         {
-            UnityEngineHook.Instance.Manager.Clear();
+            if (UnityEngineHook.ValidInstance)
+                UnityEngineHook.Instance.Manager.Clear();
         }
 
         internal static void CleanupEvents()
         {
             //TODO: clean out all the Peer events
             OnDisconnectedFromServer -= Peer_OnDisconnectedFromServer;
+            Peer.CleanupEvents();
+            Peer = null;
         }
 
         #region PNetC.Net instance -> PNetU.Net static bindings

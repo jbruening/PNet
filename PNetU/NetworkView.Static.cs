@@ -12,6 +12,9 @@ namespace PNetU
         /// <returns></returns>
         public static NetworkView Find(NetworkViewId viewId)
         {
+            if (UnityEngineHook.ValidInstance)
+                return null;
+            
             NetworkView view;
             UnityEngineHook.Instance.Manager.TryGetView(viewId, out view);
             return view;
@@ -27,7 +30,11 @@ namespace PNetU
         {
             var viewId = new NetworkViewId();
             viewId.OnDeserialize(message);
-            return UnityEngineHook.Instance.Manager.TryGetView(viewId, out view);
+            if (UnityEngineHook.ValidInstance)
+                return UnityEngineHook.Instance.Manager.TryGetView(viewId, out view);
+            
+            view = null;
+            return false;
         }
     }
 }
