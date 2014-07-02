@@ -218,13 +218,15 @@ namespace PNetS
             PNetServer.peer.SendMessage(msg, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
-        internal void SendMessage(NetOutgoingMessage message)
+        internal void SendMessage(NetOutgoingMessage message, NetDeliveryMethod delivery = NetDeliveryMethod.ReliableOrdered)
         {
             var connections = new List<NetConnection>(players.Count);
             for (int i = 0; i < players.Count; i++)
                 connections.Add(players[i].connection);
             if (connections.Count > 0)
-                PNetServer.peer.SendMessage(message, connections, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+            {
+                PNetServer.peer.SendMessage(message, connections, delivery, Channels.STATIC_RPC);
+            }
             else
                 PNetServer.peer.Recycle(message);
         }
@@ -274,7 +276,11 @@ namespace PNetS
             {
                 Buffer(message, mode);
             }
-            SendMessage(message);
+
+            if (mode == RPCMode.AllUnordered || mode == RPCMode.OthersUnordered)
+                SendMessage(message, NetDeliveryMethod.ReliableUnordered);
+            else
+                SendMessage(message);
         }
 
         #region RPC Processing

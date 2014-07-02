@@ -158,11 +158,15 @@ namespace PNetS
         /// Send a static RPC to the player. (prevents array allocation)
         /// </summary>
         /// <param name="rpcID"></param>
-        public void RPC(byte rpcID)
+        /// <param name="ordered"></param>
+        public void RPC(byte rpcID, bool ordered = true)
         {
             var size = 1;
             var message = CreateMessage(rpcID, size);
-            SendMessage(message);
+            if (ordered)
+                SendMessage(message);
+            else
+                SendUnorderedMessage(message);
         }
 
         /// <summary>
@@ -170,7 +174,8 @@ namespace PNetS
         /// </summary>
         /// <param name="rpcID"></param>
         /// <param name="arg0"></param>
-        public void RPC(byte rpcID, INetSerializable arg0)
+        /// <param name="ordered"></param>
+        public void RPC(byte rpcID, INetSerializable arg0, bool ordered = true)
         {
             var size = 1;
             size += arg0.AllocSize;
@@ -179,7 +184,10 @@ namespace PNetS
 
             arg0.OnSerialize(message);
 
-            SendMessage(message);
+            if (ordered)
+                SendMessage(message);
+            else
+                SendUnorderedMessage(message);
         }
 
         /// <summary>
@@ -188,7 +196,11 @@ namespace PNetS
         /// <param name="rpcID"></param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        public void RPC(byte rpcID, INetSerializable arg0, INetSerializable arg1)
+        /// <param name="ordered"></param>
+        public void RPC(byte rpcID, 
+            INetSerializable arg0, 
+            INetSerializable arg1, 
+            bool ordered = true)
         {
             var size = 1;
             size += arg0.AllocSize;
@@ -199,7 +211,10 @@ namespace PNetS
             arg0.OnSerialize(message);
             arg1.OnSerialize(message);
 
-            SendMessage(message);
+            if (ordered)
+                SendMessage(message);
+            else
+                SendUnorderedMessage(message);
         }
         
         /// <summary>
@@ -209,7 +224,12 @@ namespace PNetS
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        public void RPC(byte rpcID, INetSerializable arg0, INetSerializable arg1, INetSerializable arg2)
+        /// <param name="ordered"></param>
+        public void RPC(byte rpcID, 
+            INetSerializable arg0, 
+            INetSerializable arg1, 
+            INetSerializable arg2, 
+            bool ordered = true)
         {
             var size = 1;
             size += arg0.AllocSize;
@@ -222,7 +242,10 @@ namespace PNetS
             arg1.OnSerialize(message);
             arg2.OnSerialize(message);
 
-            SendMessage(message);
+            if (ordered)
+                SendMessage(message);
+            else
+                SendUnorderedMessage(message);
         }
 
         /// <summary>
@@ -233,7 +256,13 @@ namespace PNetS
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        public void RPC(byte rpcID, INetSerializable arg0, INetSerializable arg1, INetSerializable arg2, INetSerializable arg3)
+        /// <param name="ordered"></param>
+        public void RPC(byte rpcID, 
+            INetSerializable arg0, 
+            INetSerializable arg1, 
+            INetSerializable arg2, 
+            INetSerializable arg3, 
+            bool ordered = true)
         {
             var size = 1;
             size += arg0.AllocSize;
@@ -248,7 +277,10 @@ namespace PNetS
             arg2.OnSerialize(message);
             arg3.OnSerialize(message);
 
-            SendMessage(message);
+            if (ordered)
+                SendMessage(message);
+            else
+                SendUnorderedMessage(message);
         }
         /// <summary>
         /// Send a static RPC to the player. (prevents array allocation)
@@ -259,7 +291,14 @@ namespace PNetS
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
         /// <param name="arg4"></param>
-        public void RPC(byte rpcID, INetSerializable arg0, INetSerializable arg1, INetSerializable arg2, INetSerializable arg3, INetSerializable arg4)
+        /// <param name="ordered"></param>
+        public void RPC(byte rpcID, 
+            INetSerializable arg0, 
+            INetSerializable arg1, 
+            INetSerializable arg2, 
+            INetSerializable arg3, 
+            INetSerializable arg4, 
+            bool ordered = true)
         {
             var size = 1;
             size += arg0.AllocSize;
@@ -276,8 +315,34 @@ namespace PNetS
             arg3.OnSerialize(message);
             arg4.OnSerialize(message);
 
+            if (ordered)
+                SendMessage(message);
+            else
+                SendUnorderedMessage(message);
+        }
+
+        #region nonordered
+        /// <summary>
+        /// Send a static RPC to the player, in any order
+        /// </summary>
+        /// <param name="rpcId"></param>
+        /// <param name="args"></param>
+        public void RPCUnordered(byte rpcId, params INetSerializable[] args)
+        {
+            var size = 1;
+            RPCUtils.AllocSize(ref size, args);
+
+            var message = CreateMessage(rpcId, size);
+            RPCUtils.WriteParams(ref message, args);
+
             SendMessage(message);
         }
+
+        void SendUnorderedMessage(NetOutgoingMessage msg)
+        {
+            connection.SendMessage(msg, NetDeliveryMethod.ReliableUnordered, Channels.STATIC_RPC);
+        }
+        #endregion
 
         NetOutgoingMessage CreateMessage(byte rpcID, int size)
         {

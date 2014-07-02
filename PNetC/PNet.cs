@@ -196,6 +196,23 @@ namespace PNetC
         }
 
         /// <summary>
+        /// Send an rpc to the server, in any order
+        /// </summary>
+        /// <param name="rpcId"></param>
+        /// <param name="args"></param>
+        public void RPCUnordered(byte rpcId, params INetSerializable[] args)
+        {
+            var size = 1;
+            RPCUtils.AllocSize(ref size, args);
+
+            var message = Peer.CreateMessage(size);
+            message.Write(rpcId);
+            RPCUtils.WriteParams(ref message, args);
+
+            Peer.SendMessage(message, NetDeliveryMethod.ReliableUnordered, Channels.STATIC_RPC);
+        }
+
+        /// <summary>
         /// Run once the room changing has completed (tells the server you're actually ready to be in a room)
         /// </summary>
         public void FinishedRoomChange()

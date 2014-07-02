@@ -180,6 +180,15 @@ namespace PNetU
         {
             Peer.RPC(rpcId, args);
         }
+        /// <summary>
+        /// Send an rpc to the server, in any order
+        /// </summary>
+        /// <param name="rpcId"></param>
+        /// <param name="args"></param>
+        public static void RPCUnordered(byte rpcId, params INetSerializable[] args)
+        {
+            Peer.RPCUnordered(rpcId, args);
+        }
 
         /// <summary>
         /// Run this when the room changing has completed (tells the server you're actually ready to be in a room)

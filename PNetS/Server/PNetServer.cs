@@ -296,7 +296,7 @@ namespace PNetS
                         {
                             var newMessage = peer.CreateMessage();
                             msg.Clone(newMessage);
-                            currentRoom.SendMessage(newMessage);
+                            currentRoom.SendMessage(newMessage, msg.DeliveryMethod);
                         }
                     }
                     else
