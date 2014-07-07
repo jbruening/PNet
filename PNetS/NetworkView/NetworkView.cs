@@ -505,7 +505,6 @@ namespace PNetS
             {
                 var message = PNetServer.peer.CreateMessage();
                 buffer[i].Clone(message);
-                Debug.Log("Sending buffered message to player " + player.Id);
                 PNetServer.peer.SendMessage(message, player.connection, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
             }
 
