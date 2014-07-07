@@ -15,6 +15,10 @@ namespace PNet
         /// </summary>
         public const int UNRELIABLE_STREAM = 0;
         /// <summary>
+        /// Reliable, unordered, for static rpcs
+        /// </summary>
+        public const int STATIC_RPC_UNORDERED = 0;
+        /// <summary>
         /// reliable streaming
         /// </summary>
         public const int RELIABLE_STREAM = 1;

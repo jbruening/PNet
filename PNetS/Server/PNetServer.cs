@@ -190,21 +190,28 @@ namespace PNetS
                 //faster than switch, as this is in most to least common order
                 if (msg.SequenceChannel == Channels.UNRELIABLE_STREAM)
                 {
-                    var actorId = msg.ReadUInt16();
-                    NetworkView find;
-                    if (NetworkView.Find(actorId, out find))
+                    if (msg.DeliveryMethod == NetDeliveryMethod.ReliableUnordered)
                     {
-                        Player player = GetPlayer(msg.SenderConnection);
-                        find.OnDeserializeStream(msg, player);
+                        HandleStaticRpc(msg);
                     }
                     else
                     {
-                        if (GetPlayer(msg.SenderConnection).CurrentRoom != null)
+                        var actorId = msg.ReadUInt16();
+                        NetworkView find;
+                        if (NetworkView.Find(actorId, out find))
                         {
-                            Debug.LogWarning(
-                                "[PNetS.Consume] Player {0} attempted to send unreliable stream data for view {1}, but it does not exist",
-                                msg.SenderConnection.Tag, actorId);
-                            (msg.SenderConnection.Tag as Player).InternalErrorCount++;
+                            Player player = GetPlayer(msg.SenderConnection);
+                            find.OnDeserializeStream(msg, player);
+                        }
+                        else
+                        {
+                            if (GetPlayer(msg.SenderConnection).CurrentRoom != null)
+                            {
+                                Debug.LogWarning(
+                                    "[PNetS.Consume] Player {0} attempted to send unreliable stream data for view {1}, but it does not exist",
+                                    msg.SenderConnection.Tag, actorId);
+                                (msg.SenderConnection.Tag as Player).InternalErrorCount++;
+                            }
                         }
                     }
                 }
@@ -283,29 +290,7 @@ namespace PNetS
                 }
                 else if (msg.SequenceChannel == Channels.STATIC_RPC)
                 {
-                    var rpcId = msg.ReadByte();
-
-                    var player = GetPlayer(msg.SenderConnection);
-                    var currentRoom = player.CurrentRoom;
-                    if (currentRoom != null)
-                    {
-                        var info = new NetMessageInfo(RPCMode.None, player);
-                        currentRoom.CallRPC(rpcId, msg, info);
-
-                        if (info.continueForwarding)
-                        {
-                            var newMessage = peer.CreateMessage();
-                            msg.Clone(newMessage);
-                            currentRoom.SendMessage(newMessage, msg.DeliveryMethod);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[PNetS.Consume] Player {0} attempted static rpc {1}, but they are not in a room to do so",
-                            player, rpcId);
-                        (player).InternalErrorCount++;
-                    }
-
+                    HandleStaticRpc(msg);
                 }
                 else if (msg.SequenceChannel == Channels.STATIC_UTILS)
                 {
@@ -313,13 +298,42 @@ namespace PNetS
                 }
                 else
                 {
-                    Debug.LogWarning("data received over unhandled channel " + msg.SequenceChannel);
+                    Debug.LogWarning("{2} bytes received over unhandled channel {0}, delivery {1}", msg.SequenceChannel, msg.DeliveryMethod, msg.LengthBytes);
                     (msg.SenderConnection.Tag as Player).InternalErrorCount++;
                 }
             }
             catch (Exception ex)
             {
                 Debug.Log("[Consumption] {0} : {1}", ex.Message, ex.StackTrace);
+            }
+        }
+
+        static void HandleStaticRpc(NetIncomingMessage msg)
+        {
+            var rpcId = msg.ReadByte();
+
+            var player = GetPlayer(msg.SenderConnection);
+            var currentRoom = player.CurrentRoom;
+            if (currentRoom != null)
+            {
+                var info = new NetMessageInfo(RPCMode.None, player);
+                currentRoom.CallRPC(rpcId, msg, info);
+
+                if (info.continueForwarding)
+                {
+                    var newMessage = peer.CreateMessage();
+                    msg.Clone(newMessage);
+                    if (msg.DeliveryMethod == NetDeliveryMethod.ReliableOrdered)
+                        currentRoom.SendMessage(newMessage, true);
+                    else
+                        currentRoom.SendMessage(newMessage, false);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[PNetS.Consume] Player {0} attempted static rpc {1}, but they are not in a room to do so",
+                    player, rpcId);
+                (player).InternalErrorCount++;
             }
         }
 

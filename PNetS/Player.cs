@@ -340,7 +340,7 @@ namespace PNetS
 
         void SendUnorderedMessage(NetOutgoingMessage msg)
         {
-            connection.SendMessage(msg, NetDeliveryMethod.ReliableUnordered, Channels.STATIC_RPC);
+            connection.SendMessage(msg, NetDeliveryMethod.ReliableUnordered, Channels.STATIC_RPC_UNORDERED);
         }
         #endregion
 

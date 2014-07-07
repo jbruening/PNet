@@ -209,7 +209,7 @@ namespace PNetC
             message.Write(rpcId);
             RPCUtils.WriteParams(ref message, args);
 
-            Peer.SendMessage(message, NetDeliveryMethod.ReliableUnordered, Channels.STATIC_RPC);
+            Peer.SendMessage(message, NetDeliveryMethod.ReliableUnordered, Channels.STATIC_RPC_UNORDERED);
         }
 
         /// <summary>
@@ -474,10 +474,17 @@ namespace PNetC
                 //faster than switch, as this is in most to least common order
                 if (msg.SequenceChannel == Channels.UNRELIABLE_STREAM)
                 {
-                    var actorId = NetworkViewId.Deserialize(msg);
-                    NetworkView find;
-                    if (NetworkViewManager.Find(actorId, out find))
-                        find.DoOnDeserializeStream(msg);
+                    if (msg.DeliveryMethod == NetDeliveryMethod.ReliableUnordered)
+                    {
+                        HandleStaticRpc(msg);
+                    }
+                    else
+                    {
+                        var actorId = NetworkViewId.Deserialize(msg);
+                        NetworkView find;
+                        if (NetworkViewManager.Find(actorId, out find))
+                            find.DoOnDeserializeStream(msg);
+                    }
                 }
                 else if (msg.SequenceChannel == Channels.RELIABLE_STREAM)
                 {
@@ -515,8 +522,7 @@ namespace PNetC
                 }
                 else if (msg.SequenceChannel == Channels.STATIC_RPC)
                 {
-                    var rpcId = msg.ReadByte();
-                    if (ProcessRPC != null) ProcessRPC(rpcId, msg);
+                    HandleStaticRpc(msg);
                 }
                 else if (msg.SequenceChannel == Channels.STATIC_UTILS)
                 {
@@ -524,13 +530,19 @@ namespace PNetC
                 }
                 else
                 {
-                    Debug.LogWarning(this, "data received over unhandled channel {0}", msg.SequenceChannel);
+                    Debug.LogWarning(this, "{1} bytes received over unhandled channel {0}, delivery {2}", msg.SequenceChannel, msg.LengthBytes, msg.DeliveryMethod);
                 }
             }
             catch (Exception er)
             {
                 Debug.LogError(this, "[Net.Consume] {0}", er);
             }
+        }
+
+        void HandleStaticRpc(NetIncomingMessage msg)
+        {
+            var rpcId = msg.ReadByte();
+            if (ProcessRPC != null) ProcessRPC(rpcId, msg);
         }
     }
 }

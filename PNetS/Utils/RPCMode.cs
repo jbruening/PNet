@@ -42,24 +42,20 @@ namespace PNetS
         None = 10,
 
         /// <summary>
-        /// send to everyone but the owner, in an unordered fashion
+        /// send to everyone but the owner, in an unordered fashion. CURRENTLY IS ORDERED FOR NETWORKVIEWS, DUE TO LIDGREN ISSUES
         /// </summary>
         OthersUnordered = 11,
         /// <summary>
-        /// send to everyone, in an unordered fashion
+        /// send to everyone, in an unordered fashion. CURRENTLY IS ORDERED FOR NETWORKVIEWS, DUE TO LIDGREN ISSUES
         /// </summary>
         AllUnordered = 12,
     }
 
-    public static class RPCModeExtensions
+    internal static class RPCModeExtensions
     {
         public static NetDeliveryMethod GetDeliveryMethod(this RPCMode mode)
         {
-            if (mode != RPCMode.AllUnordered && mode != RPCMode.OthersUnordered)
-            {
-                return NetDeliveryMethod.ReliableOrdered;
-            }
-            return NetDeliveryMethod.ReliableUnordered;
+            return NetDeliveryMethod.ReliableOrdered;
         }
     }
 }
