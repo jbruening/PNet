@@ -120,5 +120,10 @@ namespace PNetS
                     peer.Recycle(msg);
             }
         }
+
+        static void LateUpdate()
+        {
+            peer.FlushSendQueue();
+        }
     }
 }

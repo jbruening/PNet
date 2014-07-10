@@ -101,6 +101,8 @@ namespace PNetS
             _netPeerConfiguration.SendBufferSize = Configuration.SendBuffer;
             connections = new IntDictionary<NetConnection>(Configuration.MaximumConnections);
 
+            //pnet specific things...
+            _netPeerConfiguration.AutoFlushSendQueue = false;
             _netPeerConfiguration.SetMessageTypeEnabled(NetIncomingMessageType.ConnectionApproval, true);
 
             peer = new NetServer(_netPeerConfiguration);
@@ -113,6 +115,7 @@ namespace PNetS
             Player.Server = serverPlayer;
 
             GameState.update += Update;
+            GameState.lateUpdate += LateUpdate;
         }
 
         /// <summary>
