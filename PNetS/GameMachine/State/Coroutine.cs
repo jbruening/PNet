@@ -13,8 +13,10 @@ namespace PNetS.GameMachine.State
         /// <param name="shouldRunNextFrame"></param>
         public static void Run(ref List<IEnumerator> unblockedCoroutines, ref List<IEnumerator> shouldRunNextFrame)
         {
-            foreach (IEnumerator coroutine in unblockedCoroutines)
+            for (int i = 0; i < unblockedCoroutines.Count; i++ )
             {
+                var coroutine = unblockedCoroutines[i];
+
                 var yRoute = coroutine.Current as YieldInstruction;
                 if (yRoute != null)
                 {
@@ -39,7 +41,7 @@ namespace PNetS.GameMachine.State
                     var croute = yRoute as PNetS.Coroutine;
                     lock (shouldRunNextFrame)
                     {
-                        var last = shouldRunNextFrame.Last();
+                        var last = shouldRunNextFrame[shouldRunNextFrame.Count - 1];
                         if (!ReferenceEquals(croute.Routine, last))
                         {
                             Debug.LogError(
@@ -67,8 +69,9 @@ namespace PNetS.GameMachine.State
                 }
             }
 
-            unblockedCoroutines = shouldRunNextFrame;
-            shouldRunNextFrame = new List<IEnumerator>();
+            unblockedCoroutines.Clear();
+            unblockedCoroutines.AddRange(shouldRunNextFrame);
+            shouldRunNextFrame.Clear();
         }
     }
 }
