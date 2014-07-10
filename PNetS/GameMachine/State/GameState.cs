@@ -272,6 +272,12 @@ namespace PNetS
                 }
             }
 
+            try { lateUpdate(); }
+            catch(Exception e)
+            {
+                Debug.LogError("[Server Late Update] {0}", e);
+            }
+
             if (DestroyDelays == null) return;
             try
             {
