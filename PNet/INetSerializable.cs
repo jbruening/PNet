@@ -39,10 +39,35 @@ namespace PNet
         /// </summary>
         public TValue Value;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public ASerializable() { }
+
+        /// <summary>
+        /// Initialize the object from deserializing from the message
+        /// </summary>
+        /// <param name="toDeserialize"></param>
+        public ASerializable(NetIncomingMessage toDeserialize)
+        {
+            OnDeserialize(toDeserialize);
+        }
+
+        /// <summary>
+        /// method to run when serializing to the message
+        /// </summary>
+        /// <param name="message"></param>
         public abstract void OnSerialize(NetOutgoingMessage message);
 
+        /// <summary>
+        /// deserialize from the message
+        /// </summary>
+        /// <param name="message"></param>
         public abstract void OnDeserialize(NetIncomingMessage message);
 
+        /// <summary>
+        /// size in bytes
+        /// </summary>
         public abstract int AllocSize { get; }
 
         [ThreadStatic]
@@ -64,6 +89,17 @@ namespace PNet
         {
             Value = newValue;
             return this;
+        }
+
+        /// <summary>
+        /// deserialize Instance.Value from the message
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns>Instance.Value</returns>
+        public static TValue Deserialize(NetIncomingMessage msg)
+        {
+            Instance.OnDeserialize(msg);
+            return Instance.Value;
         }
     }
 

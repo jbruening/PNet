@@ -109,5 +109,31 @@ namespace ClientServerIntegrationTests
             Thread.Sleep(50);
             Assert.IsTrue(rpcWasCalled);
         }
+
+        [TestMethod]
+        public void StaticASerializableTest()
+        {
+            var player = PNetServer.AllPlayers().First(f => f != null && f != Player.Server);
+
+            var rpcWasCalled = false;
+
+            string rpcStr = "foobar";
+
+            _client.ProcessRPC += (id, msg) =>
+            {
+                if (id == 1)
+                {
+                    var str = StringSerializer.Deserialize(msg);
+
+                    Assert.AreEqual(rpcStr, str);
+                    rpcWasCalled = true;
+                }
+            };
+
+            player.RPC(1, StringSerializer.Instance.Update(rpcStr));
+
+            Thread.Sleep(50);
+            Assert.IsTrue(rpcWasCalled);
+        }
     }
 }
