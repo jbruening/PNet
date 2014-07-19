@@ -12,7 +12,7 @@ namespace PNetU
         /// <returns></returns>
         public static NetworkView Find(NetworkViewId viewId)
         {
-            if (UnityEngineHook.ValidInstance)
+            if (!UnityEngineHook.ValidInstance)
                 return null;
             
             NetworkView view;
