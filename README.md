@@ -1,8 +1,9 @@
+<p align="center">
+  <img src="http://fc08.deviantart.net/fs70/f/2014/200/8/9/pnetlogo_by_faikie-d7rfr8n.png" width="150" />
+</p>
 PNet
-====
+===
 Networking middleware for Unity using Lidgren, with a custom dedicated server.
-
-Examples pending.
 
 
 Directions
