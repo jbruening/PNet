@@ -74,6 +74,8 @@ namespace PNetS
             {
                 Debug.LogError("[Disposing {0}] {1}", gameObject.Name, e);
             }
+            //help prevent bad use of the library from keeping the other components around.
+            gameObject = null;
         }
         /// <summary>
         /// The object is being deleted
