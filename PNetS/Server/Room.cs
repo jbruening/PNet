@@ -201,7 +201,7 @@ namespace PNetS
             m_Actors.Remove(view);
 
             //if we don't do it now, it'll just get cleared once gamestate leaves the delegate call
-            GameObject.DestroyNow(view.gameObject);
+            GameObject.Destroy(view.gameObject);
 
             NetworkView.RemoveView(view);
 

@@ -86,7 +86,7 @@ namespace PNetS
             GameState.DestroyDelays += () => { DestroyNow(gameObject); };
         }
 
-        internal static void DestroyNow(GameObject gameObject)
+        private static void DestroyNow(GameObject gameObject)
         {
             gameObject._markedForDestruction = true; //just in case
             gameObject.Owner = null;
