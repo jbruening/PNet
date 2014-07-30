@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace PNetS
 {
@@ -20,6 +21,7 @@ namespace PNetS
         /// </summary>
         /// <param name="value"></param>
         /// <param name="args"></param>
+        [StringFormatMethod("value")]
         public static void Log(string value, params object[] args)
         {
             logger.Info(value, args);
@@ -29,6 +31,7 @@ namespace PNetS
         /// </summary>
         /// <param name="value"></param>
         /// <param name="args"></param>
+        [StringFormatMethod("value")]
         public static void LogError(string value, params object[] args)
         {
             logger.Error(value, args);
@@ -38,6 +41,7 @@ namespace PNetS
         /// </summary>
         /// <param name="value"></param>
         /// <param name="args"></param>
+        [StringFormatMethod("value")]
         public static void LogWarning(string value, params object[] args)
         {
             logger.Warning(value, args);
