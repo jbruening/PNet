@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using PNet;
 
 namespace PNetS
@@ -14,6 +15,9 @@ namespace PNetS
 
         internal void Update()
         {
+            //process messages for game objects...
+            NetworkUpdate();
+
             try
             {
                 for (int i = 0; i < _roomBehaviours.Count; ++i)
@@ -31,6 +35,11 @@ namespace PNetS
             {
                 Debug.LogError("[Room Update] {0}: {1}", Name, e);
             }
+        }
+
+        internal void LateUpdate()
+        {
+            Peer.FlushSendQueue();
         }
     }
 }

@@ -30,15 +30,15 @@ namespace PNetS
                 {
                     foreach (var player in room.players)
                     {
-                        _connections.Add(player.connection);
+                        _connections.Add(player.RoomConnection);
                         if (player != _owner)
-                            _allButOwner.Add(player.connection);
+                            _allButOwner.Add(player.RoomConnection);
                     }
                 }
                 else
                 {
                     if (_owner != Player.Server)
-                        _connections.Add(_owner.connection);
+                        _connections.Add(_owner.RoomConnection);
                 }
             }
         }
@@ -79,8 +79,8 @@ namespace PNetS
                     var playersToAdd = new List<NetConnection>(room.players.Count);
                     for (var i = 0; i < room.players.Count; i++)
                     {
-                        if (!_connections.Contains(room.players[i].connection))
-                            playersToAdd.Add(room.players[i].connection);
+                        if (!_connections.Contains(room.players[i].RoomConnection))
+                            playersToAdd.Add(room.players[i].RoomConnection);
                     }
 
                     room.SendNetworkInstantiate(playersToAdd, gameObject);
@@ -117,11 +117,11 @@ namespace PNetS
             {
                 if (_connections.Contains(player.connection))
                     return; //player is already subscribed
-                
-                _connections.Add(player.connection);
-                _allButOwner.Add(player.connection);
 
-                room.SendNetworkInstantiate(new List<NetConnection> {player.connection}, gameObject);
+                _connections.Add(player.RoomConnection);
+                _allButOwner.Add(player.RoomConnection);
+
+                room.SendNetworkInstantiate(new List<NetConnection> { player.RoomConnection }, gameObject);
             }
             else
             {
@@ -137,16 +137,16 @@ namespace PNetS
         {
             if (_allButOwner.Count > 0)
             {
-                var message = PNetServer.peer.CreateMessage(3);
+                var message = room.Peer.CreateMessage(3);
                 message.Write(PNet.RPCUtils.Remove);
                 message.Write(viewID.guid);
-                PNetServer.peer.SendMessage(message, _allButOwner, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
+                room.Peer.SendMessage(message, _allButOwner, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_RPC);
             }
 
             _allButOwner.Clear();
             _connections.Clear();
             if (owner != Player.Server)
-                _connections.Add(owner.connection);
+                _connections.Add(owner.RoomConnection);
         }
 
         void DestroyOnPlayer(Player player)
@@ -168,16 +168,16 @@ namespace PNetS
                 if (owner == player)
                     return;
 
-                _connections.Add(player.connection);
-                _allButOwner.Add(player.connection);
+                _connections.Add(player.RoomConnection);
+                _allButOwner.Add(player.RoomConnection);
             }
         }
         void OnPlayerLeftRoom(Player player)
         {
-            _connections.Remove(player.connection);
+            _connections.Remove(player.RoomConnection);
             
             if (player != owner)
-                _allButOwner.Remove(player.connection);
+                _allButOwner.Remove(player.RoomConnection);
         }
 
         private void OnInstantiationFinished(Player player)
@@ -188,7 +188,7 @@ namespace PNetS
 
             //get all the secondary views and send them
             if (IsSecondaryView) return;
-            var conn = new List<NetConnection> {player.connection};
+            var conn = new List<NetConnection> { player.RoomConnection };
 
             foreach (var nview in gameObject.GetComponents<NetworkView>().Where(n => n != this))
             {
@@ -232,7 +232,7 @@ namespace PNetS
         {
             if (conns.Count <= 0) return;
 
-            var message = PNetServer.peer.CreateMessage();
+            var message = room.Peer.CreateMessage();
 
             message.Write(RPCUtils.AddView);
             message.Write(viewID.guid);
@@ -240,7 +240,7 @@ namespace PNetS
             if (newView._customSecondaryFunction != null)
                 message.Write(newView._customSecondaryFunction);
 
-            PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
+            room.Peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
 
         #region RPC Subscriptions
@@ -452,7 +452,7 @@ namespace PNetS
                 if (SerializationTime < 0.01f)
                     SerializationTime = 0.01f;
 
-                if (owner == Player.Server || owner.connection.Status == NetConnectionStatus.Connected)
+                if (owner == Player.Server || owner.RoomConnection.Status == NetConnectionStatus.Connected)
                 {
                     List<NetConnection> conns;
 
@@ -463,20 +463,21 @@ namespace PNetS
 
                     if (conns.Count > 0)
                     {
-                        var nMessage = PNetServer.peer.CreateMessage(DefaultStreamSize);
+                        var nMessage = room.Peer.CreateMessage(DefaultStreamSize);
                         nMessage.Write(viewID.guid);
                         OnSerializeStream(nMessage);
 
                         if (StateSynchronization == NetworkStateSynchronization.Unreliable)
                         {
-                            PNetServer.peer.SendMessage(nMessage, conns, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
+                            room.Peer.SendMessage(nMessage, conns, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
                         }
                         else if (StateSynchronization == NetworkStateSynchronization.ReliableDeltaCompressed)
                         {
-                            PNetServer.peer.SendMessage(nMessage, conns, NetDeliveryMethod.ReliableOrdered, Channels.RELIABLE_STREAM);
+                            room.Peer.SendMessage(nMessage, conns, NetDeliveryMethod.ReliableOrdered, Channels.RELIABLE_STREAM);
                         }
                         else
                         {
+                            room.Peer.Recycle(nMessage);
                             Debug.LogError("A networkview is set to the serialization type {0}. This is not a valid serialization type.", StateSynchronization);
                         }
                     }
@@ -503,17 +504,17 @@ namespace PNetS
         {
             for(int i = 0; i < buffer.Count; i++)
             {
-                var message = PNetServer.peer.CreateMessage();
+                var message = room.Peer.CreateMessage();
                 buffer[i].Clone(message);
-                PNetServer.peer.SendMessage(message, player.connection, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+                room.Peer.SendMessage(message, player.RoomConnection, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
             }
 
             foreach (var b in fieldBuffer)
             {
-                var message = PNetServer.peer.CreateMessage();
+                var message = room.Peer.CreateMessage();
                 b.Value.Clone(message);
 
-                PNetServer.peer.SendMessage(message, player.connection, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
+                room.Peer.SendMessage(message, player.RoomConnection, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
             }
         }
 
@@ -527,7 +528,7 @@ namespace PNetS
 
         internal void Send(NetBuffer msg, RPCMode mode, NetConnection originalSender = null)
         {
-            var message = PNetServer.peer.CreateMessage();
+            var message = room.Peer.CreateMessage();
             msg.Clone(message);
 
             SendMessage(message, mode, originalSender);
@@ -539,21 +540,21 @@ namespace PNetS
             {
                 //all and other are identical if originalsender is null.
                 if ((mode == RPCMode.All || mode == RPCMode.AllBuffered || originalSender == null) && _connections.Count > 0)
-                    PNetServer.peer.SendMessage(msg, _connections, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
+                    room.Peer.SendMessage(msg, _connections, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
                 else
                 {
                     if (_allButOwner.Count != 0)
-                        PNetServer.peer.SendMessage(msg, _allButOwner, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
+                        room.Peer.SendMessage(msg, _allButOwner, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
                     else
                     {
                         //need to recycle unused messages...
-                        PNetServer.peer.Recycle(msg);
+                        room.Peer.Recycle(msg);
                     }
                 }
             }
             else
             {
-                PNetServer.peer.SendMessage(msg, owner.connection, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
+                room.Peer.SendMessage(msg, owner.connection, mode.GetDeliveryMethod(), Channels.OWNER_RPC);
             }
         }
 
@@ -572,14 +573,14 @@ namespace PNetS
         //fields are basically treated like OthersBuffered
         internal void SendField(NetBuffer msg, NetConnection originalSender = null)
         {
-            var message = PNetServer.peer.CreateMessage();
+            var message = room.Peer.CreateMessage();
             msg.Clone(message);
 
             var conns = _connections.Where(c => c != originalSender).ToList();
             if (conns.Count != 0)
-                PNetServer.peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
+                room.Peer.SendMessage(message, conns, NetDeliveryMethod.ReliableOrdered, Channels.SYNCHED_FIELD);
             else
-                PNetServer.peer.Recycle(message);
+                room.Peer.Recycle(message);
         }
         #endregion
     }

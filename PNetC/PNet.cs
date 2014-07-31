@@ -104,6 +104,8 @@ namespace PNetC
         }
 
         internal NetClient Peer;
+        internal NetClient RoomPeer;
+
         /// <summary>
         /// The Network ID of this client
         /// </summary>
@@ -212,15 +214,20 @@ namespace PNetC
             Peer.SendMessage(message, NetDeliveryMethod.ReliableUnordered, Channels.STATIC_RPC_UNORDERED);
         }
 
+        private int _roomPort;
+        private readonly byte[] _roomKey = new byte[16];
         /// <summary>
         /// Run once the room changing has completed (tells the server you're actually ready to be in a room)
         /// </summary>
         public void FinishedRoomChange()
         {
-            var message = Peer.CreateMessage(1);
-
-            message.Write(RPCUtils.FinishedRoomChange);
-            Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
+            var message = RoomPeer.CreateMessage(18);
+            message.Write(PlayerId);
+            message.Write(_roomKey);
+            //faster to use existing information about connection rather than from config.
+            var endPoint = Peer.ServerConnection.RemoteEndPoint;
+            endPoint.Port = _roomPort;
+            RoomPeer.Connect(endPoint, message);
         }
 
         private void FinishedInstantiate(NetworkViewId netId)
@@ -292,6 +299,8 @@ namespace PNetC
             else if (utilId == RPCUtils.ChangeRoom)
             {
                 var newRoom = msg.ReadString();
+                _roomPort = msg.ReadInt32();
+                msg.ReadBytes(_roomKey, 0, 16);
 
                 Debug.LogInfo(this, "Changing to room {0}", newRoom);
 
@@ -311,6 +320,9 @@ namespace PNetC
                 {
                     NetworkViewManager.DestroyAllViews();
                 }
+
+                //and disconnect the room peer.
+                RoomPeer.Disconnect("SRS");
             }
             else if (utilId == RPCUtils.AddView)
             {

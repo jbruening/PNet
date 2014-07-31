@@ -272,6 +272,11 @@ namespace PNetS
                 }
             }
 
+            for (int i = 0; i < AllRooms.Count; i++)
+            {
+                AllRooms[i].LateUpdate();
+            }
+
             try { lateUpdate(); }
             catch(Exception e)
             {

@@ -68,6 +68,8 @@ namespace PNetS
         /// </summary>
         public static ServerConfiguration Configuration { get; private set; }
 
+        internal readonly static Random Random = new Random();
+
         /// <summary>
         /// Set up the server, and bind to a socket. Use Start to actually fully start the server
         /// </summary>
@@ -359,20 +361,15 @@ namespace PNetS
             }
             else if (utilId == RPCUtils.FinishedRoomChange)
             {
-                //the player has finished loading into the new room. now actually put their player in the new room.
                 var player = msg.SenderConnection.Tag as Player;
 
-                var newRoom = player.GetRoomSwitchingTo();
+                msg.SenderConnection.Disconnect("FinishedRoomChange no longer supported. Please upgrade PNet.");
 
-                if (newRoom != null)
-                {
-                    newRoom.AddPlayer(player);
-                }
-                else
-                {
-                    Debug.LogWarning("[PNetS.ProcessUtils] Player {0} attempted to finish joining a room, but it no longer exists", msg.SenderConnection.Tag);
-                    (msg.SenderConnection.Tag as Player).InternalErrorCount++;
-                }
+                if (player == null)
+                    return;
+
+                Debug.LogWarning("[PNetS.ProcessUtils] Player {0} attempted to finish joining a room, but this should now be done via connecting to the room server. They have been disconnected", 
+                    msg.SenderConnection.Tag);
             }
             else if (utilId == RPCUtils.Remove)
             {

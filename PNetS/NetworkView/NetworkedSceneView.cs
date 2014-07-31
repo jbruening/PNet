@@ -27,7 +27,7 @@ namespace PNetS
         /// </summary>
         public void UpdateConnections()
         {
-            connections = room.players.Select(p => p.connection).ToList();
+            connections = room.players.Select(p => p.RoomConnection).ToList();
         }
 
         #region RPC Processing
@@ -111,12 +111,11 @@ namespace PNetS
             var size = 3;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = PNetServer.peer.CreateMessage(size);
+            var message = room.Peer.CreateMessage(size);
             message.Write((ushort)NetworkID);
             message.Write(rpcID);
             RPCUtils.WriteParams(ref message, args);
-
-            PNetServer.peer.SendMessage(message, connections, NetDeliveryMethod.ReliableOrdered, Channels.OBJECT_RPC);
+            room.Peer.SendMessage(message, connections, NetDeliveryMethod.ReliableOrdered, Channels.OBJECT_RPC);
         }
     }
 }

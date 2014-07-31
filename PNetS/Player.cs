@@ -71,6 +71,7 @@ namespace PNetS
         }
 
         internal NetConnection connection;
+        internal NetConnection RoomConnection;
         /// <summary>
         /// current room the player is in. can be null
         /// </summary>
@@ -83,6 +84,7 @@ namespace PNetS
         }
 
         private Room newRoom;
+        internal readonly byte[] RoomChangeKeyBytes = new byte[16];
 
         /// <summary>
         /// change the player to the specified room
@@ -100,9 +102,12 @@ namespace PNetS
                 CurrentRoom.RemovePlayer(this);
             CurrentRoom = null;
 
-            var message = PNetServer.peer.CreateMessage();
+            var message = PNetServer.peer.CreateMessage(room.Name.Length*2 + 21);
             message.Write(RPCUtils.ChangeRoom);
             message.Write(room.Name);
+            message.Write(room.Port);
+            PNetServer.Random.NextBytes(RoomChangeKeyBytes);
+            message.Write(RoomChangeKeyBytes);
 
             connection.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.STATIC_UTILS);
         }
@@ -114,6 +119,12 @@ namespace PNetS
 
         internal void FireLeaveRoom(Room roomLeaving)
         {
+            if (RoomConnection != null)
+            {
+                RoomConnection.Disconnect("CR");
+                RoomConnection = null;
+            }
+
             if (LeavingRoom != null)
                 LeavingRoom(roomLeaving);
         }
@@ -130,6 +141,11 @@ namespace PNetS
         public void Disconnect(string reason)
         {
             connection.Disconnect(reason);
+            if (RoomConnection != null)
+            {
+                RoomConnection.Disconnect("DC");
+                RoomConnection = null;
+            }
         }
 
         /// <summary>

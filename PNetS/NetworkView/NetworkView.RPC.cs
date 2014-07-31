@@ -270,7 +270,7 @@ namespace PNetS
 
             var buff = new NetBuffer();
             message.Clone(buff);
-            PNetServer.peer.Recycle(message);
+            room.Peer.Recycle(message);
             return buff;
         }
         
@@ -281,7 +281,7 @@ namespace PNetS
         /// <param name="buffer"></param>
         public void SendBuffer(Player player, NetBuffer buffer)
         {
-            var message = PNetServer.peer.CreateMessage(buffer.LengthBytes);
+            var message = room.Peer.CreateMessage(buffer.LengthBytes);
             buffer.Clone(message);
 
             FinishRPCSend(player, message);
@@ -294,7 +294,7 @@ namespace PNetS
         /// <param name="buffer"></param>
         public void SendBuffer(RPCMode mode, NetBuffer buffer)
         {
-            var message = PNetServer.peer.CreateMessage(buffer.LengthBytes);
+            var message = room.Peer.CreateMessage(buffer.LengthBytes);
             buffer.Clone(message);
             FinishRPCSend(mode, message);
         }
@@ -328,12 +328,12 @@ namespace PNetS
 
         void FinishRPCSend(Player player, NetOutgoingMessage message)
         {
-            PNetServer.peer.SendMessage(message, player.connection, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+            room.Peer.SendMessage(message, player.RoomConnection, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
         }
 
         NetOutgoingMessage CreateMessage(int byteSize, byte rpcID)
         {
-            var message = PNetServer.peer.CreateMessage(byteSize);
+            var message = room.Peer.CreateMessage(byteSize);
             message.Write(viewID.guid); //2 bytes
             message.Write(rpcID); //1 byte
             return message;
