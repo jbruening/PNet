@@ -245,12 +245,12 @@ namespace PNetS
                 }
                 else if (msg.MessageType == NetIncomingMessageType.DebugMessage)
                 {
-                    Debug.Log(msg.ReadString());
+                    Debug.Log("[Room] {0}: {1}", Name, msg.ReadString());
                     _peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.WarningMessage)
                 {
-                    Debug.LogWarning(msg.ReadString());
+                    Debug.LogWarning("[Room] {0}: {1}", Name, msg.ReadString());
                     _peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ConnectionLatencyUpdated)
@@ -261,7 +261,7 @@ namespace PNetS
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ErrorMessage)
                 {
-                    Debug.LogError(msg.ReadString());
+                    Debug.LogError("[Room] {0}: {1}", Name, msg.ReadString());
                     _peer.Recycle(msg);
                 }
                 else if (msg.MessageType == NetIncomingMessageType.ConnectionApproval)
@@ -312,7 +312,7 @@ namespace PNetS
                         if (PNetServer.GetPlayer(msg.SenderConnection).CurrentRoom != null)
                         {
                             Debug.LogWarning(
-                                "[PNetS.Consume] Player {0} attempted to send unreliable stream data for view {1}, but it does not exist",
+                                "[Room.Consume] Player {0} attempted to send unreliable stream data for view {1}, but it does not exist",
                                 msg.SenderConnection.Tag, actorId);
                             (msg.SenderConnection.Tag as Player).InternalErrorCount++;
                         }
@@ -332,7 +332,7 @@ namespace PNetS
                         if (PNetServer.GetPlayer(msg.SenderConnection).CurrentRoom != null)
                         {
                             Debug.LogWarning(
-                                "[PNetS.Consume] Player {0} attempted to send reliable stream data for view {1}, but it does not exist",
+                                "[Room.Consume] Player {0} attempted to send reliable stream data for view {1}, but it does not exist",
                                 msg.SenderConnection.Tag, actorId);
                             (msg.SenderConnection.Tag as Player).InternalErrorCount++;
                         }
@@ -368,7 +368,7 @@ namespace PNetS
                         if (player.CurrentRoom != null)
                         {
                             Debug.LogWarning(
-                                "[PNetS.Consume] Player {0} attempted RPC {1} on view {2}, but the view does not exist",
+                                "[Room.Consume] Player {0} attempted RPC {1} on view {2}, but the view does not exist",
                                 player, rpcId, viewId);
                             player.InternalErrorCount++;
                         }
@@ -391,7 +391,7 @@ namespace PNetS
                 }
                 else
                 {
-                    Debug.LogWarning("{2} bytes received over unhandled channel {0}, delivery {1}", msg.SequenceChannel, msg.DeliveryMethod, msg.LengthBytes);
+                    Debug.LogWarning("[Room] {2} bytes received over unhandled channel {0}, delivery {1}", msg.SequenceChannel, msg.DeliveryMethod, msg.LengthBytes);
                     (msg.SenderConnection.Tag as Player).InternalErrorCount++;
                 }
             }
@@ -417,6 +417,7 @@ namespace PNetS
                 return;
             }
             msg.SenderConnection.Tag = player;
+            player.RoomConnection = msg.SenderConnection;
             msg.SenderConnection.Approve();
 
             AddPlayer(player);

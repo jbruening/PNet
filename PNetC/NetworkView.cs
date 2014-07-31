@@ -80,12 +80,12 @@ namespace PNetC
             var size = 2;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = Manager.Net.Peer.CreateMessage(size);
+            var message = Manager.Net.RoomPeer.CreateMessage(size);
             message.Write(ViewID.guid);
             message.Write(rpcID);
             RPCUtils.WriteParams(ref message, args);
 
-            Manager.Net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, (int)mode + Channels.BEGIN_RPCMODES);
+            Manager.Net.RoomPeer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, (int)mode + Channels.BEGIN_RPCMODES);
         }
 
         /// <summary>
@@ -98,12 +98,12 @@ namespace PNetC
             var size = 3;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = Manager.Net.Peer.CreateMessage(size);
+            var message = Manager.Net.RoomPeer.CreateMessage(size);
             message.Write(ViewID.guid);
             message.Write(rpcID);
             RPCUtils.WriteParams(ref message, args);
 
-            Manager.Net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
+            Manager.Net.RoomPeer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OWNER_RPC);
         }
 
         #region serialization
@@ -134,15 +134,17 @@ namespace PNetC
         {
             if (Manager.Net.Status == NetConnectionStatus.Connected)
             {
-                var nMessage = Manager.Net.Peer.CreateMessage(DefaultStreamSize);
+                var nMessage = Manager.Net.RoomPeer.CreateMessage(DefaultStreamSize);
                 nMessage.Write(ViewID.guid);
                 if (_onSerializeStream != null)
                     _onSerializeStream(nMessage);
 
                 if (StateSynchronization == NetworkStateSynchronization.Unreliable)
-                    Manager.Net.Peer.SendMessage(nMessage, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
+                    Manager.Net.RoomPeer.SendMessage(nMessage, NetDeliveryMethod.Unreliable, Channels.UNRELIABLE_STREAM);
                 else if (StateSynchronization == NetworkStateSynchronization.ReliableDeltaCompressed)
-                    Manager.Net.Peer.SendMessage(nMessage, NetDeliveryMethod.ReliableOrdered, Channels.RELIABLE_STREAM);
+                    Manager.Net.RoomPeer.SendMessage(nMessage, NetDeliveryMethod.ReliableOrdered, Channels.RELIABLE_STREAM);
+                else
+                    Manager.Net.RoomPeer.Recycle(nMessage);
             }
         }
 

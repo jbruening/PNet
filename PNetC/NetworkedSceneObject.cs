@@ -135,12 +135,12 @@ namespace PNetC
             var size = 3;
             RPCUtils.AllocSize(ref size, args);
 
-            var message = _net.Peer.CreateMessage(size);
+            var message = _net.RoomPeer.CreateMessage(size);
             message.Write((ushort)NetworkID);
             message.Write(rpcID);
             RPCUtils.WriteParams(ref message, args);
 
-            _net.Peer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OBJECT_RPC);
+            _net.RoomPeer.SendMessage(message, NetDeliveryMethod.ReliableOrdered, Channels.OBJECT_RPC);
         }
 
         /// <summary>

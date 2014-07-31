@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Lidgren.Network;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
@@ -46,6 +47,23 @@ namespace PNetU
             }
         }
 
+        /// <summary>
+        /// not changeable, just to show current status
+        /// </summary>
+        public string StatusReason;
+        /// <summary>
+        /// not changeable, just to show current status
+        /// </summary>
+        public NetConnectionStatus Status;
+        /// <summary>
+        /// not changeable, just to show current status
+        /// </summary>
+        public string RoomStatusReason;
+        /// <summary>
+        /// not changeable, just to show current status
+        /// </summary>
+        public NetConnectionStatus RoomStatus;
+
         void Awake()
         {
             if (_instance == null)
@@ -67,6 +85,10 @@ namespace PNetU
         {
             if (EngineUpdate != null)
                 EngineUpdate();
+            StatusReason = PNetU.Net.StatusReason;
+            Status = PNetU.Net.Status;
+            RoomStatusReason = Net.Peer.RoomStatusReason;
+            RoomStatus = Net.Peer.RoomStatus;
         }
 
         void OnDestroy()
@@ -83,6 +105,7 @@ namespace PNetU
         }
 
         internal static Dictionary<string, GameObject> ResourceCache = new Dictionary<string, GameObject>();
+
         public void Instantiate(string path, PNetC.NetworkView newView, PNetC.Vector3 location, PNetC.Quaternion rotation)
         {
             GameObject gobj;

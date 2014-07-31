@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using Lidgren.Network;
 using PNet;
 using System.ComponentModel;
@@ -159,9 +160,13 @@ namespace PNetC
             _config = new NetPeerConfiguration(Configuration.AppIdentifier);
             _config.Port =  Configuration.BindPort; //so we can run client and server on the same machine..
 
+            var roomConfig = _config.Clone();
+
             Peer = new NetClient(_config);
+            RoomPeer = new NetClient(roomConfig);
 
             Peer.Start();
+            RoomPeer.Start();
 
             var hailMessage = Peer.CreateMessage();
             WriteHailMessage(hailMessage);
@@ -178,6 +183,7 @@ namespace PNetC
                 return;
 
             Peer.Shutdown("disconnecting");
+            RoomPeer.Shutdown("CDC");
         }
 
         /// <summary>
@@ -216,18 +222,24 @@ namespace PNetC
 
         private int _roomPort;
         private readonly byte[] _roomKey = new byte[16];
+        private bool _roomChangeQueued = false;
+        private bool _roomChangeCompleteQueued = false;
         /// <summary>
         /// Run once the room changing has completed (tells the server you're actually ready to be in a room)
         /// </summary>
         public void FinishedRoomChange()
         {
-            var message = RoomPeer.CreateMessage(18);
-            message.Write(PlayerId);
-            message.Write(_roomKey);
-            //faster to use existing information about connection rather than from config.
-            var endPoint = Peer.ServerConnection.RemoteEndPoint;
-            endPoint.Port = _roomPort;
-            RoomPeer.Connect(endPoint, message);
+            if (RoomPeer == null)
+                throw new InvalidOperationException("Cannot switch rooms before connecting to a server");
+            if (RoomPeer.Status != NetPeerStatus.Running)
+                throw new InvalidOperationException("Cannot switch rooms while not running");
+            if (Peer.ConnectionStatus != NetConnectionStatus.Connected)
+                throw new InvalidOperationException("Cannot switch rooms when not connected to a server");
+
+            if (!_roomChangeQueued)
+                throw new InvalidOperationException("Cannot switch rooms when no room change is queued");
+            _roomChangeQueued = false;
+            _roomChangeCompleteQueued = true;
         }
 
         private void FinishedInstantiate(NetworkViewId netId)
@@ -300,9 +312,12 @@ namespace PNetC
             {
                 var newRoom = msg.ReadString();
                 _roomPort = msg.ReadInt32();
+                _roomChangeQueued = true;
                 msg.ReadBytes(_roomKey, 0, 16);
 
                 Debug.LogInfo(this, "Changing to room {0}", newRoom);
+                //and disconnect the room peer.
+                RoomPeer.Disconnect("SRS");
 
                 if (OnRoomChange != null)
                 {
@@ -320,9 +335,6 @@ namespace PNetC
                 {
                     NetworkViewManager.DestroyAllViews();
                 }
-
-                //and disconnect the room peer.
-                RoomPeer.Disconnect("SRS");
             }
             else if (utilId == RPCUtils.AddView)
             {
@@ -378,6 +390,8 @@ namespace PNetC
                 {
                     //let's gracefully close things up.
                     Peer.Shutdown(StatusReason);
+                    if (RoomPeer != null)
+                        RoomPeer.Shutdown("CCC");
                 }
             }
 
@@ -419,9 +433,6 @@ namespace PNetC
                     StatusReason = msg.ReadString();
 
                     Debug.LogInfo(this, "Status changed from {0} to {1}: {2}", lastStatus, Status, StatusReason);
-#if DEBUG
-                    StatusReason = string.Format("{0} changed to {1}: {2}", lastStatus, Status, msg.RemainingBits > 0 ? msg.ReadString() : "");
-#endif
                     Peer.Recycle(msg);
 
                     try
@@ -459,7 +470,76 @@ namespace PNetC
                 else
                     Peer.Recycle(msg);
             }
+
+            UpdateRoom();
         }
+
+        private int _lastRoomFrameCount;
+        void UpdateRoom()
+        {
+            if (RoomPeer == null) return;
+
+            var messages = new List<NetIncomingMessage>(_lastRoomFrameCount * 2);
+            _lastRoomFrameCount = RoomPeer.ReadMessages(messages);
+
+            //for loops are way faster with lists than foreach
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (int i = 0; i < messages.Count; i++)
+            {
+                var msg = messages[i];
+                //faster than switch, as most will be Data messages.
+                if (msg.MessageType == NetIncomingMessageType.Data)
+                {
+                    Consume(msg);
+                }
+                else if (msg.MessageType == NetIncomingMessageType.DebugMessage)
+                {
+                    Debug.LogInfo(this, "[Room] {0}", msg.ReadString());
+                }
+                else if (msg.MessageType == NetIncomingMessageType.WarningMessage)
+                {
+                    Debug.LogWarning(this, "[Room] {0}", msg.ReadString());
+                }
+                else if (msg.MessageType == NetIncomingMessageType.StatusChanged)
+                {
+                    var lastStatus = RoomStatus;
+                    RoomStatus = (NetConnectionStatus)msg.ReadByte();
+                    RoomStatusReason = msg.ReadString();
+
+                    Debug.LogInfo(this, "Room status changed from {0} to {1}: {2}", lastStatus, RoomStatus, RoomStatusReason);
+
+                }
+                else if (msg.MessageType == NetIncomingMessageType.Error)
+                {
+                    Debug.LogError(this, "[Room] {0}", msg.ReadString()); //this should really never happen...
+                }
+
+                RoomPeer.Recycle(msg);
+            }
+
+            //actually switch to the room on the server.
+            if (_roomChangeCompleteQueued && RoomPeer.ConnectionStatus == NetConnectionStatus.Disconnected)
+            {
+                _roomChangeCompleteQueued = false;
+                
+                var message = RoomPeer.CreateMessage(18);
+                message.Write(PlayerId);
+                message.Write(_roomKey);
+                //faster to use existing information about connection rather than from config.
+                var endPoint = new IPEndPoint(Peer.ServerConnection.RemoteEndPoint.Address, _roomPort);
+                RoomPeer.Connect(endPoint, message);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string RoomStatusReason { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public NetConnectionStatus RoomStatus { get; private set; }
 
         void FinalizeDisconnect()
         {
