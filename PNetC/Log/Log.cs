@@ -21,6 +21,7 @@ namespace PNetC
         /// <param name="sender"></param>
         /// <param name="value"></param>
         /// <param name="args"></param>
+        [JetBrains.Annotations.StringFormatMethod("value")]
         public static void Log(Net sender, string value, params object[] args)
         {
             Logger.Full(sender, value, args);
@@ -32,6 +33,7 @@ namespace PNetC
         /// <param name="sender"></param>
         /// <param name="value"></param>
         /// <param name="args"></param>
+        [JetBrains.Annotations.StringFormatMethod("value")]
         public static void LogInfo(Net sender, string value, params  object[] args)
         {
             Logger.Info(sender, value, args);
@@ -43,6 +45,7 @@ namespace PNetC
         /// <param name="sender"></param>
         /// <param name="value"></param>
         /// <param name="args"></param>
+        [JetBrains.Annotations.StringFormatMethod("value")]
         public static void LogError(Net sender, string value, params object[] args)
         {
             Logger.Error(sender, value, args);
@@ -54,6 +57,7 @@ namespace PNetC
         /// <param name="sender"></param>
         /// <param name="value"></param>
         /// <param name="args"></param>
+        [JetBrains.Annotations.StringFormatMethod("value")]
         public static void LogWarning(Net sender, string value, params object[] args)
         {
             Logger.Warning(sender, value, args);

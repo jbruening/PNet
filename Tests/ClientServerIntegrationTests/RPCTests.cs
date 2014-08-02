@@ -20,6 +20,7 @@ namespace ClientServerIntegrationTests
     {
         private Room _testRoom;
         private TestablePNet _client;
+        private Player _player;
 
         /// <summary>
         ///Gets or sets the test context which provides
@@ -58,6 +59,7 @@ namespace ClientServerIntegrationTests
 
             _client.Connect(TestablePNet.GetTestConnectionConfig());
             Thread.Sleep(250);
+            _player = PNetServer.AllPlayers().First(f => f != null && f != Player.Server);
         }
         //
         // Use TestCleanup to run code after each test has run
@@ -75,46 +77,38 @@ namespace ClientServerIntegrationTests
         [TestMethod]
         public void TestInstantiateRPC()
         {
-            var player = PNetServer.AllPlayers().First(f => f != null && f != Player.Server);
-            var rand = new Random();
-            var expectedInstantiate = (rand.NextDouble()*50).ToString();
-            
-            byte expectedRPCValue = (byte) rand.Next(byte.MinValue, byte.MaxValue);
-            if (expectedRPCValue == default(byte))
-                expectedRPCValue += 1; //don't allow defaults
-            
-            byte rpcID = (byte) rand.Next(byte.MinValue, byte.MaxValue);
-            if (rpcID == default(byte))
-                rpcID += 1;
+            const string expectedInstantiate = "joi129348ujij&&I(";
+            const string expectedRPCValue = "(**Ylkafjsiu&^&*";
+            const byte rpcID = 36;
 
-            var gobj = _testRoom.NetworkInstantiate(expectedInstantiate, Vector3.Zero, Quaternion.Identity, player);
+            var gobj = _testRoom.NetworkInstantiate(expectedInstantiate, Vector3.Zero, Quaternion.Identity, _player);
             var netView = gobj.GetComponent<NetworkView>();
 
             Thread.Sleep(50);
 
-            Assert.IsTrue(_client.TestableHook.Instantiates.ContainsKey(expectedInstantiate));
+            Assert.IsTrue(_client.TestableHook.Instantiates.ContainsKey(expectedInstantiate), 
+                "Client did not have an object named {0} instantiated", expectedInstantiate);
 
             var rpcWasCalled = false;
 
             _client.TestableHook.Instantiates[expectedInstantiate].SubscribeToRPC(rpcID, message =>
             {
-                ByteSerializer.Instance.OnDeserialize(message);
-                Assert.AreEqual(expectedRPCValue, ByteSerializer.Instance.Value);
+                StringSerializer.Instance.OnDeserialize(message);
+                Assert.AreEqual(expectedRPCValue, StringSerializer.Instance.Value, 
+                    "Client received {0} but expected {1}", StringSerializer.Instance.Value, expectedRPCValue);
                 rpcWasCalled = true;
             });
 
             //of note: the rpc method that takes a few serializers, instead of the params[], should be called
-            netView.RPC(rpcID, RPCMode.All, ByteSerializer.Instance.Update(expectedRPCValue));
+            netView.RPC(rpcID, RPCMode.All, StringSerializer.Instance.Update(expectedRPCValue));
 
-            Thread.Sleep(50);
-            Assert.IsTrue(rpcWasCalled);
+            Thread.Sleep(100);
+            Assert.IsTrue(rpcWasCalled, "Message was not received within 100ms");
         }
 
         [TestMethod]
         public void StaticASerializableTest()
         {
-            var player = PNetServer.AllPlayers().First(f => f != null && f != Player.Server);
-
             var rpcWasCalled = false;
 
             string rpcStr = "foobar";
@@ -130,7 +124,31 @@ namespace ClientServerIntegrationTests
                 }
             };
 
-            player.RPC(1, StringSerializer.Instance.Update(rpcStr));
+            _player.RPC(1, StringSerializer.Instance.Update(rpcStr));
+
+            Thread.Sleep(50);
+            Assert.IsTrue(rpcWasCalled);
+        }
+
+        [TestMethod]
+        public void RoomRPCTest()
+        {
+            var rpcWasCalled = false;
+
+            const string expected = "roomRpcTest";
+            const int msgId = 7;
+
+            _client.ProcessRPC += (b, message) =>
+            {
+                if (b == msgId)
+                {
+                    var str = StringSerializer.Deserialize(message);
+                    Assert.AreEqual(expected, str);
+                    rpcWasCalled = true;
+                }
+            };
+
+            _testRoom.RPC(msgId, RPCMode.All, StringSerializer.Instance.Update(expected));
 
             Thread.Sleep(50);
             Assert.IsTrue(rpcWasCalled);
