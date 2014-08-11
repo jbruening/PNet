@@ -109,7 +109,17 @@ Index: NetConnection.cs
  			m_sendChannels = new NetSenderChannelBase[NetConstants.NumTotalChannels];
  			m_receiveChannels = new NetReceiverChannelBase[NetConstants.NumTotalChannels];
  			m_queuedOutgoingAcks = new NetQueue<NetTuple<NetMessageType, int>>(4);
-@@ -243,31 +247,40 @@
+@@ -195,7 +199,8 @@
+ 					m_sendBufferNumMessages++;
+ 
+ 					// write acks header
+-					sendBuffer[m_sendBufferWritePtr++] = (byte)NetMessageType.Acknowledge;
++				    const byte ackByte = (byte) NetMessageType.Acknowledge;
++					sendBuffer[m_sendBufferWritePtr++] = ackByte;
+ 					sendBuffer[m_sendBufferWritePtr++] = 0; // no sequence number
+ 					sendBuffer[m_sendBufferWritePtr++] = 0; // no sequence number
+ 					int len = (acks * 3) * 8; // bits
+@@ -243,31 +248,40 @@
  			//
  			// send queued messages
  			//
@@ -170,7 +180,7 @@ Index: NetConnection.cs
  		
  		// Queue an item for immediate sending on the wire
  		// This method is called from the ISenderChannels
-@@ -364,7 +377,16 @@
+@@ -364,7 +378,16 @@
  							chan = new NetReliableSenderChannel(this, NetUtility.GetWindowSize(method));
  							break;
  					}
