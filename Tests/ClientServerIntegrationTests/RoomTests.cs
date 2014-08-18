@@ -17,6 +17,7 @@ namespace ClientServerIntegrationTests
     public class RoomTests
     {
         private Room _testRoom;
+        private Room _testRoom2;
         private TestablePNet _client;
 
         public RoomTests()
@@ -57,6 +58,7 @@ namespace ClientServerIntegrationTests
             _client.TestableHook.StartUpdateThread();
 
             _testRoom = Room.CreateRoom("test room");
+            _testRoom2 = Room.CreateRoom("test room 2");
         }
         //
         // Use TestCleanup to run code after each test has run
@@ -87,7 +89,27 @@ namespace ClientServerIntegrationTests
 
             Thread.Sleep(100);
 
-            Assert.AreSame(_testRoom, PNetServer.AllPlayers()[1].CurrentRoom, "Client did not change to the room within 100 ms");
+            var tPlayer = PNetServer.AllPlayers()[1];
+
+            Assert.AreSame(_testRoom, tPlayer.CurrentRoom, "Client did not change to the room within 100 ms");
+
+            GameState.InvokeIfRequired(() =>
+            {
+                tPlayer.ChangeRoom(_testRoom2); 
+            });
+
+            Thread.Sleep(100);
+
+            Assert.AreSame(_testRoom2, tPlayer.CurrentRoom, "Client did not switch to room 2 within 100 ms");
+
+            GameState.InvokeIfRequired(() =>
+            {
+                tPlayer.ChangeRoom(_testRoom);
+            });
+
+            Thread.Sleep(100);
+
+            Assert.AreSame(_testRoom, tPlayer.CurrentRoom, "Client did not change back to room within 100 ms");
         }
 
         private void OnPlayerConnected(Player player)

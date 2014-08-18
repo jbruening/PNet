@@ -62,12 +62,10 @@ namespace ClientServerIntegrationTests
             ServerUtils.StartServerOnNewThread();
 
             int cCount = 0;
-            var cLock = new object();
             int dcCount = 0;
-            var dcLock = new object();
 
-            PNetServer.OnPlayerConnected += player => { lock (cLock) cCount++; };
-            PNetServer.OnPlayerDisconnected += player => { lock (dcLock) dcCount++; };
+            PNetServer.OnPlayerConnected += player => Interlocked.Increment(ref cCount);
+            PNetServer.OnPlayerDisconnected += player => Interlocked.Increment(ref dcCount);
             PNetServer.ApproveConnection += message =>
                                                 {
                                                     Thread.Sleep(10);
@@ -126,8 +124,8 @@ namespace ClientServerIntegrationTests
             Task.WaitAll(aTasks);
 
             Thread.Sleep(500);
-            Assert.AreEqual(ExpectedTotalConnections, cCount);
-            Assert.AreEqual(ExpectedTotalConnections, dcCount);
+            Assert.AreEqual(ExpectedTotalConnections, cCount, "Expected " + ExpectedTotalConnections + " connections but got " + cCount);
+            Assert.AreEqual(ExpectedTotalConnections, dcCount, "Expected " + ExpectedTotalConnections + " disconnects but got " + dcCount);
             var ap = PNetServer.AllPlayers();
             foreach (var player in ap)
             {
