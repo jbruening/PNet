@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Lidgren.Network;
 using PNet;
+using PNetS.Server;
 
 namespace PNetS
 {
@@ -80,6 +81,8 @@ namespace PNetS
             Configuration = new ServerConfiguration(maxConnections, listenPort, tickRate);
         }
 
+        private static TcpServer tcpServer;
+
         /// <summary>
         /// Set up the server, bind to a socket. Use Start to fully start the server after running this
         /// </summary>
@@ -106,8 +109,11 @@ namespace PNetS
             _netPeerConfiguration.SetMessageTypeEnabled(NetIncomingMessageType.ConnectionApproval, true);
 
             peer = new NetServer(_netPeerConfiguration);
+            tcpServer = new TcpServer();
 
             peer.Start();
+            tcpServer.Start(Configuration.TcpListenPort);
+            
 
             var serverId = connections.Add(null);
             var serverPlayer = new Player();

@@ -23,6 +23,10 @@ namespace PNetS
         /// <summary>
         /// 
         /// </summary>
+        public int TcpListenPort { get { return ListenPort + 1; } }
+        /// <summary>
+        /// 
+        /// </summary>
         public readonly int TickRate;
         /// <summary>
         /// this should be unique per game, and should be the same on the client and server

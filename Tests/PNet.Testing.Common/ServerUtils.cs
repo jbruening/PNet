@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Lidgren.Network;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PNetS;
 
 namespace PNet.Testing.Common
@@ -37,6 +38,27 @@ namespace PNet.Testing.Common
             {Thread.Sleep(10);}
             PNetServer.Shutdown();
             Thread.Sleep(100);
+        }
+    }
+
+    /// <summary>
+    /// Outputs info and warning to console, but fails on Error
+    /// </summary>
+    public class TestLogger : ILogger
+    {
+        public void Info(string info, params object[] args)
+        {
+            Console.WriteLine(info, args);
+        }
+
+        public void Warning(string info, params object[] args)
+        {
+            Console.WriteLine(info, args);
+        }
+
+        public void Error(string info, params object[] args)
+        {
+            Assert.Fail(info, args);
         }
     }
 }

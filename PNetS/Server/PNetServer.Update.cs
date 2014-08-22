@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Lidgren.Network;
+using PNetS.Server;
 
 namespace PNetS
 {
     public static partial class PNetServer
     {
+        private const int maxUdpFrameCount = 50000;
+        private const int maxTcpFrameCount = 50000;
+
         /// <summary>
         /// Start a coroutine
         /// Not thread safe
@@ -27,6 +31,23 @@ namespace PNetS
             var messages = new List<NetIncomingMessage>(_lastFrameSize * 2);
             int counter = peer.ReadMessages(messages);
             _lastFrameSize = counter;
+
+            int messageReadCount = counter;
+            if (messageReadCount > maxUdpFrameCount)
+            {
+                udpOverflowCount++;
+                messageReadCount = maxUdpFrameCount;
+            }
+            else
+            {
+                udpOverflowCount = 0;
+            }
+
+            if (udpOverflowCount > 30)
+            {
+                Debug.LogWarning("Udp queue exceeded 50k messages for 30 contiguous frames. The queue might be full.");
+                udpOverflowCount = 0;
+            }
 
             //for faster than foreach
 // ReSharper disable once ForCanBeConvertedToForeach
@@ -119,7 +140,42 @@ namespace PNetS
                 else
                     peer.Recycle(msg);
             }
+
+            TcpServer.NetworkMessage tcpMsg;
+            int dqCount = 0;
+            bool didOverflow = false;
+            while (tcpServer.ReceiveQueue.TryDequeue(out tcpMsg))
+            {
+                if (dqCount > maxTcpFrameCount)
+                {
+                    didOverflow = true;
+                    break;
+                }
+                
+                //todo: do something with the message.
+
+                dqCount++;
+                tcpServer.RecycleMessage(tcpMsg);
+            }
+
+            if (didOverflow)
+            {
+                tcpOverflowCount++;
+            }
+            else
+            {
+                tcpOverflowCount = 0;
+            }
+
+            if (tcpOverflowCount > 30)
+            {
+                tcpOverflowCount = 0;
+                Debug.LogWarning("Tcp queue exceeded 50k messages for 30 contiguous frames. The queue might be full.");
+            }
         }
+
+        private static int tcpOverflowCount;
+        private static int udpOverflowCount;
 
         static void LateUpdate()
         {
