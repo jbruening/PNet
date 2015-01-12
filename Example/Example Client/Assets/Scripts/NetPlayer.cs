@@ -71,5 +71,7 @@ public class NetPlayer : NetBehaviour
     void SimpleMessage(NetIncomingMessage msg)
     {
         Debug.Log("Message from the server on the player: " + msg.ReadString(), this);
+
+        netView.RPC(7, RPCMode.Server, StringSerializer.Instance.Update("This rpc goes only to the corresponding gameobject/component on the server"));
     }
 }

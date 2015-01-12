@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using Lidgren.Network;
+using PNet;
 using PNetS;
 using SlimMath;
 
@@ -13,7 +15,7 @@ namespace ExampleServer
             playerObject.AddComponent<PlayerComponent>();
 
             //so we can reference the player's object easier in things like rpcs
-            player.UserData = player;
+            player.UserData = playerObject;
         }
         public override void OnPlayerExit(Player player)
         {
@@ -23,6 +25,12 @@ namespace ExampleServer
                 Room.NetworkDestroy(actor);
             }
             player.UserData = null;
+        }
+
+        [Rpc(3, false)]
+        void PlayerStaticMessage3(NetIncomingMessage msg, NetMessageInfo info)
+        {
+            Debug.Log("Got a room-wide/static message {0} from player {1}", msg.ReadString(), info.player);
         }
     }
 }

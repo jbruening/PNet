@@ -114,5 +114,16 @@ namespace ExampleServer
                 gameObject.Position = Vector3Serializer.Instance.Value;
             }
         }
+
+        [Rpc(7, false)]
+        void ReceiveMessage(NetIncomingMessage msg, NetMessageInfo info)
+        {
+            //if you want to prevent the message from the player from continuing to other players (if it was sent with rpcmode.all or others or owner,
+            //then you set info.continueForwarding to false
+            //alternatively, the second parameter of the rpc attribute can set what the default value of info.continueForwarding is (in this case, false), 
+            //and then change it to true if you figure out you do need to let the message continue on.
+
+            Debug.Log("Player {0} sent a message on this component: {1}", info.player, msg.ReadString());
+        }
     }
 }

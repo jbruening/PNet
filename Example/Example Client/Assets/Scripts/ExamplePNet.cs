@@ -1,5 +1,6 @@
 using System;
 using Lidgren.Network;
+using PNet;
 using Debug = UnityEngine.Debug;
 using UnityEngine;
 using Net = PNetU.Net;
@@ -64,6 +65,8 @@ public class ExamplePNet : MonoBehaviour
 
         //TODO: this should probably be called after we actually switch scenes, but because we're not changing scenes, we'll call it right now
         Net.FinishedRoomChange();
+
+        Net.RPC(3, StringSerializer.Instance.Update("This is a static rpc call. It goes to a room behaviour that is subscribed to it."));
     }
 
     private void OnDestroy()
