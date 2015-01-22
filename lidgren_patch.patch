@@ -1,6 +1,6 @@
 Index: Lidgren.Network.csproj
 ===================================================================
---- Lidgren.Network.csproj	(revision 359)
+--- Lidgren.Network.csproj	(revision 360)
 +++ Lidgren.Network.csproj	(working copy)
 @@ -10,7 +10,7 @@
      <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -47,7 +47,7 @@ Index: Lidgren.Network.csproj
    </ItemGroup>
 Index: NetBuffer.cs
 ===================================================================
---- NetBuffer.cs	(revision 359)
+--- NetBuffer.cs	(revision 360)
 +++ NetBuffer.cs	(working copy)
 @@ -69,8 +69,39 @@
  		{
@@ -93,7 +93,7 @@ Index: NetBuffer.cs
  			MethodInfo[] methods = typeof(NetIncomingMessage).GetMethods(BindingFlags.Instance | BindingFlags.Public);
 Index: NetConnection.cs
 ===================================================================
---- NetConnection.cs	(revision 359)
+--- NetConnection.cs	(revision 360)
 +++ NetConnection.cs	(working copy)
 @@ -19,6 +19,8 @@
  		internal NetConnectionStatus m_status;
@@ -203,7 +203,7 @@ Index: NetConnection.cs
  
 Index: NetConnectionStatistics.cs
 ===================================================================
---- NetConnectionStatistics.cs	(revision 359)
+--- NetConnectionStatistics.cs	(revision 360)
 +++ NetConnectionStatistics.cs	(working copy)
 @@ -177,7 +177,7 @@
  				if (relSendChan != null)
@@ -216,7 +216,7 @@ Index: NetConnectionStatistics.cs
  			}
 Index: NetConstants.cs
 ===================================================================
---- NetConstants.cs	(revision 359)
+--- NetConstants.cs	(revision 360)
 +++ NetConstants.cs	(working copy)
 @@ -25,18 +25,19 @@
  	/// </summary>
@@ -247,7 +247,7 @@ Index: NetConstants.cs
  
 Index: NetPeer.Internal.cs
 ===================================================================
---- NetPeer.Internal.cs	(revision 359)
+--- NetPeer.Internal.cs	(revision 360)
 +++ NetPeer.Internal.cs	(working copy)
 @@ -1,5 +1,5 @@
  ﻿#if !__ANDROID__ && !IOS
@@ -258,7 +258,7 @@ Index: NetPeer.Internal.cs
  using System;
 Index: NetPeer.MessagePools.cs
 ===================================================================
---- NetPeer.MessagePools.cs	(revision 359)
+--- NetPeer.MessagePools.cs	(revision 360)
 +++ NetPeer.MessagePools.cs	(working copy)
 @@ -183,7 +183,7 @@
  			m_incomingMessagesPool.Enqueue(toRecycle);
@@ -271,7 +271,7 @@ Index: NetPeer.MessagePools.cs
  				return;
 Index: NetReliableSenderChannel.cs
 ===================================================================
---- NetReliableSenderChannel.cs	(revision 359)
+--- NetReliableSenderChannel.cs	(revision 360)
 +++ NetReliableSenderChannel.cs	(working copy)
 @@ -14,6 +14,7 @@
  		private int m_sendStart;
@@ -432,7 +432,7 @@ Index: NetReliableSenderChannel.cs
  
 Index: NetUnreliableSenderChannel.cs
 ===================================================================
---- NetUnreliableSenderChannel.cs	(revision 359)
+--- NetUnreliableSenderChannel.cs	(revision 360)
 +++ NetUnreliableSenderChannel.cs	(working copy)
 @@ -29,7 +29,10 @@
  
@@ -499,7 +499,7 @@ Index: NetUnreliableSenderChannel.cs
  	}
 Index: NetUtility.cs
 ===================================================================
---- NetUtility.cs	(revision 359)
+--- NetUtility.cs	(revision 360)
 +++ NetUtility.cs	(working copy)
 @@ -17,7 +17,7 @@
  USE OR OTHER DEALINGS IN THE SOFTWARE.
