@@ -1,6 +1,6 @@
 Index: Lidgren.Network.csproj
 ===================================================================
---- Lidgren.Network.csproj	(revision 362)
+--- Lidgren.Network.csproj	(revision 365)
 +++ Lidgren.Network.csproj	(working copy)
 @@ -10,7 +10,7 @@
      <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -47,7 +47,7 @@ Index: Lidgren.Network.csproj
    </ItemGroup>
 Index: NetBuffer.cs
 ===================================================================
---- NetBuffer.cs	(revision 362)
+--- NetBuffer.cs	(revision 365)
 +++ NetBuffer.cs	(working copy)
 @@ -69,8 +69,39 @@
  		{
@@ -93,7 +93,7 @@ Index: NetBuffer.cs
  			MethodInfo[] methods = typeof(NetIncomingMessage).GetMethods(BindingFlags.Instance | BindingFlags.Public);
 Index: NetConnection.cs
 ===================================================================
---- NetConnection.cs	(revision 362)
+--- NetConnection.cs	(revision 365)
 +++ NetConnection.cs	(working copy)
 @@ -19,6 +19,8 @@
  		internal NetConnectionStatus m_status;
@@ -184,7 +184,7 @@ Index: NetConnection.cs
  
 Index: NetConnectionStatistics.cs
 ===================================================================
---- NetConnectionStatistics.cs	(revision 362)
+--- NetConnectionStatistics.cs	(revision 365)
 +++ NetConnectionStatistics.cs	(working copy)
 @@ -177,7 +177,7 @@
  				if (relSendChan != null)
@@ -197,7 +197,7 @@ Index: NetConnectionStatistics.cs
  			}
 Index: NetConstants.cs
 ===================================================================
---- NetConstants.cs	(revision 362)
+--- NetConstants.cs	(revision 365)
 +++ NetConstants.cs	(working copy)
 @@ -25,18 +25,19 @@
  	/// </summary>
@@ -228,7 +228,7 @@ Index: NetConstants.cs
  
 Index: NetPeer.MessagePools.cs
 ===================================================================
---- NetPeer.MessagePools.cs	(revision 362)
+--- NetPeer.MessagePools.cs	(revision 365)
 +++ NetPeer.MessagePools.cs	(working copy)
 @@ -183,7 +183,7 @@
  			m_incomingMessagesPool.Enqueue(toRecycle);
@@ -241,7 +241,7 @@ Index: NetPeer.MessagePools.cs
  				return;
 Index: NetReliableSenderChannel.cs
 ===================================================================
---- NetReliableSenderChannel.cs	(revision 362)
+--- NetReliableSenderChannel.cs	(revision 365)
 +++ NetReliableSenderChannel.cs	(working copy)
 @@ -14,6 +14,7 @@
  		private int m_sendStart;
@@ -396,7 +396,7 @@ Index: NetReliableSenderChannel.cs
  
 Index: NetUnreliableSenderChannel.cs
 ===================================================================
---- NetUnreliableSenderChannel.cs	(revision 362)
+--- NetUnreliableSenderChannel.cs	(revision 365)
 +++ NetUnreliableSenderChannel.cs	(working copy)
 @@ -29,7 +29,10 @@
  
