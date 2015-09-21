@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="http://fc08.deviantart.net/fs70/f/2014/200/7/7/pnetlogo150_by_faikie-d7rfu8s.png" alt="pnet logo" />
+  <img src="http://orig05.deviantart.net/dba9/f/2014/235/b/2/pnetlogo150_by_faikie-d7rfu8s.png" alt="pnet logo" />
 </p>
 ===
 Networking middleware for Unity using Lidgren, with a custom dedicated server.
